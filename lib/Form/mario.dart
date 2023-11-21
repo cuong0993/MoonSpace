@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:moonspace/Helper/extensions.dart';
-import 'package:moonspace/darkknight/type_check.dart';
+import 'package:moonspace/helper/extensions/theme_ext.dart';
+import 'package:moonspace/helper/validator/type_check.dart';
 
 class MAction {
   final String text;

@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:moonspace/Helper/debug_functions.dart';
-import 'package:moonspace/Helper/functions.dart';
+import 'package:moonspace/helper/stream/functions.dart';
+import 'package:moonspace/helper/validator/debug_functions.dart';
 
 class AsyncTextFormField extends StatefulWidget {
   const AsyncTextFormField({
@@ -10,7 +10,7 @@ class AsyncTextFormField extends StatefulWidget {
     this.con,
     required this.asyncFn,
     this.style,
-    this.intialValue,
+    this.initialValue,
     this.decoration,
     this.autofocus = false,
     this.showPrefix = true,
@@ -18,9 +18,9 @@ class AsyncTextFormField extends StatefulWidget {
   });
 
   final TextEditingController? con;
-  final Future<bool> Function(String value) asyncFn;
+  final Future<String?> Function(String value) asyncFn;
   final InputDecoration? decoration;
-  final String? intialValue;
+  final String? initialValue;
   final bool autofocus;
   final bool showPrefix;
   final int milliseconds;
@@ -31,7 +31,7 @@ class AsyncTextFormField extends StatefulWidget {
 }
 
 class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
-  ({bool valid, bool load})? allowedtText;
+  ({String? valid, bool load})? allowedtText;
   final focusNode = FocusNode(debugLabel: 'AsyncTextFormField');
   final key = GlobalKey<FormFieldState>();
 
@@ -40,7 +40,7 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
   @override
   void initState() {
     fnStream = createDebounceFunc(widget.milliseconds, (String name) async {
-      allowedtText = (valid: false, load: true);
+      allowedtText = (valid: 'Checking...', load: true);
       setState(() {});
       key.currentState?.validate();
       allowedtText = (valid: (await widget.asyncFn(name)), load: false);
@@ -62,7 +62,7 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
     return TextFormField(
       controller: widget.con,
       key: key,
-      initialValue: widget.intialValue,
+      initialValue: widget.initialValue,
 
       autofocus: widget.autofocus,
 
@@ -97,18 +97,12 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
               ),
       ),
       onChanged: (value) => fnStream.add(value),
-      validator: (name) {
-        lava(name);
-        if (name == null) {
-          return 'Empty not allowed';
-        }
+      validator: (value) {
+        lava(value);
         if ((allowedtText?.load ?? false)) {
           return 'Checking';
         }
-        if (!(allowedtText?.valid ?? false)) {
-          return 'Not Allowed';
-        }
-        return null;
+        return allowedtText?.valid;
       },
     );
   }

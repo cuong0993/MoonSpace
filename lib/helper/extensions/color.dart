@@ -1,6 +1,6 @@
 import 'dart:math' show max, min, Random;
 import 'package:flutter/material.dart' show Color, Colors, HSVColor, immutable;
-import 'package:moonspace/darkknight/extensions/string.dart';
+import 'package:moonspace/helper/extensions/string.dart';
 
 @immutable
 class HexColor extends Color {

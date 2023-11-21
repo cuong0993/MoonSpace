@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:moonspace/Helper/functions.dart';
-import 'package:moonspace/darkknight/extensions/color.dart';
-import 'package:moonspace/darkknight/stream/cached_stream';
-import 'package:moonspace/Helper/extensions.dart';
+import 'package:moonspace/helper/extensions/color.dart';
+import 'package:moonspace/helper/extensions/theme_ext.dart';
+import 'package:moonspace/helper/stream/cached_stream.dart';
+import 'package:moonspace/helper/stream/functions.dart';
 
 class Sherlock extends StatefulWidget {
   const Sherlock({
