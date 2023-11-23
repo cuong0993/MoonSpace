@@ -4,18 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:moonspace/widgets/shimmer_boxes.dart';
 
-class AnimSlide extends StatefulWidget {
-  const AnimSlide({Key? key, this.radius, this.width, this.height}) : super(key: key);
+class AnimatedSlideButton extends StatefulWidget {
+  const AnimatedSlideButton({Key? key, this.radius, this.width, this.height}) : super(key: key);
 
   final double? radius;
   final double? width;
   final double? height;
 
   @override
-  State<AnimSlide> createState() => _AnimSlideState();
+  State<AnimatedSlideButton> createState() => _AnimatedSlideButtonState();
 }
 
-class _AnimSlideState extends State<AnimSlide> with SingleTickerProviderStateMixin {
+class _AnimatedSlideButtonState extends State<AnimatedSlideButton> with SingleTickerProviderStateMixin {
   double position = 0;
   bool dragging = false;
   double stop = 0;

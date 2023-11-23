@@ -219,6 +219,20 @@ extension SuperContext on BuildContext {
           },
         ),
       );
+  Future<T?> fPush<T>(Widget widget) => nav.push<T?>(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => widget,
+          transitionDuration: const Duration(milliseconds: 500),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            var curvedAnimation = CurvedAnimation(parent: animation, curve: Curves.easeInOutCubic);
+
+            return FadeTransition(
+              opacity: curvedAnimation,
+              child: child,
+            );
+          },
+        ),
+      );
   Future<T?> scalePush<T>(Widget widget) => nav.push<T?>(
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) => widget,

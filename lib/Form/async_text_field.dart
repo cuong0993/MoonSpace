@@ -8,7 +8,7 @@ class AsyncTextFormField extends StatefulWidget {
   const AsyncTextFormField({
     super.key,
     this.con,
-    required this.asyncFn,
+    required this.asyncValidator,
     this.style,
     this.initialValue,
     this.decoration,
@@ -18,7 +18,7 @@ class AsyncTextFormField extends StatefulWidget {
   });
 
   final TextEditingController? con;
-  final Future<String?> Function(String value) asyncFn;
+  final Future<String?> Function(String value) asyncValidator;
   final InputDecoration? decoration;
   final String? initialValue;
   final bool autofocus;
@@ -31,7 +31,7 @@ class AsyncTextFormField extends StatefulWidget {
 }
 
 class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
-  ({String? valid, bool load})? allowedtText;
+  ({String? valid, bool load})? asyncText;
   final focusNode = FocusNode(debugLabel: 'AsyncTextFormField');
   final key = GlobalKey<FormFieldState>();
 
@@ -40,10 +40,10 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
   @override
   void initState() {
     fnStream = createDebounceFunc(widget.milliseconds, (String name) async {
-      allowedtText = (valid: 'Checking...', load: true);
+      asyncText = (valid: 'Checking...', load: true);
       setState(() {});
       key.currentState?.validate();
-      allowedtText = (valid: (await widget.asyncFn(name)), load: false);
+      asyncText = (valid: (await widget.asyncValidator(name)), load: false);
       setState(() {});
       key.currentState?.validate();
     });
@@ -87,11 +87,11 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
                 width: 20,
                 height: 20,
                 margin: const EdgeInsets.all(16),
-                child: (allowedtText?.valid == true)
+                child: (asyncText?.valid == null)
                     ? const Icon(Icons.done)
-                    : (allowedtText?.load == true
+                    : (asyncText?.load == true
                         ? const CircularProgressIndicator()
-                        : (allowedtText == null
+                        : (asyncText == null
                             ? const Icon(Icons.account_circle_outlined)
                             : const Icon(Icons.error_outline))),
               ),
@@ -99,10 +99,10 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
       onChanged: (value) => fnStream.add(value),
       validator: (value) {
         lava(value);
-        if ((allowedtText?.load ?? false)) {
+        if ((asyncText?.load ?? false)) {
           return 'Checking';
         }
-        return allowedtText?.valid;
+        return asyncText?.valid;
       },
     );
   }
