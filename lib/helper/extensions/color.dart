@@ -35,12 +35,7 @@ extension Shade on Color {
   HSVColor get hsv => HSVColor.fromColor(this);
   bool get isDark => hsv.value < 0.6;
   Color get op => isDark ? Colors.white : Colors.black;
-  Color get mop => isDark ? lighten(.9) : darken(.1);
-
-  Color grey(int lighten) {
-    int oo = (((red + blue + green) ~/ 3) + lighten) % 255;
-    return Color.fromARGB(alpha, oo, oo, oo);
-  }
+  Color get mop => isDark ? lighten(.9) : darken(.8);
 
   Color get i {
     return Color.fromARGB(alpha, 255 - red, 255 - green, 255 - blue);
@@ -50,9 +45,9 @@ extension Shade on Color {
     assert(v >= 0 && v <= 1);
     return Color.fromARGB(
       alpha,
-      (red * v).round(),
-      (green * v).round(),
-      (blue * v).round(),
+      (red * (1 - v)).round(),
+      (green * (1 - v)).round(),
+      (blue * (1 - v)).round(),
     );
   }
 
