@@ -21,6 +21,9 @@ List<String> blurHashes = [
   'L17AxV\$%100#}W4pKO9b.7t7-V9]',
   'LO6Iw9tVp0RNOxS,a\$ngVqtTV?XA',
   'L7Db:6T24T}U00-r.A9Y}U{v;eF|',
+  'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
+  'LGF5]+Yk^6#M@-5c,1J5@[or[Q6.',
+  'L6PZfSi_.AyE_3t7t7R**0o#DgR4',
 ];
 
 class CustomCacheImage extends StatelessWidget {
