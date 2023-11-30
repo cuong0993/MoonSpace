@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 class Marque extends StatefulWidget {
   const Marque({
     super.key,
+    this.style,
     required this.text,
     required this.width,
-    this.decoration,
+    this.boxDecoration,
   });
 
-  final BoxDecoration? decoration;
+  final TextStyle? style;
+  final BoxDecoration? boxDecoration;
   final String text;
   final double width;
 
@@ -20,10 +22,7 @@ class _MarqueState extends State<Marque> with SingleTickerProviderStateMixin {
   late final AnimationController anim;
   ScrollController scroll = ScrollController();
 
-  final TextStyle textStyle = const TextStyle(
-    fontSize: 30,
-    color: Colors.red,
-  );
+  late final TextStyle textStyle;
   late final Size txtSize;
 
   late final String padText;
@@ -33,6 +32,8 @@ class _MarqueState extends State<Marque> with SingleTickerProviderStateMixin {
 
   @override
   void initState() {
+    textStyle = widget.style ?? const TextStyle();
+
     anim = AnimationController(vsync: this, duration: const Duration(seconds: 10));
 
     anim.forward();
@@ -64,7 +65,7 @@ class _MarqueState extends State<Marque> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Container(
       width: widget.width,
-      decoration: widget.decoration,
+      decoration: widget.boxDecoration,
       height: txtSize.height,
       child: SingleChildScrollView(
         controller: scroll,

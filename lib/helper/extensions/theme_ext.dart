@@ -472,8 +472,7 @@ extension SuperTextStyle on TextStyle? {
   TextStyle? height(num v) => this?.copyWith(height: v.toDouble());
   TextStyle? dt(num v) => this?.copyWith(decorationThickness: v.toDouble());
   TextStyle? fs(num v) => this?.copyWith(fontSize: v.toDouble());
-  TextStyle? fc(Color? c) => this?.copyWith(color: c);
-  TextStyle? bc(Color? c) => this?.copyWith(color: c);
+  TextStyle? bc(Color? c) => this?.copyWith(backgroundColor: c);
 
   //
   TextStyle? get baseAlpha => this?.copyWith(textBaseline: TextBaseline.alphabetic);

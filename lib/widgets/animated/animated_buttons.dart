@@ -115,72 +115,49 @@ class _AnimatedSlideButtonState extends State<AnimatedSlideButton> with SingleTi
   }
 }
 
-class AsyncButton extends StatefulWidget {
-  const AsyncButton({
+class AsyncLock extends StatefulWidget {
+  const AsyncLock({
     super.key,
-    this.name,
-    required this.icon,
-    this.asyncFn,
-    this.debounce = const Duration(milliseconds: 500),
+    required this.builder,
   });
 
-  final Future<bool> Function()? asyncFn;
-  final Duration debounce;
-  final String? name;
-  final IconData icon;
+  final Widget Function(bool loading, String? status, Function lock, Function open, Function(String? status) setStatus)
+      builder;
 
   @override
-  State<AsyncButton> createState() => _AsyncButtonState();
+  State<AsyncLock> createState() => _AsyncLockState();
 }
 
-class _AsyncButtonState extends State<AsyncButton> {
-  bool? isLoading;
-  bool status = false;
+class _AsyncLockState extends State<AsyncLock> {
+  bool loading = false;
+  String? status = '';
 
   @override
   Widget build(BuildContext context) {
-    final hello = (isLoading != null)
-        ? null
-        : () async {
-            if (isLoading == null) {
-              isLoading = true;
-              setState(() {});
-
-              status = await widget.asyncFn!();
-
-              isLoading = false;
-              setState(() {});
-
-              Future.delayed(widget.debounce, () {
-                isLoading = null;
-                if (mounted) setState(() {});
-              });
-            }
-          };
-
-    final icon = AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      height: 25,
-      width: 25,
-      alignment: Alignment.center,
-      child: isLoading == null
-          ? Icon(widget.icon)
-          : (isLoading!
-              ? const AspectRatio(aspectRatio: 1, child: GoogleLoader())
-              : (status ? const Icon(Icons.check) : const Icon(Icons.error))),
-    );
-
-    if (widget.name == null) {
-      return IconButton(
-        onPressed: widget.asyncFn != null ? hello : null,
-        icon: icon,
-      );
+    setStatus(String? s) async {
+      status = s;
+      if (mounted) {
+        setState(() {});
+      }
     }
 
-    return FilledButton.icon(
-      onPressed: widget.asyncFn != null ? hello : null,
-      icon: icon,
-      label: Text(widget.name!),
+    lock() {
+      loading = true;
+      if (mounted) {
+        setState(() {});
+      }
+    }
+
+    open() {
+      loading = false;
+      if (mounted) {
+        setState(() {});
+      }
+    }
+
+    return IgnorePointer(
+      ignoring: loading,
+      child: widget.builder(loading, status, lock, open, setStatus),
     );
   }
 }
@@ -388,18 +365,21 @@ class _NeonLinePainter extends CustomPainter {
 }
 
 class CircularProgress extends StatefulWidget {
-  const CircularProgress(
-      {super.key,
-      required this.size,
-      this.secondaryColor = Colors.white,
-      this.primaryColor = Colors.orange,
-      this.lapDuration = 1000,
-      this.strokeWidth = 5.0});
+  const CircularProgress({
+    super.key,
+    required this.size,
+    this.secondaryColor,
+    this.primaryColor,
+    this.lapDuration = 1000,
+    this.strokeWidth = 5.0,
+  });
+
   final double size;
-  final Color secondaryColor;
-  final Color primaryColor;
+  final Color? secondaryColor;
+  final Color? primaryColor;
   final int lapDuration;
   final double strokeWidth;
+
   @override
   State<CircularProgress> createState() => _CircularProgressState();
 }
@@ -429,10 +409,11 @@ class _CircularProgressState extends State<CircularProgress> with SingleTickerPr
       ).animate(controller),
       child: CustomPaint(
         painter: CirclePaint(
-            // progress: animation.value,
-            secondaryColor: widget.secondaryColor,
-            primaryColor: widget.primaryColor,
-            strokeWidth: widget.strokeWidth),
+          // progress: animation.value,
+          secondaryColor: widget.secondaryColor ?? Theme.of(context).scaffoldBackgroundColor,
+          primaryColor: widget.primaryColor ?? Theme.of(context).primaryColor,
+          strokeWidth: widget.strokeWidth,
+        ),
         size: Size(widget.size, widget.size),
       ),
     );
@@ -447,7 +428,11 @@ class CirclePaint extends CustomPainter {
   // 2
   double _degreeToRad(double degree) => degree * pi / 180;
 
-  CirclePaint({this.secondaryColor = Colors.grey, this.primaryColor = Colors.blue, this.strokeWidth = 15});
+  CirclePaint({
+    this.secondaryColor = Colors.grey,
+    this.primaryColor = Colors.blue,
+    this.strokeWidth = 15,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
