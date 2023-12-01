@@ -91,14 +91,11 @@ extension SuperThemeData on ThemeData {
 }
 
 class Device {
-  static bool get isAndroid => Platform.isAndroid;
-  static bool get isIos => Platform.isIOS;
-  static bool get isMobile => isAndroid || isIos;
-  static bool get isWebMobile => isAndroid || isIos || isWeb;
-  static bool get isWindows => Platform.isWindows;
-  static bool get isMac => Platform.isMacOS;
-  static bool get isPc => isMac || isWindows;
-  static bool get isWeb => kIsWeb;
+  static bool isAndroid = !kIsWeb && Platform.isAndroid;
+  static bool isIos = !kIsWeb && Platform.isIOS;
+  static bool isMobile = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+  static bool isDesktop = !kIsWeb && (Platform.isMacOS || Platform.isWindows || Platform.isLinux);
+  static bool isWeb = kIsWeb;
 }
 
 extension SuperContext on BuildContext {

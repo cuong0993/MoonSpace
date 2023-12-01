@@ -10,7 +10,7 @@ typedef AsyncText = ({String? error, bool load});
 class AsyncTextFormField extends StatefulWidget {
   const AsyncTextFormField({
     super.key,
-    this.con,
+    this.controller,
     required this.asyncValidator,
     this.style,
     this.initialValue,
@@ -23,14 +23,19 @@ class AsyncTextFormField extends StatefulWidget {
     this.heading,
     this.milliseconds = 300,
     this.textAlign = TextAlign.start,
+    this.minLines,
     this.maxLines,
+    this.maxLength,
     this.textInputAction,
+    this.onChanged,
     this.onSubmit,
     this.onTap,
     this.onEditingComplete,
+    this.buildCounter,
+    this.scrollPhysics,
   });
 
-  final TextEditingController? con;
+  final TextEditingController? controller;
   final Future<String?> Function(String value) asyncValidator;
   final InputDecoration Function(AsyncText asyncText, TextEditingController textCon)? decoration;
   final String? initialValue;
@@ -43,11 +48,17 @@ class AsyncTextFormField extends StatefulWidget {
   final int milliseconds;
   final TextStyle? style;
   final TextAlign textAlign;
+  final int? minLines;
   final int? maxLines;
+  final int? maxLength;
   final TextInputAction? textInputAction;
+  final void Function(String)? onChanged;
   final Future<void> Function(TextEditingController controller)? onSubmit;
   final Future<void> Function(TextEditingController controller)? onTap;
   final Future<void> Function(TextEditingController controller)? onEditingComplete;
+  final Widget? Function(BuildContext, {required int currentLength, required bool isFocused, required int? maxLength})?
+      buildCounter;
+  final ScrollPhysics? scrollPhysics;
 
   @override
   State<AsyncTextFormField> createState() => _AsyncTextFormFieldState();
@@ -64,7 +75,7 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
 
   @override
   void initState() {
-    textCon = widget.con ?? TextEditingController(text: widget.initialValue);
+    textCon = widget.controller ?? TextEditingController(text: widget.initialValue);
 
     fnStream = createDebounceFunc(widget.milliseconds, (String name) async {
       asyncText = (error: 'Checking...', load: true);
@@ -106,8 +117,15 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
       onTap: () => widget.onTap?.call(textCon),
       //
       focusNode: focusNode,
+
+      minLines: widget.minLines,
       maxLines: widget.maxLines,
+      maxLength: widget.maxLength,
       enabled: widget.enabled,
+      scrollPhysics: widget.scrollPhysics,
+
+      //
+      buildCounter: widget.buildCounter,
 
       //
       style: widget.style,
@@ -160,7 +178,10 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
                     ],
                   ),
           ),
-      onChanged: (value) => fnStream.add(value),
+      onChanged: (value) {
+        widget.onChanged?.call(value);
+        fnStream.add(value);
+      },
       validator: (value) {
         lava(value);
         if ((asyncText.load)) {
@@ -168,7 +189,7 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
         }
         return asyncText.error;
       },
-      textInputAction: TextInputAction.done,
+      textInputAction: widget.textInputAction,
     );
 
     return widget.heading == null
