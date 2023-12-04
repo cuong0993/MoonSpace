@@ -109,7 +109,7 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
       onEditingComplete: () => widget.onEditingComplete?.call(textCon),
       onFieldSubmitted: (value) async {
         final res = await widget.asyncValidator(value);
-        if (res == null) {
+        if (res == null && widget.initialValue != textCon.text) {
           widget.onSubmit?.call(textCon);
         }
       },
