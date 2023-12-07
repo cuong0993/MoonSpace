@@ -60,7 +60,7 @@ class AnimatedFlipCounter extends StatelessWidget {
   final EdgeInsets padding;
 
   const AnimatedFlipCounter({
-    Key? key,
+    super.key,
     required this.value,
     this.duration = const Duration(milliseconds: 300),
     this.curve = Curves.linear,
@@ -74,8 +74,7 @@ class AnimatedFlipCounter extends StatelessWidget {
     this.mainAxisAlignment = MainAxisAlignment.center,
     this.padding = EdgeInsets.zero,
   })  : assert(fractionDigits >= 0, "fractionDigits must be non-negative"),
-        assert(wholeDigits >= 0, "wholeDigits must be non-negative"),
-        super(key: key);
+        assert(wholeDigits >= 0, "wholeDigits must be non-negative");
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +83,7 @@ class AnimatedFlipCounter extends StatelessWidget {
     final prototypeDigit = TextPainter(
       text: TextSpan(text: "8", style: style),
       textDirection: TextDirection.ltr,
-      textScaleFactor: MediaQuery.of(context).textScaleFactor,
+      textScaler: MediaQuery.of(context).textScaler,
     )..layout();
 
     // Find the text color (or red as warning). This is so we can avoid using
@@ -182,14 +181,14 @@ class _SingleDigitFlipCounter extends StatelessWidget {
   final EdgeInsets padding;
 
   const _SingleDigitFlipCounter({
-    Key? key,
+    super.key,
     required this.value,
     required this.duration,
     required this.curve,
     required this.size,
     required this.color,
     required this.padding,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

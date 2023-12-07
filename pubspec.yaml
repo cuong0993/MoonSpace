@@ -12,16 +12,14 @@ dependencies:
     sdk: flutter
 
   stack_trace: ^1.11.0
-
-  cached_network_image: ^3.3.0
+  meta: ^1.10.0
+  rxdart: ^0.27.7
   flutter_animate: ^4.2.0+1
-  flutter_blurhash: ^0.7.0
-  flutter_cache_manager: ^3.3.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  flutter_lints: ^2.0.0
+  flutter_lints: ^3.0.1
 
 flutter:

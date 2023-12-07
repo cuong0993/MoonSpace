@@ -51,7 +51,8 @@ class MAction {
         child: popup(),
       );
 
-  CupertinoContextMenuAction cupertinoContextMenuAction() => CupertinoContextMenuAction(
+  CupertinoContextMenuAction cupertinoContextMenuAction() =>
+      CupertinoContextMenuAction(
         onPressed: fn,
         isDestructiveAction: destructive,
         isDefaultAction: defaultAction,
@@ -70,12 +71,14 @@ extension SuperMAction on List<MAction> {
           (e == last)
               ? FilledButton(
                   onPressed: e.fn,
-                  style: FilledButton.styleFrom(padding: const EdgeInsets.all(0)),
+                  style:
+                      FilledButton.styleFrom(padding: const EdgeInsets.all(0)),
                   child: Text(e.text),
                 )
               : OutlinedButton(
                   onPressed: e.fn,
-                  style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(0)),
+                  style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.all(0)),
                   child: Text(e.text),
                 ),
 
@@ -238,7 +241,7 @@ Future<T?> marioActionSheet<T>({
 Future<T?> marioSheet<T>({
   required BuildContext context,
   required List<Widget> children,
-  Future<bool> Function()? onWillPop,
+  void Function(bool didPop)? onPopInvoked,
   GlobalKey<FormState>? formKey,
   VoidCallback? onChanged,
   double? width,
@@ -267,8 +270,8 @@ Future<T?> marioSheet<T>({
     // isScrollControlled: true,
 
     builder: (context) {
-      return WillPopScope(
-        onWillPop: onWillPop,
+      return PopScope(
+        onPopInvoked: onPopInvoked,
         child: Form(
           key: formKey,
           onChanged: onChanged,
@@ -292,7 +295,7 @@ Future<T?> marioDialog<T>({
   required List<Widget> children,
   GlobalKey<FormState>? formKey,
   VoidCallback? onChanged,
-  Future<bool> Function()? onWillPop,
+  void Function(bool didPop)? onPopInvoked,
   double? width,
   double? height,
   Widget? title,
@@ -305,10 +308,11 @@ Future<T?> marioDialog<T>({
   return showDialog<T>(
     context: context,
     builder: (BuildContext context) {
-      return WillPopScope(
-        onWillPop: onWillPop,
+      return PopScope(
+        onPopInvoked: onPopInvoked,
         child: Dialog(
-          insetPadding: insetPadding ?? const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+          insetPadding: insetPadding ??
+              const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
           backgroundColor: color,
           clipBehavior: Clip.hardEdge,
           shape: border,
@@ -363,17 +367,21 @@ class MarioChoice<T> extends StatelessWidget {
                     return multi
                         ? CheckboxListTile.adaptive(
                             title: Text(choices.elementAt(index).toString()),
-                            value: selectedRadio.contains(choices.elementAt(index)),
+                            value: selectedRadio
+                                .contains(choices.elementAt(index)),
                             onChanged: (value) {
                               if (value != null) {
-                                setState(() => selectedRadio.add(choices.elementAt(index)));
+                                setState(() => selectedRadio
+                                    .add(choices.elementAt(index)));
                               }
                             },
                           )
                         : RadioListTile<T>.adaptive(
                             title: Text(choices.elementAt(index).toString()),
                             value: choices.elementAt(index),
-                            groupValue: selectedRadio.length == 1 ? selectedRadio.first : null,
+                            groupValue: selectedRadio.length == 1
+                                ? selectedRadio.first
+                                : null,
                             onChanged: (value) {
                               // print(value);
                               if (value != null) {
@@ -738,7 +746,9 @@ class LoadingBox extends StatelessWidget {
                                       height: 200,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 10,
-                                        value: double.tryParse(snapshot.data ?? '0')?.clamp(0, 1),
+                                        value: double.tryParse(
+                                                snapshot.data ?? '0')
+                                            ?.clamp(0, 1),
                                       ),
                                     ),
                                   ),
@@ -807,7 +817,10 @@ class ContextOverlay {
 
   LoadingScreenController? controller;
 
-  void show({required BuildContext context, required Widget child, required Size boxSize}) {
+  void show(
+      {required BuildContext context,
+      required Widget child,
+      required Size boxSize}) {
     controller = showOverlay(context: context, child: child, boxSize: boxSize);
   }
 
@@ -827,7 +840,8 @@ class ContextOverlay {
     // final offsetSize = renderBox.size;
     final Offset offset = renderBox.localToGlobal(Offset.zero);
 
-    final scafSize = (Scaffold.of(context).context.findRenderObject() as RenderBox).size;
+    final scafSize =
+        (Scaffold.of(context).context.findRenderObject() as RenderBox).size;
 
     final overlay = OverlayEntry(
       builder: (context) {
@@ -896,11 +910,23 @@ class _AnimatedDialogState extends State<AnimatedDialog> {
                 }
               },
               builder: (context, value, child) {
-                final x = widget.offset.dx - (value * (widget.boxSize.width / 2));
-                final y = widget.offset.dy - (value * widget.boxSize.height) - 10;
+                final x =
+                    widget.offset.dx - (value * (widget.boxSize.width / 2));
+                final y =
+                    widget.offset.dy - (value * widget.boxSize.height) - 10;
                 return Positioned(
-                  left: clampDouble(x, 10, widget.scafSize.width - value * widget.boxSize.width - 10),
-                  top: clampDouble(y, 100, widget.scafSize.height - value * widget.boxSize.height - 100),
+                  left: clampDouble(
+                      x,
+                      10,
+                      widget.scafSize.width -
+                          value * widget.boxSize.width -
+                          10),
+                  top: clampDouble(
+                      y,
+                      100,
+                      widget.scafSize.height -
+                          value * widget.boxSize.height -
+                          100),
                   child: Container(
                     width: value * widget.boxSize.width,
                     clipBehavior: Clip.antiAlias,

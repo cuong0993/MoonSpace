@@ -1,11 +1,10 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'package:moonspace/widgets/shimmer_boxes.dart';
+import 'package:moonspace/helper/extensions/theme_ext.dart';
 
 class AnimatedSlideButton extends StatefulWidget {
-  const AnimatedSlideButton({Key? key, this.radius, this.width, this.height}) : super(key: key);
+  const AnimatedSlideButton({super.key, this.radius, this.width, this.height});
 
   final double? radius;
   final double? width;
@@ -61,30 +60,30 @@ class _AnimatedSlideButtonState extends State<AnimatedSlideButton> with SingleTi
         child: Stack(
           alignment: Alignment.center,
           children: [
-            Positioned(
-              left: 0,
-              child: ShimmerBox(
-                isLoading: position > width / 2,
-                loadingChild: Container(color: Colors.red),
-                child: Container(
-                  color: Colors.blue,
-                  child: const Text('Left'),
-                ),
-              ),
-            ),
-            Positioned(
-              right: 0,
-              child: ShimmerBox(
-                isLoading: position > width / 2,
-                loadingChild: Container(color: Colors.red),
-                child: Container(
-                  color: Colors.blue,
-                  child: const Text('Right'),
-                ),
-              ),
-            ),
+            // Positioned(
+            //   left: 0,
+            //   child: ShimmerBox(
+            //     isLoading: position > width / 2,
+            //     loadingChild: Container(color: Colors.red),
+            //     child: Container(
+            //       color: Colors.blue,
+            //       child: const Text('Left'),
+            //     ),
+            //   ),
+            // ),
+            // Positioned(
+            //   right: 0,
+            //   child: ShimmerBox(
+            //     isLoading: position > width / 2,
+            //     loadingChild: Container(color: Colors.red),
+            //     child: Container(
+            //       color: Colors.blue,
+            //       child: const Text('Right'),
+            //     ),
+            //   ),
+            // ),
             TweenAnimationBuilder<double>(
-              duration: 100.milliseconds,
+              duration: 100.mil,
               tween: Tween<double>(
                 begin: position,
                 end: dragging ? position : (position < width / 2 ? 0 : width - radius),

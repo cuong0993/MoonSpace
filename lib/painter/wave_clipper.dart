@@ -3,7 +3,7 @@ import 'package:moonspace/painter/paint_helper.dart';
 
 class WaveClipper extends CustomClipper<Path> {
   final int? numXDiv, numYDiv;
-  final double? triXHeight, triYHeight;
+  final double? triXHeight, triYHeight, scaleLeft, scaleBottom, scaleRight, scaleTop;
   final bool smooth;
 
   const WaveClipper({
@@ -11,6 +11,10 @@ class WaveClipper extends CustomClipper<Path> {
     this.numYDiv,
     this.triXHeight,
     this.triYHeight,
+    this.scaleLeft,
+    this.scaleBottom,
+    this.scaleRight,
+    this.scaleTop,
     this.smooth = true,
   });
 
@@ -28,6 +32,10 @@ class WaveClipper extends CustomClipper<Path> {
       numYDiv: numYDiv + (numYDiv % 2 == 0 ? 1 : 0),
       triXHeight: triXHeight,
       triYHeight: triYHeight,
+      scaleLeft: scaleLeft ?? 1,
+      scaleRight: scaleRight ?? 1,
+      scaleTop: scaleTop ?? 1,
+      scaleBottom: scaleBottom ?? 1,
       smooth: smooth,
     );
   }
@@ -44,6 +52,10 @@ Path wavePath({
   required int numYDiv,
   required double triXHeight,
   required double triYHeight,
+  required double scaleLeft,
+  required double scaleRight,
+  required double scaleTop,
+  required double scaleBottom,
   required bool smooth,
 }) {
   final width = (size.width - 2 * triYHeight);
@@ -64,8 +76,9 @@ Path wavePath({
     upward = !upward;
   }
 
-  final List<Offset> upPath = xPath.offset(Offset(triYHeight, triXHeight));
-  final List<Offset> downPath = xPath.mirrorY.offset(Offset(triYHeight, height + triXHeight)).reversed.toList();
+  final List<Offset> upPath = xPath.scale(1, scaleTop).offset(Offset(triYHeight, triXHeight));
+  final List<Offset> downPath =
+      xPath.scale(1, scaleBottom).mirrorY.offset(Offset(triYHeight, height + triXHeight)).reversed.toList();
 
   final double triYWidth = height / numYDiv;
 
@@ -80,8 +93,8 @@ Path wavePath({
     upward = !upward;
   }
 
-  final List<Offset> leftPath = yPath.offset(Offset(triYHeight, triXHeight)).reversed.toList();
-  final List<Offset> rightPath = yPath.mirrorX.offset(Offset(width + triYHeight, triXHeight));
+  final List<Offset> leftPath = yPath.scale(scaleLeft, 1).offset(Offset(triYHeight, triXHeight)).reversed.toList();
+  final List<Offset> rightPath = yPath.scale(scaleRight, 1).mirrorX.offset(Offset(width + triYHeight, triXHeight));
 
   var path = merge([
     upPath,
