@@ -1,9 +1,11 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+
 import 'package:moonspace/helper/extensions/theme_ext.dart';
 import 'package:moonspace/helper/validator/type_check.dart';
 
@@ -51,8 +53,7 @@ class MAction {
         child: popup(),
       );
 
-  CupertinoContextMenuAction cupertinoContextMenuAction() =>
-      CupertinoContextMenuAction(
+  CupertinoContextMenuAction cupertinoContextMenuAction() => CupertinoContextMenuAction(
         onPressed: fn,
         isDestructiveAction: destructive,
         isDefaultAction: defaultAction,
@@ -71,14 +72,12 @@ extension SuperMAction on List<MAction> {
           (e == last)
               ? FilledButton(
                   onPressed: e.fn,
-                  style:
-                      FilledButton.styleFrom(padding: const EdgeInsets.all(0)),
+                  style: FilledButton.styleFrom(padding: const EdgeInsets.all(0)),
                   child: Text(e.text),
                 )
               : OutlinedButton(
                   onPressed: e.fn,
-                  style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.all(0)),
+                  style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(0)),
                   child: Text(e.text),
                 ),
 
@@ -311,8 +310,7 @@ Future<T?> marioDialog<T>({
       return PopScope(
         onPopInvoked: onPopInvoked,
         child: Dialog(
-          insetPadding: insetPadding ??
-              const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+          insetPadding: insetPadding ?? const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
           backgroundColor: color,
           clipBehavior: Clip.hardEdge,
           shape: border,
@@ -367,21 +365,17 @@ class MarioChoice<T> extends StatelessWidget {
                     return multi
                         ? CheckboxListTile.adaptive(
                             title: Text(choices.elementAt(index).toString()),
-                            value: selectedRadio
-                                .contains(choices.elementAt(index)),
+                            value: selectedRadio.contains(choices.elementAt(index)),
                             onChanged: (value) {
                               if (value != null) {
-                                setState(() => selectedRadio
-                                    .add(choices.elementAt(index)));
+                                setState(() => selectedRadio.add(choices.elementAt(index)));
                               }
                             },
                           )
                         : RadioListTile<T>.adaptive(
                             title: Text(choices.elementAt(index).toString()),
                             value: choices.elementAt(index),
-                            groupValue: selectedRadio.length == 1
-                                ? selectedRadio.first
-                                : null,
+                            groupValue: selectedRadio.length == 1 ? selectedRadio.first : null,
                             onChanged: (value) {
                               // print(value);
                               if (value != null) {
@@ -746,9 +740,7 @@ class LoadingBox extends StatelessWidget {
                                       height: 200,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 10,
-                                        value: double.tryParse(
-                                                snapshot.data ?? '0')
-                                            ?.clamp(0, 1),
+                                        value: double.tryParse(snapshot.data ?? '0')?.clamp(0, 1),
                                       ),
                                     ),
                                   ),
@@ -779,84 +771,53 @@ class LoadingBox extends StatelessWidget {
   }
 }
 
-class ContextMenu extends StatelessWidget {
-  const ContextMenu({
+class AnimatedOverlay extends StatefulWidget {
+  const AnimatedOverlay({
     super.key,
-    required this.child,
-    required this.optionChild,
-    required this.boxSize,
+    required this.builder,
+    this.duration,
+    required this.scafSize,
+    required this.offset,
+    this.alignment = Alignment.bottomCenter,
   });
 
-  final Widget child;
-  final Widget optionChild;
-  final Size boxSize;
+  final Widget Function(bool hide, Size scafSize, Offset offset) builder;
+  final Duration? duration;
+  final Offset offset;
+  final Size scafSize;
+  final AlignmentGeometry alignment;
 
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        ContextOverlay().show(
-          context: context,
-          child: optionChild,
-          boxSize: boxSize,
-        );
-      },
-      child: child,
-    );
-  }
+  static LoadingScreenController? controller;
 
-  static void hide() {
-    ContextOverlay._shared.hide();
-  }
-}
-
-class ContextOverlay {
-  static final ContextOverlay _shared = ContextOverlay._sharedInstance();
-  ContextOverlay._sharedInstance();
-  factory ContextOverlay() => _shared;
-
-  LoadingScreenController? controller;
-
-  void show(
-      {required BuildContext context,
-      required Widget child,
-      required Size boxSize}) {
-    controller = showOverlay(context: context, child: child, boxSize: boxSize);
-  }
-
-  void hide() {
-    controller?.close();
-    controller = null;
-  }
-
-  LoadingScreenController showOverlay({
+  static void show({
     required BuildContext context,
-    required Widget child,
-    required Size boxSize,
+    required Widget Function(bool hide, Size scafSize, Offset offset) builder,
+    Duration? duration,
+    AlignmentGeometry alignment = Alignment.bottomCenter,
   }) {
-    ContextMenu.hide();
+    hide();
     final state = Overlay.of(context);
-    final renderBox = context.findRenderObject() as RenderBox;
-    // final offsetSize = renderBox.size;
-    final Offset offset = renderBox.localToGlobal(Offset.zero);
 
-    final scafSize =
-        (Scaffold.of(context).context.findRenderObject() as RenderBox).size;
+    final renderBox = context.findRenderObject() as RenderBox;
+    final offsetSize = renderBox.size;
+    final Offset offset = renderBox.localToGlobal(Offset(offsetSize.width / 2, 0));
+    final scafSize = (Scaffold.of(context).context.findRenderObject() as RenderBox).size;
 
     final overlay = OverlayEntry(
       builder: (context) {
-        return AnimatedDialog(
+        return AnimatedOverlay(
+          duration: duration,
+          builder: builder,
           scafSize: scafSize,
           offset: offset,
-          boxSize: boxSize,
-          child: child,
+          alignment: alignment,
         );
       },
     );
 
     state.insert(overlay);
 
-    return LoadingScreenController(
+    controller = LoadingScreenController(
       close: () {
         overlay.remove();
         return true;
@@ -866,107 +827,310 @@ class ContextOverlay {
       },
     );
   }
-}
 
-class AnimatedDialog extends StatefulWidget {
-  const AnimatedDialog({
-    super.key,
-    required this.scafSize,
-    required this.offset,
-    required this.boxSize,
-    required this.child,
-  });
-
-  final Widget child;
-  final Size scafSize;
-  final Offset offset;
-  final Size boxSize;
+  static void hide() {
+    controller?.close();
+    controller = null;
+  }
 
   @override
-  State<AnimatedDialog> createState() => _AnimatedDialogState();
+  State<AnimatedOverlay> createState() => _AnimatedOverlayState();
 }
 
-class _AnimatedDialogState extends State<AnimatedDialog> {
+class _AnimatedOverlayState extends State<AnimatedOverlay> {
   bool hide = false;
+
+  late final Timer timer;
+
+  @override
+  void initState() {
+    if (widget.duration != null) {
+      timer = Timer(widget.duration!, () {
+        if (mounted) {
+          hide = true;
+          setState(() {});
+        }
+      });
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.deferToChild,
       onTap: () => setState(() => hide = true),
-      onVerticalDragStart: (details) => setState(() => hide = true),
-      onHorizontalDragStart: (details) => setState(() => hide = true),
-      child: Material(
-        color: const Color.fromARGB(0, 243, 103, 33),
-        child: Stack(
-          children: [
-            TweenAnimationBuilder(
-              duration: const Duration(milliseconds: 300),
-              tween: Tween(begin: hide ? 0.9 : 0.0, end: hide ? 0.0 : 0.9),
-              curve: Curves.easeInOut,
-              onEnd: () {
-                if (hide) {
-                  ContextOverlay().hide();
-                }
-              },
-              builder: (context, value, child) {
-                final x =
-                    widget.offset.dx - (value * (widget.boxSize.width / 2));
-                final y =
-                    widget.offset.dy - (value * widget.boxSize.height) - 10;
-                return Positioned(
-                  left: clampDouble(
-                      x,
-                      10,
-                      widget.scafSize.width -
-                          value * widget.boxSize.width -
-                          10),
-                  top: clampDouble(
-                      y,
-                      100,
-                      widget.scafSize.height -
-                          value * widget.boxSize.height -
-                          100),
-                  child: Container(
-                    width: value * widget.boxSize.width,
-                    clipBehavior: Clip.antiAlias,
-                    height: value * widget.boxSize.height,
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 1,
-                          spreadRadius: 1,
-                          offset: Offset(0, 2),
-                        ),
-                      ],
-                      borderRadius: BorderRadius.circular((1 - value) * 200),
-                    ),
-                    child: Opacity(
-                      opacity: value,
-                      child: Theme(
-                        data: Theme.of(context).copyWith(
-                          splashColor: Colors.transparent,
-                          highlightColor: Colors.transparent,
-                        ),
-                        child: GestureDetector(
-                          onTap: () {},
-                          onHorizontalDragStart: (details) {},
-                          onVerticalDragStart: (details) {},
-                          child: child,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-              child: widget.child,
-            ),
-          ],
+      onVerticalDragStart: (details) {
+        if (mounted) {
+          setState(() => hide = true);
+        }
+      },
+      onHorizontalDragStart: (details) {
+        if (mounted) {
+          setState(() => hide = true);
+        }
+      },
+      child: SafeArea(
+        top: false,
+        child: Material(
+          type: (widget.duration != null) ? MaterialType.transparency : MaterialType.canvas,
+          color: Colors.transparent,
+          child: Stack(
+            alignment: widget.alignment,
+            children: [
+              widget.builder(hide, widget.scafSize, widget.offset),
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class AnimatedSnackbar extends StatelessWidget {
+  const AnimatedSnackbar({
+    super.key,
+    this.hide = true,
+    this.duration = const Duration(seconds: 3),
+    required this.content,
+    required this.title,
+    this.icon,
+    this.decoration,
+    this.padding,
+    this.margin,
+    this.action = const [],
+  });
+
+  final bool hide;
+  final Duration duration;
+  final String content;
+  final String title;
+  final Icon? icon;
+  final BoxDecoration? decoration;
+  final EdgeInsets? padding;
+  final EdgeInsets? margin;
+  final List<Widget> action;
+
+  AnimatedSnackbar copyWith({
+    bool? hide,
+    Duration? duration,
+    String? content,
+    String? title,
+    Icon? icon,
+    BoxDecoration? decoration,
+    EdgeInsets? padding,
+    EdgeInsets? margin,
+    List<Widget>? action,
+  }) {
+    return AnimatedSnackbar(
+      hide: hide ?? this.hide,
+      duration: duration ?? this.duration,
+      content: content ?? this.content,
+      title: title ?? this.title,
+      icon: icon ?? this.icon,
+      decoration: decoration ?? this.decoration,
+      padding: padding ?? this.padding,
+      margin: margin ?? this.margin,
+      action: action ?? this.action,
+    );
+  }
+
+  void show(
+    BuildContext context, {
+    Duration? duration,
+    AlignmentGeometry alignment = Alignment.bottomCenter,
+  }) {
+    AnimatedOverlay.show(
+      context: context,
+      alignment: alignment,
+      duration: duration ?? const Duration(seconds: 3),
+      builder: (hide, scafSize, offset) {
+        return copyWith(hide: hide);
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder(
+      duration: duration,
+      tween: Tween(begin: hide ? 1.0 : 0.0, end: hide ? 0.0 : 1.0),
+      curve: Curves.easeInOut,
+      onEnd: () {
+        if (hide) {
+          AnimatedOverlay.hide();
+        }
+      },
+      builder: (context, value, child) {
+        final v = clampDouble(value * 4, 0, 1);
+        return Transform.translate(
+          offset: Offset(300 - v * 300, 0),
+          child: Opacity(
+            opacity: v,
+            child: Container(
+              decoration: decoration ??
+                  BoxDecoration(
+                    color: context.theme.csOnSur,
+                    border: const Border(left: BorderSide(width: 10, color: Colors.green)),
+                    borderRadius: 16.br,
+                  ),
+              margin: margin ?? const EdgeInsets.all(8),
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: padding ?? const EdgeInsets.all(8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: icon ??
+                              Icon(
+                                Icons.star_border,
+                                color: context.theme.csSur,
+                              ),
+                        ),
+                        // const SizedBox(height: 30, child: VerticalDivider()),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(title, style: context.tl.c(context.theme.csSur)),
+                              // const Divider(),
+                              Text(content, style: context.ts.c(context.theme.csSur)),
+                            ],
+                          ),
+                        ),
+
+                        //
+                        ...action,
+                        IconButton(
+                          color: context.theme.csSur,
+                          onPressed: () {
+                            AnimatedOverlay.hide();
+                          },
+                          icon: const Icon(Icons.close),
+                        )
+                      ],
+                    ),
+                  ),
+                  LinearProgressIndicator(value: value),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class AnimatedDialogBox extends StatelessWidget {
+  const AnimatedDialogBox({
+    super.key,
+    this.hide = true,
+    required this.boxSize,
+    this.scafSize = Size.zero,
+    this.offset = Offset.zero,
+    required this.child,
+  });
+
+  final bool hide;
+  final Size boxSize;
+  final Offset offset;
+  final Size scafSize;
+  final Widget child;
+
+  AnimatedDialogBox copyWith({
+    bool? hide,
+    Widget? child,
+    Size? boxSize,
+    Offset? offset,
+    Size? scafSize,
+  }) {
+    return AnimatedDialogBox(
+      hide: hide ?? this.hide,
+      boxSize: boxSize ?? this.boxSize,
+      offset: offset ?? this.offset,
+      scafSize: scafSize ?? this.scafSize,
+      child: child ?? this.child,
+    );
+  }
+
+  void show(
+    BuildContext context, {
+    Duration? duration,
+    AlignmentGeometry alignment = Alignment.bottomCenter,
+  }) {
+    AnimatedOverlay.show(
+      context: context,
+      alignment: alignment,
+      builder: (hide, scafSize, offset) {
+        return copyWith(
+          hide: hide,
+          scafSize: scafSize,
+          offset: offset,
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder(
+      duration: const Duration(milliseconds: 300),
+      tween: Tween(begin: hide ? 0.9 : 0.0, end: hide ? 0.0 : 0.9),
+      curve: Curves.easeInOut,
+      onEnd: () {
+        if (hide) {
+          AnimatedOverlay.hide();
+        }
+      },
+      builder: (context, value, child) {
+        final x = offset.dx - (value * (boxSize.width / 2));
+        final y = offset.dy - (value * boxSize.height) - 10;
+        return Positioned(
+          left: clampDouble(x, 10, scafSize.width - value * boxSize.width - 10),
+          top: clampDouble(y, 100, scafSize.height - value * boxSize.height - 100),
+          child: Container(
+            width: value * boxSize.width,
+            clipBehavior: Clip.antiAlias,
+            height: value * boxSize.height,
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 1,
+                  spreadRadius: 1,
+                  offset: Offset(0, 2),
+                ),
+              ],
+              borderRadius: BorderRadius.circular((1 - value) * 200),
+            ),
+            child: Opacity(
+              opacity: value,
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                ),
+                child: GestureDetector(
+                  onTap: () {},
+                  onHorizontalDragStart: (details) {},
+                  onVerticalDragStart: (details) {},
+                  child: child,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+      child: child,
     );
   }
 }

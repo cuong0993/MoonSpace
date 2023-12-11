@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
+// import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
@@ -55,7 +55,7 @@ List<Map<String, String>> logs = [];
 //   );
 
 void dividerline() {
-  log('$fWhite  ■  ∙  ÷  =  ≡  ─  ×  ☼  ■  ∙  ÷  =  ≡  ─  ×  ☼  $reset');
+  debugLog('$fWhite  ■  ∙  ÷  =  ≡  ─  ×  ☼  ■  ∙  ÷  =  ≡  ─  ×  ☼  $reset');
 }
 
 StreamController<Map<String, String>> logStream = StreamController<Map<String, String>>()
@@ -100,20 +100,21 @@ String _stack(bool s) {
   );
   if (s) {
     // log("  🍪 ${color['fYellow']} ${st.frames.length > 4 ? "[${st.frames[4].member}] -> " : ""}<${st.frames[3].member}> -> (${st.frames[2].member}) ->${color['bBlack']} ${("${frame2[0]}:${frame2[1].split(":").first}").replaceAll("../../lib", "E:\\_Temp\\tamannaah\\lib").replaceAll("package:monkey", "E:\\_Temp\\cracker\\lib").replaceAll("/", "\\")} $reset");
-    log('$fileHash ${("${frame2[0]}:${frame2[1].split(":").first}").replaceAll("../../lib", "E:\\_Temp\\tamannaah\\lib").replaceAll("package:monkey", "E:\\_Temp\\cracker\\lib").replaceAll("/", "\\")} ');
+    debugLog(
+        '$fileHash ${("${frame2[0]}:${frame2[1].split(":").first}").replaceAll("../../lib", "E:\\_Temp\\tamannaah\\lib").replaceAll("package:monkey", "E:\\_Temp\\cracker\\lib").replaceAll("/", "\\")} ');
   }
   return '$fileHash ${frame2[0].split('/').last.split('.').first.toUpperCase()} $reset';
 }
 
 taco(dynamic obj, {String name = '', bool stack = false}) {
-  log("\x1B[2J\x1B[0;0H");
+  debugLog("\x1B[2J\x1B[0;0H");
 
   if (kDebugMode) {
     if (stack) _stack(stack);
     String text = beautifyMap(obj);
     logs.add({"Taco $name": text});
     logStream.add({"Taco $name": text});
-    log("  🌮 ${_stack(false)} ${name == '' ? '' : '$name : '} $fBlack $text $reset");
+    debugLog("  🌮 ${_stack(false)} ${name == '' ? '' : '$name : '} $fBlack $text $reset");
     // log(text);
   }
 }
@@ -124,7 +125,7 @@ lava(dynamic obj, {String name = '', bool stack = false}) {
     String text = beautifyMap(obj);
     logs.add({"Lava $name": text});
     logStream.add({"Lava $name": text});
-    log("  🌋 ${_stack(false)} ${name == '' ? '' : '$name : '} $fRed $text $reset");
+    debugLog("  🌋 ${_stack(false)} ${name == '' ? '' : '$name : '} $fRed $text $reset");
     // log(text);
   }
 }
@@ -135,7 +136,7 @@ unicorn(dynamic obj, {String name = '', bool stack = false}) {
     String text = beautifyMap(obj);
     logs.add({"Unicorn $name": text});
     logStream.add({"Unicorn $name": text});
-    log("  🦄 ${_stack(false)} $fMagenta ${name == '' ? '' : '$name : '} $text $reset");
+    debugLog("  🦄 ${_stack(false)} $fMagenta ${name == '' ? '' : '$name : '} $text $reset");
     // log(text);
   }
 }
@@ -146,7 +147,7 @@ dino(dynamic obj, {String name = '', bool stack = false}) {
     String text = beautifyMap(obj);
     logs.add({"Dino $name": text});
     logStream.add({"Dino $name": text});
-    log("  🦖 ${_stack(false)} ${name == '' ? '' : '$name : '} $text $reset");
+    debugLog("  🦖 ${_stack(false)} ${name == '' ? '' : '$name : '} $text $reset");
     // log(text);$fGreen $text $reset");
     // log(text);
   }
@@ -158,7 +159,15 @@ owl(dynamic obj, {String name = '', bool stack = false}) {
     String text = beautifyMap(obj);
     logs.add({"Owl $name": text});
     logStream.add({"Owl $name": text});
-    log("  🦉 ${_stack(false)} ${name == '' ? '' : '$name : '} $fCyan $text $reset");
+    debugLog("  🦉 ${_stack(false)} ${name == '' ? '' : '$name : '} $fCyan $text $reset");
     // log(text);
   }
+}
+
+void debugLog(String value) {
+  // if (Device.isIos) {
+  //   log(value);
+  // } else {
+  debugPrint(value);
+  // }
 }
