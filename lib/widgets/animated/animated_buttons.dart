@@ -114,40 +114,45 @@ class _AnimatedSlideButtonState extends State<AnimatedSlideButton> with SingleTi
   }
 }
 
-class AsyncLock extends StatefulWidget {
+class AsyncLock<T> extends StatefulWidget {
   const AsyncLock({
     super.key,
     required this.builder,
   });
 
-  final Widget Function(bool loading, String? status, Function lock, Function open, Function(String? status) setStatus)
-      builder;
+  final Widget Function(
+    bool loading,
+    T? status,
+    void Function() lock,
+    void Function() open,
+    void Function(T? status) setStatus,
+  ) builder;
 
   @override
-  State<AsyncLock> createState() => _AsyncLockState();
+  State<AsyncLock<T>> createState() => _AsyncLockState<T>();
 }
 
-class _AsyncLockState extends State<AsyncLock> {
+class _AsyncLockState<T> extends State<AsyncLock<T>> {
   bool loading = false;
-  String? status = '';
+  T? status;
 
   @override
   Widget build(BuildContext context) {
-    setStatus(String? s) async {
+    void setStatus(T? s) {
       status = s;
       if (mounted) {
         setState(() {});
       }
     }
 
-    lock() {
+    void lock() {
       loading = true;
       if (mounted) {
         setState(() {});
       }
     }
 
-    open() {
+    void open() {
       loading = false;
       if (mounted) {
         setState(() {});

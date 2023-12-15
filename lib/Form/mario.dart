@@ -666,6 +666,7 @@ class LoadingScreen {
       close: () {
         infoText.close();
         overlay.remove();
+        overlay.dispose();
         return true;
       },
       update: (text) {
@@ -820,6 +821,7 @@ class AnimatedOverlay extends StatefulWidget {
     controller = LoadingScreenController(
       close: () {
         overlay.remove();
+        overlay.dispose();
         return true;
       },
       update: (text) {

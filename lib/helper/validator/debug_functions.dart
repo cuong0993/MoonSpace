@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 // import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
+import 'package:moonspace/helper/extensions/theme_ext.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stack_trace/stack_trace.dart';
 
@@ -165,9 +167,9 @@ owl(dynamic obj, {String name = '', bool stack = false}) {
 }
 
 void debugLog(String value) {
-  // if (Device.isIos) {
-  //   log(value);
-  // } else {
-  debugPrint(value);
-  // }
+  if (Device.isIos) {
+    log(value);
+  } else {
+    debugPrint(value);
+  }
 }
