@@ -19,6 +19,8 @@ class AsyncTextFormField extends StatefulWidget {
     this.enabled = true,
     this.showPrefix = true,
     this.showSubmitSuffix = true,
+    this.autocorrect = true,
+    this.enableSuggestions = true,
     this.suffix = const [],
     this.heading,
     this.milliseconds = 300,
@@ -43,6 +45,8 @@ class AsyncTextFormField extends StatefulWidget {
   final bool showPrefix;
   final bool enabled;
   final bool showSubmitSuffix;
+  final bool autocorrect;
+  final bool enableSuggestions;
   final List<Widget> suffix;
   final Widget? heading;
   final int milliseconds;
@@ -51,6 +55,7 @@ class AsyncTextFormField extends StatefulWidget {
   final int? minLines;
   final int? maxLines;
   final int? maxLength;
+
   final TextInputAction? textInputAction;
   final void Function(String)? onChanged;
   final Future<void> Function(TextEditingController controller)? onSubmit;
@@ -103,6 +108,10 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
       textAlign: widget.textAlign,
 
       autofocus: widget.autofocus,
+
+      //
+      autocorrect: widget.autocorrect,
+      enableSuggestions: widget.enableSuggestions,
 
       //
       onTapOutside: (event) => focusNode.unfocus(),
