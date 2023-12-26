@@ -19,12 +19,14 @@ class AsyncTextFormField extends StatefulWidget {
     this.enabled = true,
     this.showPrefix = true,
     this.showSubmitSuffix = true,
+    this.showClear = false,
     this.autocorrect = true,
     this.enableSuggestions = true,
     this.suffix = const [],
     this.heading,
     this.milliseconds = 300,
     this.textAlign = TextAlign.start,
+    this.textAlignVertical = TextAlignVertical.center,
     this.minLines,
     this.maxLines,
     this.maxLength,
@@ -45,6 +47,7 @@ class AsyncTextFormField extends StatefulWidget {
   final bool showPrefix;
   final bool enabled;
   final bool showSubmitSuffix;
+  final bool showClear;
   final bool autocorrect;
   final bool enableSuggestions;
   final List<Widget> suffix;
@@ -52,6 +55,7 @@ class AsyncTextFormField extends StatefulWidget {
   final int milliseconds;
   final TextStyle? style;
   final TextAlign textAlign;
+  final TextAlignVertical textAlignVertical;
   final int? minLines;
   final int? maxLines;
   final int? maxLength;
@@ -106,6 +110,7 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
       controller: textCon,
       key: key,
       textAlign: widget.textAlign,
+      textAlignVertical: widget.textAlignVertical,
 
       autofocus: widget.autofocus,
 
@@ -161,6 +166,13 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       ...widget.suffix,
+                      if (widget.showClear && textCon.text.isNotEmpty)
+                        IconButton.filledTonal(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () async {
+                            textCon.clear();
+                          },
+                        ),
                       if (widget.showSubmitSuffix)
                         asyncText.load
                             ? const SizedBox(
@@ -172,18 +184,20 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
                                 ? const Icon(Icons.edit)
                                 : (asyncText.error != null)
                                     ? const Icon(Icons.error)
-                                    : AsyncLock(
-                                        builder: (isLoading, status, lock, open, setStatus) {
-                                          return IconButton.filledTonal(
-                                            icon: const Icon(Icons.done),
-                                            onPressed: () async {
-                                              lock();
-                                              await widget.onSubmit?.call(textCon);
-                                              open();
+                                    : (widget.onSubmit == null)
+                                        ? const SizedBox()
+                                        : AsyncLock(
+                                            builder: (isLoading, status, lock, open, setStatus) {
+                                              return IconButton.filledTonal(
+                                                icon: const Icon(Icons.done),
+                                                onPressed: () async {
+                                                  lock();
+                                                  await widget.onSubmit?.call(textCon);
+                                                  open();
+                                                },
+                                              );
                                             },
-                                          );
-                                        },
-                                      )
+                                          )
                     ],
                   ),
           ),

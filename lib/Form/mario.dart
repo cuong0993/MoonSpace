@@ -63,7 +63,7 @@ class MAction {
 }
 
 extension SuperMAction on List<MAction> {
-  List<Widget> toButtonBar(BuildContext context) => fold(
+  List<Widget> toButtonBar() => fold(
         [],
         (previousValue, e) => [
           ...previousValue,
@@ -478,7 +478,7 @@ Future<T?> marioAlertDialog<T>({
   required String title,
   String? content,
   IconData? icon,
-  required List<MAction> actions,
+  required List<MAction> Function(BuildContext context) actions,
 }) {
   if (Device.isWeb || !Device.isIos) {
     return showDialog<T>(
@@ -488,7 +488,7 @@ Future<T?> marioAlertDialog<T>({
           title: Text(title),
           content: content != null ? Text(content) : null,
           icon: icon != null ? Icon(icon) : null,
-          actions: actions.toButtonBar(context),
+          actions: actions(context).toButtonBar(),
           semanticLabel: title,
         );
       },
@@ -501,7 +501,7 @@ Future<T?> marioAlertDialog<T>({
         return CupertinoAlertDialog(
           title: Text(title),
           content: content != null ? Text(content) : null,
-          actions: actions.map((e) => e.cupertinoDialogAction()).toList(),
+          actions: actions(context).map((e) => e.cupertinoDialogAction()).toList(),
         );
       },
     );
