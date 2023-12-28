@@ -34,6 +34,7 @@ class AsyncTextFormField extends StatefulWidget {
     this.onChanged,
     this.onSubmit,
     this.onTap,
+    this.clearFunc,
     this.onEditingComplete,
     this.buildCounter,
     this.scrollPhysics,
@@ -67,6 +68,7 @@ class AsyncTextFormField extends StatefulWidget {
   final Future<void> Function(TextEditingController controller)? onEditingComplete;
   final Widget? Function(BuildContext, {required int currentLength, required bool isFocused, required int? maxLength})?
       buildCounter;
+  final void Function()? clearFunc;
   final ScrollPhysics? scrollPhysics;
 
   @override
@@ -171,6 +173,7 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
                           icon: const Icon(Icons.clear),
                           onPressed: () async {
                             textCon.clear();
+                            widget.clearFunc?.call();
                           },
                         ),
                       if (widget.showSubmitSuffix)

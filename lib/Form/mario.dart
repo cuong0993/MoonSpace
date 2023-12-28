@@ -1097,35 +1097,38 @@ class AnimatedDialogBox extends StatelessWidget {
         return Positioned(
           left: clampDouble(x, 10, scafSize.width - value * boxSize.width - 10),
           top: clampDouble(y, 100, scafSize.height - value * boxSize.height - 100),
-          child: Container(
-            width: value * boxSize.width,
-            clipBehavior: Clip.antiAlias,
-            height: value * boxSize.height,
-            padding: const EdgeInsets.all(2),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 1,
-                  spreadRadius: 1,
-                  offset: Offset(0, 2),
-                ),
-              ],
-              borderRadius: BorderRadius.circular((1 - value) * 200),
-            ),
-            child: Opacity(
-              opacity: value,
-              child: Theme(
-                data: Theme.of(context).copyWith(
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                ),
-                child: GestureDetector(
-                  onTap: () {},
-                  onHorizontalDragStart: (details) {},
-                  onVerticalDragStart: (details) {},
-                  child: child,
+          child: Semantics(
+            label: 'Dialog box',
+            child: Container(
+              width: value * boxSize.width,
+              clipBehavior: Clip.antiAlias,
+              height: value * boxSize.height,
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 1,
+                    spreadRadius: 1,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+                borderRadius: BorderRadius.circular((1 - value) * 200),
+              ),
+              child: Opacity(
+                opacity: value,
+                child: Theme(
+                  data: Theme.of(context).copyWith(
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                  ),
+                  child: GestureDetector(
+                    onTap: () {},
+                    onHorizontalDragStart: (details) {},
+                    onVerticalDragStart: (details) {},
+                    child: child,
+                  ),
                 ),
               ),
             ),
