@@ -199,15 +199,6 @@ void marioBanner({
   );
 }
 
-// void rootPop(BuildContext context) {
-//   Navigator.of(context).popUntil((route) {
-//     print(ModalRoute.of(context)?.settings);
-//     print(route.settings.name);
-//     return true;
-//     return route.settings.name == '/';
-//   });
-// }
-
 Future<T?> marioActionSheet<T>({
   required BuildContext context,
   String? title,
@@ -506,6 +497,27 @@ Future<T?> marioAlertDialog<T>({
       },
     );
   }
+}
+
+Future<bool> showYesNo({required BuildContext context, required String title, String? content}) async {
+  return (await marioAlertDialog<bool>(
+        context: context,
+        title: title,
+        content: content,
+        actions: (context) {
+          return [
+            MAction(
+              text: 'cancel',
+              fn: () => Navigator.pop(context, false),
+            ),
+            MAction(
+              text: 'yes',
+              fn: () => Navigator.pop(context, true),
+            ),
+          ];
+        },
+      ) ??
+      false);
 }
 
 /////////////////////////

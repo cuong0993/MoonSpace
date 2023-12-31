@@ -43,6 +43,7 @@ extension SuperThemeData on ThemeData {
   //
   Color get csErr => colorScheme.error;
   Color get csErrCon => colorScheme.errorContainer;
+  Color get csOnErrCon => colorScheme.onErrorContainer;
   //
   Color get csOut => colorScheme.outline;
   Color get csOutVar => colorScheme.outlineVariant;
@@ -96,6 +97,7 @@ class Device {
   static bool isMobile = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
   static bool isDesktop = !kIsWeb && (Platform.isMacOS || Platform.isWindows || Platform.isLinux);
   static bool isWeb = kIsWeb;
+  static bool isMacOS = !kIsWeb && Platform.isMacOS;
 }
 
 extension SuperContext on BuildContext {
