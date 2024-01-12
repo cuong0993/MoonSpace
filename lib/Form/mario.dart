@@ -11,7 +11,7 @@ import 'package:moonspace/helper/validator/type_check.dart';
 
 class MAction {
   final String text;
-  final VoidCallback fn;
+  final Function(BuildContext context) fn;
   final bool destructive;
   final bool defaultAction;
   final IconData? icon;
@@ -24,7 +24,7 @@ class MAction {
     this.defaultAction = false,
   });
 
-  Widget popup() {
+  Widget popup(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -32,38 +32,41 @@ class MAction {
         // const SizedBox(width: 10),
         if (icon != null) Icon(icon),
         const SizedBox(width: 8),
-        Text(text),
+        Text(
+          text,
+          style: destructive ? context.tm.c(Colors.red) : context.tm,
+        ),
       ],
     );
   }
 
-  CupertinoActionSheetAction cupertinoSheetAction() {
+  CupertinoActionSheetAction cupertinoSheetAction(BuildContext context) {
     return CupertinoActionSheetAction(
-      onPressed: fn,
+      onPressed: () => fn.call(context),
       isDestructiveAction: destructive,
       isDefaultAction: defaultAction,
-      child: popup(),
+      child: popup(context),
     );
   }
 
-  CupertinoDialogAction cupertinoDialogAction() => CupertinoDialogAction(
-        onPressed: fn,
+  CupertinoDialogAction cupertinoDialogAction(BuildContext context) => CupertinoDialogAction(
+        onPressed: () => fn.call(context),
         isDestructiveAction: destructive,
         isDefaultAction: defaultAction,
-        child: popup(),
+        child: popup(context),
       );
 
-  CupertinoContextMenuAction cupertinoContextMenuAction() => CupertinoContextMenuAction(
-        onPressed: fn,
+  CupertinoContextMenuAction cupertinoContextMenuAction(BuildContext context) => CupertinoContextMenuAction(
+        onPressed: () => fn.call(context),
         isDestructiveAction: destructive,
         isDefaultAction: defaultAction,
         trailingIcon: icon,
-        child: popup(),
+        child: popup(context),
       );
 }
 
 extension SuperMAction on List<MAction> {
-  List<Widget> toButtonBar() => fold(
+  List<Widget> toButtonBar(BuildContext context) => fold(
         [],
         (previousValue, e) => [
           ...previousValue,
@@ -71,12 +74,12 @@ extension SuperMAction on List<MAction> {
           //
           (e == last)
               ? FilledButton(
-                  onPressed: e.fn,
+                  onPressed: () => e.fn.call(context),
                   style: FilledButton.styleFrom(padding: const EdgeInsets.all(0)),
                   child: Text(e.text),
                 )
               : OutlinedButton(
-                  onPressed: e.fn,
+                  onPressed: () => e.fn.call(context),
                   style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(0)),
                   child: Text(e.text),
                 ),
@@ -98,6 +101,8 @@ class PopupMenu extends StatelessWidget {
     return PopupMenuButton<int>(
       icon: child == null ? const Icon(Icons.more_vert) : null,
       iconSize: 20,
+      color: context.theme.canvas,
+      surfaceTintColor: Colors.white,
       splashRadius: 24,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       itemBuilder: (context) {
@@ -110,7 +115,7 @@ class PopupMenu extends StatelessWidget {
                     (e.value != null)
                         ? PopupMenuItem<int>(
                             value: e.key,
-                            child: /*e.value?.widget ??*/ e.value?.popup(),
+                            child: /*e.value?.widget ??*/ e.value?.popup(context),
                           )
                         : const PopupMenuDivider(),
                   ) ??
@@ -213,7 +218,7 @@ Future<T?> marioActionSheet<T>({
         message: message != null ? Text(message) : null,
         actions: actions
             .map(
-              (e) => e.cupertinoSheetAction(),
+              (e) => e.cupertinoSheetAction(context),
             )
             .toList(),
         cancelButton: CupertinoActionSheetAction(
@@ -230,7 +235,7 @@ Future<T?> marioActionSheet<T>({
 
 Future<T?> marioSheet<T>({
   required BuildContext context,
-  required List<Widget> children,
+  required List<Widget> Function(BuildContext context) children,
   void Function(bool didPop)? onPopInvoked,
   GlobalKey<FormState>? formKey,
   VoidCallback? onChanged,
@@ -242,7 +247,7 @@ Future<T?> marioSheet<T>({
   bool showDragHandle = true,
   double horizontalPadding = 12,
   ShapeBorder? border,
-  Widget? actions,
+  Widget Function(BuildContext context)? actions,
 }) async {
   return await showModalBottomSheet<T>(
     context: context,
@@ -282,7 +287,7 @@ Future<T?> marioSheet<T>({
 
 Future<T?> marioDialog<T>({
   required BuildContext context,
-  required List<Widget> children,
+  required List<Widget> Function(BuildContext context) children,
   GlobalKey<FormState>? formKey,
   VoidCallback? onChanged,
   void Function(bool didPop)? onPopInvoked,
@@ -293,7 +298,7 @@ Future<T?> marioDialog<T>({
   Color? titleColor,
   ShapeBorder? border,
   EdgeInsets? insetPadding,
-  Widget? actions,
+  Widget Function(BuildContext context)? actions,
 }) {
   return showDialog<T>(
     context: context,
@@ -328,77 +333,112 @@ class MarioChoice<T> extends StatelessWidget {
     super.key,
     required this.choices,
     this.selected = const {},
-    required this.selectionUpdate,
     this.multi = false,
+    required this.child,
+    this.semanticLabel,
+    required this.title,
+    required this.actions,
   });
 
+  final Widget child;
   final Set<T> choices;
   final Set<T> selected;
-  final Function(Set<T> selection) selectionUpdate;
   final bool multi;
+  final String? semanticLabel;
+  final Widget title;
+  final Widget Function(BuildContext context, Set<T> selectedRadio) actions;
 
   @override
   Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: () {
-        Set<T> selectedRadio = {};
-
-        marioDialog(
-          title: const Text('Mario Choice'),
-          context: context,
-          height: 400,
-          children: [
-            StatefulBuilder(
-              builder: (context, setState) {
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: List<Widget>.generate(choices.length, (index) {
-                    return multi
-                        ? CheckboxListTile.adaptive(
-                            title: Text(choices.elementAt(index).toString()),
-                            value: selectedRadio.contains(choices.elementAt(index)),
-                            onChanged: (value) {
-                              if (value != null) {
-                                setState(() => selectedRadio.add(choices.elementAt(index)));
-                              }
-                            },
-                          )
-                        : RadioListTile<T>.adaptive(
-                            title: Text(choices.elementAt(index).toString()),
-                            value: choices.elementAt(index),
-                            groupValue: selectedRadio.length == 1 ? selectedRadio.first : null,
-                            onChanged: (value) {
-                              // print(value);
-                              if (value != null) {
-                                setState(() => selectedRadio = {value});
-                              }
-                            },
-                          );
-                  }),
-                );
-              },
-            ),
-          ],
-          actions: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
-                child: const Text('CANCEL'),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-              TextButton(
-                child: const Text('OK'),
-                onPressed: () {
-                  selectionUpdate(selectedRadio);
-
-                  Navigator.of(context).pop();
-                },
+    return Semantics(
+      label: semanticLabel,
+      button: true,
+      enabled: true,
+      child: InkWell(
+        child: child,
+        onTap: () {
+          marioDialog(
+            title: title,
+            context: context,
+            height: 400,
+            children: (context) => [
+              MarioChoiceBox(
+                choices: choices,
+                title: title,
+                actions: actions,
+                multi: multi,
+                child: child,
               ),
             ],
-          ),
-        );
-      },
-      child: Text(selected.toString()),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class MarioChoiceBox<T> extends StatefulWidget {
+  const MarioChoiceBox({
+    super.key,
+    required this.choices,
+    this.selected = const {},
+    this.multi = false,
+    required this.child,
+    this.semanticLabel,
+    required this.title,
+    required this.actions,
+  });
+
+  final Widget child;
+  final Set<T> choices;
+  final Set<T> selected;
+  final bool multi;
+  final String? semanticLabel;
+  final Widget title;
+  final Widget Function(BuildContext context, Set<T> selectedRadio) actions;
+
+  @override
+  State<MarioChoiceBox<T>> createState() => _MarioChoiceBoxState<T>();
+}
+
+class _MarioChoiceBoxState<T> extends State<MarioChoiceBox<T>> {
+  Set<T> selectedRadio = {};
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ...List<Widget>.generate(
+          widget.choices.length,
+          (index) {
+            return widget.multi
+                ? CheckboxListTile(
+                    contentPadding: const EdgeInsets.only(left: 10),
+                    title: Text(widget.choices.elementAt(index).toString()),
+                    value: selectedRadio.contains(widget.choices.elementAt(index)),
+                    onChanged: (value) {
+                      if (value == true) {
+                        setState(() => selectedRadio.add(widget.choices.elementAt(index)));
+                      } else {
+                        setState(() => selectedRadio.remove(widget.choices.elementAt(index)));
+                      }
+                    },
+                  )
+                : RadioListTile<T>(
+                    contentPadding: const EdgeInsets.only(left: 10),
+                    title: Text(widget.choices.elementAt(index).toString()),
+                    value: widget.choices.elementAt(index),
+                    groupValue: selectedRadio.length == 1 ? selectedRadio.first : null,
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() => selectedRadio = {value});
+                      }
+                    },
+                  );
+          },
+        ),
+        widget.actions.call(context, selectedRadio),
+      ],
     );
   }
 }
@@ -416,9 +456,9 @@ class MarioBox extends StatelessWidget {
   });
 
   final Widget? title;
-  final List<Widget> children;
+  final List<Widget> Function(BuildContext context) children;
   final bool sheet;
-  final Widget? actions;
+  final Widget Function(BuildContext context)? actions;
   final double? width;
   final double? height;
   final Color? titleColor;
@@ -443,7 +483,7 @@ class MarioBox extends StatelessWidget {
               child: ListView(
                 shrinkWrap: true,
                 physics: const ClampingScrollPhysics(),
-                children: [...children],
+                children: [...children(context)],
               ),
             ),
           ),
@@ -451,7 +491,7 @@ class MarioBox extends StatelessWidget {
             Container(
               color: titleColor,
               padding: const EdgeInsets.all(8.0),
-              child: actions,
+              child: actions?.call(context),
               // child: Row(
               //   mainAxisAlignment: mEnd,
               //   children: actions.toButtonBar(context),
@@ -479,7 +519,7 @@ Future<T?> marioAlertDialog<T>({
           title: Text(title),
           content: content != null ? Text(content) : null,
           icon: icon != null ? Icon(icon) : null,
-          actions: actions(context).toButtonBar(),
+          actions: actions(context).toButtonBar(context),
           semanticLabel: title,
         );
       },
@@ -492,7 +532,7 @@ Future<T?> marioAlertDialog<T>({
         return CupertinoAlertDialog(
           title: Text(title),
           content: content != null ? Text(content) : null,
-          actions: actions(context).map((e) => e.cupertinoDialogAction()).toList(),
+          actions: actions(context).map((e) => e.cupertinoDialogAction(context)).toList(),
         );
       },
     );
@@ -508,11 +548,11 @@ Future<bool> showYesNo({required BuildContext context, required String title, St
           return [
             MAction(
               text: 'cancel',
-              fn: () => Navigator.pop(context, false),
+              fn: (context) => Navigator.pop(context, false),
             ),
             MAction(
               text: 'yes',
-              fn: () => Navigator.pop(context, true),
+              fn: (context) => Navigator.pop(context, true),
             ),
           ];
         },
