@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
-// import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:moonspace/helper/extensions/theme_ext.dart';
@@ -60,12 +59,13 @@ void dividerline() {
   debugLog('$fWhite  ■  ∙  ÷  =  ≡  ─  ×  ☼  ■  ∙  ÷  =  ≡  ─  ×  ☼  $reset');
 }
 
-StreamController<Map<String, String>> logStream = StreamController<Map<String, String>>()
-  ..stream.debounceTime(const Duration(seconds: 2)).listen(
-    (event) {
-      dividerline();
-    },
-  );
+StreamController<Map<String, String>> logStream =
+    StreamController<Map<String, String>>()
+      ..stream.debounceTime(const Duration(seconds: 2)).listen(
+        (event) {
+          dividerline();
+        },
+      );
 
 final JsonEncoder _encoder = JsonEncoder.withIndent(
   '  ',
@@ -98,7 +98,10 @@ String _stack(bool s) {
   Trace st = Trace.from(StackTrace.current).terse;
   List<String> frame2 = st.frames[2].toString().split(" ");
   String fileHash = color.elementAt(
-    (frame2[0].codeUnits.fold<int>(0, (previousValue, element) => previousValue + element) % color.length),
+    (frame2[0]
+            .codeUnits
+            .fold<int>(0, (previousValue, element) => previousValue + element) %
+        color.length),
   );
   if (s) {
     // log("  🍪 ${color['fYellow']} ${st.frames.length > 4 ? "[${st.frames[4].member}] -> " : ""}<${st.frames[3].member}> -> (${st.frames[2].member}) ->${color['bBlack']} ${("${frame2[0]}:${frame2[1].split(":").first}").replaceAll("../../lib", "E:\\_Temp\\tamannaah\\lib").replaceAll("package:monkey", "E:\\_Temp\\cracker\\lib").replaceAll("/", "\\")} $reset");
@@ -116,7 +119,8 @@ taco(dynamic obj, {String name = '', bool stack = false}) {
     String text = beautifyMap(obj);
     logs.add({"Taco $name": text});
     logStream.add({"Taco $name": text});
-    debugLog("  🌮 ${_stack(false)} ${name == '' ? '' : '$name : '} $fBlack $text $reset");
+    debugLog(
+        "  🌮 ${_stack(false)} ${name == '' ? '' : '$name : '} $fBlack $text $reset");
     // log(text);
   }
 }
@@ -127,7 +131,8 @@ lava(dynamic obj, {String name = '', bool stack = false}) {
     String text = beautifyMap(obj);
     logs.add({"Lava $name": text});
     logStream.add({"Lava $name": text});
-    debugLog("  🌋 ${_stack(false)} ${name == '' ? '' : '$name : '} $fRed $text $reset");
+    debugLog(
+        "  🌋 ${_stack(false)} ${name == '' ? '' : '$name : '} $fRed $text $reset");
     // log(text);
   }
 }
@@ -138,7 +143,8 @@ unicorn(dynamic obj, {String name = '', bool stack = false}) {
     String text = beautifyMap(obj);
     logs.add({"Unicorn $name": text});
     logStream.add({"Unicorn $name": text});
-    debugLog("  🦄 ${_stack(false)} $fMagenta ${name == '' ? '' : '$name : '} $text $reset");
+    debugLog(
+        "  🦄 ${_stack(false)} $fMagenta ${name == '' ? '' : '$name : '} $text $reset");
     // log(text);
   }
 }
@@ -149,7 +155,8 @@ dino(dynamic obj, {String name = '', bool stack = false}) {
     String text = beautifyMap(obj);
     logs.add({"Dino $name": text});
     logStream.add({"Dino $name": text});
-    debugLog("  🦖 ${_stack(false)} ${name == '' ? '' : '$name : '} $text $reset");
+    debugLog(
+        "  🦖 ${_stack(false)} ${name == '' ? '' : '$name : '} $text $reset");
     // log(text);$fGreen $text $reset");
     // log(text);
   }
@@ -161,7 +168,8 @@ owl(dynamic obj, {String name = '', bool stack = false}) {
     String text = beautifyMap(obj);
     logs.add({"Owl $name": text});
     logStream.add({"Owl $name": text});
-    debugLog("  🦉 ${_stack(false)} ${name == '' ? '' : '$name : '} $fCyan $text $reset");
+    debugLog(
+        "  🦉 ${_stack(false)} ${name == '' ? '' : '$name : '} $fCyan $text $reset");
     // log(text);
   }
 }

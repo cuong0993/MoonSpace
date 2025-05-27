@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:moonspace/helper/stream/functions.dart';
 import 'package:moonspace/helper/validator/debug_functions.dart';
-import 'package:moonspace/widgets/animated/animated_buttons.dart';
+import 'package:moonspace/widgets/async_lock.dart';
 
 typedef AsyncText = ({String? error, bool load});
 
@@ -42,7 +42,8 @@ class AsyncTextFormField extends StatefulWidget {
 
   final TextEditingController? controller;
   final Future<String?> Function(String value) asyncValidator;
-  final InputDecoration Function(AsyncText asyncText, TextEditingController textCon)? decoration;
+  final InputDecoration Function(
+      AsyncText asyncText, TextEditingController textCon)? decoration;
   final String? initialValue;
   final bool autofocus;
   final bool showPrefix;
@@ -65,9 +66,12 @@ class AsyncTextFormField extends StatefulWidget {
   final void Function(String)? onChanged;
   final Future<void> Function(TextEditingController controller)? onSubmit;
   final Future<void> Function(TextEditingController controller)? onTap;
-  final Future<void> Function(TextEditingController controller)? onEditingComplete;
-  final Widget? Function(BuildContext, {required int currentLength, required bool isFocused, required int? maxLength})?
-      buildCounter;
+  final Future<void> Function(TextEditingController controller)?
+      onEditingComplete;
+  final Widget? Function(BuildContext,
+      {required int currentLength,
+      required bool isFocused,
+      required int? maxLength})? buildCounter;
   final void Function()? clearFunc;
   final ScrollPhysics? scrollPhysics;
 
@@ -86,7 +90,8 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
 
   @override
   void initState() {
-    textCon = widget.controller ?? TextEditingController(text: widget.initialValue);
+    textCon =
+        widget.controller ?? TextEditingController(text: widget.initialValue);
 
     fnStream = createDebounceFunc(widget.milliseconds, (String name) async {
       asyncText = (error: 'Checking...', load: true);
@@ -190,12 +195,14 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
                                     : (widget.onSubmit == null)
                                         ? const SizedBox()
                                         : AsyncLock(
-                                            builder: (isLoading, status, lock, open, setStatus) {
+                                            builder: (isLoading, status, lock,
+                                                open, setStatus) {
                                               return IconButton.filledTonal(
                                                 icon: const Icon(Icons.done),
                                                 onPressed: () async {
                                                   lock();
-                                                  await widget.onSubmit?.call(textCon);
+                                                  await widget.onSubmit
+                                                      ?.call(textCon);
                                                   open();
                                                 },
                                               );

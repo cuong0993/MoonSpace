@@ -5,24 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-const CrossAxisAlignment cStart = CrossAxisAlignment.start;
-const CrossAxisAlignment cCenter = CrossAxisAlignment.center;
-const CrossAxisAlignment cEnd = CrossAxisAlignment.end;
-
-const MainAxisAlignment mStart = MainAxisAlignment.start;
-const MainAxisAlignment mCenter = MainAxisAlignment.center;
-const MainAxisAlignment mEnd = MainAxisAlignment.end;
-const MainAxisAlignment mAround = MainAxisAlignment.spaceAround;
-const MainAxisAlignment mBet = MainAxisAlignment.spaceBetween;
-const MainAxisAlignment mEven = MainAxisAlignment.spaceEvenly;
-
-const MainAxisSize mMax = MainAxisSize.max;
-const MainAxisSize mMin = MainAxisSize.min;
-
-typedef Ei = EdgeInsets;
-typedef Mq = MediaQuery;
-typedef Brr = BorderRadius;
-
 extension SuperMediaQueryData on MediaQueryData {
   double get w => size.width;
   double get h => size.height;
@@ -56,7 +38,7 @@ extension SuperThemeData on ThemeData {
   Color get csInvSur => colorScheme.inverseSurface;
   Color get csOnInvSur => colorScheme.onInverseSurface;
   Color get csSurTint => colorScheme.surfaceTint;
-  Color get csSurVar => colorScheme.surfaceVariant;
+  Color get csSurVar => colorScheme.surfaceContainerHighest;
   //
   Color get csSec => colorScheme.secondary;
   Color get csSecCon => colorScheme.secondaryContainer;
@@ -69,8 +51,8 @@ extension SuperThemeData on ThemeData {
   Color get csOnPriCon => colorScheme.onPrimaryContainer;
   Color get csInvPri => colorScheme.inversePrimary;
   //
-  Color get csBg => colorScheme.background;
-  Color get csOnBg => colorScheme.onBackground;
+  Color get csBg => colorScheme.surface;
+  Color get csOnBg => colorScheme.onSurface;
   //
   Color get csTer => colorScheme.tertiary;
   Color get csTerCon => colorScheme.tertiaryContainer;
@@ -84,9 +66,7 @@ extension SuperThemeData on ThemeData {
   Color get hint => hintColor;
   Color get splash => splashColor;
   Color get shadow => shadowColor;
-  Color get indicator => indicatorColor;
   Color get disabled => disabledColor;
-  Color get dialogBg => dialogBackgroundColor;
   Color get scafBg => scaffoldBackgroundColor;
   Color get highlight => highlightColor;
 }
@@ -95,7 +75,8 @@ class Device {
   static bool isAndroid = !kIsWeb && Platform.isAndroid;
   static bool isIos = !kIsWeb && Platform.isIOS;
   static bool isMobile = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
-  static bool isDesktop = !kIsWeb && (Platform.isMacOS || Platform.isWindows || Platform.isLinux);
+  static bool isDesktop =
+      !kIsWeb && (Platform.isMacOS || Platform.isWindows || Platform.isLinux);
   static bool isWeb = kIsWeb;
   static bool isMacOS = !kIsWeb && Platform.isMacOS;
 }
@@ -147,7 +128,8 @@ extension SuperContext on BuildContext {
   Size get sizePx => mq.size;
 
   Size? get scafSize {
-    final renderBox = Scaffold.of(this).context.findRenderObject() as RenderBox?;
+    final renderBox =
+        Scaffold.of(this).context.findRenderObject() as RenderBox?;
     final hasSize = renderBox?.hasSize ?? false;
     return hasSize ? renderBox?.size : null;
   }
@@ -205,8 +187,10 @@ extension SuperContext on BuildContext {
           pageBuilder: (context, animation, secondaryAnimation) => widget,
           transitionDuration: const Duration(milliseconds: 500),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            var tween = Tween<Offset>(begin: const Offset(1.0, 0.0), end: Offset.zero);
-            var curvedAnimation = CurvedAnimation(parent: animation, curve: Curves.easeInOutCubic);
+            var tween =
+                Tween<Offset>(begin: const Offset(1.0, 0.0), end: Offset.zero);
+            var curvedAnimation = CurvedAnimation(
+                parent: animation, curve: Curves.easeInOutCubic);
 
             return SlideTransition(
               position: tween.animate(curvedAnimation),
@@ -220,8 +204,10 @@ extension SuperContext on BuildContext {
           pageBuilder: (context, animation, secondaryAnimation) => widget,
           transitionDuration: const Duration(milliseconds: 500),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            var tween = Tween<Offset>(begin: const Offset(0, 1.0), end: Offset.zero);
-            var curvedAnimation = CurvedAnimation(parent: animation, curve: Curves.easeInOutCubic);
+            var tween =
+                Tween<Offset>(begin: const Offset(0, 1.0), end: Offset.zero);
+            var curvedAnimation = CurvedAnimation(
+                parent: animation, curve: Curves.easeInOutCubic);
 
             return SlideTransition(
               position: tween.animate(curvedAnimation),
@@ -235,7 +221,8 @@ extension SuperContext on BuildContext {
           pageBuilder: (context, animation, secondaryAnimation) => widget,
           transitionDuration: const Duration(milliseconds: 500),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            var curvedAnimation = CurvedAnimation(parent: animation, curve: Curves.easeInOutCubic);
+            var curvedAnimation = CurvedAnimation(
+                parent: animation, curve: Curves.easeInOutCubic);
 
             return FadeTransition(
               opacity: curvedAnimation,
@@ -302,7 +289,8 @@ extension SuperDuration on Duration {
         days: inDays - d.inDays,
       );
 
-  Future<T> delay<T>([Future<T> Function()? computation]) => Future.delayed(this, computation);
+  Future<T> delay<T>([Future<T> Function()? computation]) =>
+      Future.delayed(this, computation);
 }
 
 extension SuperNumber on num {
@@ -430,7 +418,8 @@ extension SuperTextStyle on TextStyle? {
   Text text(String text) => Text(text, style: this);
 
   //
-  TextStyle? get normal => this?.copyWith(fontWeight: FontWeight.normal, fontStyle: FontStyle.normal);
+  TextStyle? get normal => this
+      ?.copyWith(fontWeight: FontWeight.normal, fontStyle: FontStyle.normal);
   TextStyle? get bold => this?.copyWith(fontWeight: FontWeight.bold);
   TextStyle? get w1 => this?.copyWith(fontWeight: FontWeight.w100);
   TextStyle? get w2 => this?.copyWith(fontWeight: FontWeight.w200);
@@ -443,11 +432,16 @@ extension SuperTextStyle on TextStyle? {
   TextStyle? get w9 => this?.copyWith(fontWeight: FontWeight.w900);
 
   //
-  TextStyle? get dot => this?.copyWith(decorationStyle: TextDecorationStyle.dotted);
-  TextStyle? get dash => this?.copyWith(decorationStyle: TextDecorationStyle.dashed);
-  TextStyle? get solid => this?.copyWith(decorationStyle: TextDecorationStyle.solid);
-  TextStyle? get doub => this?.copyWith(decorationStyle: TextDecorationStyle.double);
-  TextStyle? get wavy => this?.copyWith(decorationStyle: TextDecorationStyle.wavy);
+  TextStyle? get dot =>
+      this?.copyWith(decorationStyle: TextDecorationStyle.dotted);
+  TextStyle? get dash =>
+      this?.copyWith(decorationStyle: TextDecorationStyle.dashed);
+  TextStyle? get solid =>
+      this?.copyWith(decorationStyle: TextDecorationStyle.solid);
+  TextStyle? get doub =>
+      this?.copyWith(decorationStyle: TextDecorationStyle.double);
+  TextStyle? get wavy =>
+      this?.copyWith(decorationStyle: TextDecorationStyle.wavy);
 
   //
   TextStyle? get none => this?.copyWith(decoration: TextDecoration.none);
@@ -459,8 +453,10 @@ extension SuperTextStyle on TextStyle? {
   TextStyle? shadow(List<Shadow> shadows) => this?.copyWith(shadows: shadows);
 
   //
-  TextStyle? get even => this?.copyWith(leadingDistribution: TextLeadingDistribution.even);
-  TextStyle? get proportional => this?.copyWith(leadingDistribution: TextLeadingDistribution.proportional);
+  TextStyle? get even =>
+      this?.copyWith(leadingDistribution: TextLeadingDistribution.even);
+  TextStyle? get proportional =>
+      this?.copyWith(leadingDistribution: TextLeadingDistribution.proportional);
 
   //
   TextStyle? paintf(Paint paint) => this?.copyWith(foreground: paint);
@@ -486,6 +482,8 @@ extension SuperTextStyle on TextStyle? {
   TextStyle? bc(Color? c) => this?.copyWith(backgroundColor: c);
 
   //
-  TextStyle? get baseAlpha => this?.copyWith(textBaseline: TextBaseline.alphabetic);
-  TextStyle? get baseIdeo => this?.copyWith(textBaseline: TextBaseline.ideographic);
+  TextStyle? get baseAlpha =>
+      this?.copyWith(textBaseline: TextBaseline.alphabetic);
+  TextStyle? get baseIdeo =>
+      this?.copyWith(textBaseline: TextBaseline.ideographic);
 }

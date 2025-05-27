@@ -1,170 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:moonspace/helper/extensions/theme_ext.dart';
-
-class AnimatedSlideButton extends StatefulWidget {
-  const AnimatedSlideButton({super.key, this.radius, this.width, this.height});
-
-  final double? radius;
-  final double? width;
-  final double? height;
-
-  @override
-  State<AnimatedSlideButton> createState() => _AnimatedSlideButtonState();
-}
-
-class _AnimatedSlideButtonState extends State<AnimatedSlideButton> with SingleTickerProviderStateMixin {
-  double position = 0;
-  bool dragging = false;
-  double stop = 0;
-  late double width;
-  late double height;
-  late double radius;
-  @override
-  void initState() {
-    width = widget.width ?? 100;
-    height = widget.height ?? 50;
-    radius = widget.radius ?? 40;
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onHorizontalDragStart: (details) {
-        dragging = true;
-      },
-      onHorizontalDragEnd: (details) {
-        stop = position;
-        dragging = false;
-        setState(() {});
-      },
-      onHorizontalDragUpdate: (details) {
-        position = details.localPosition.dx;
-        position = position < 0 ? 0 : position;
-        position = position > (width - radius) ? (width - radius) : position;
-
-        setState(() {});
-      },
-      onTapUp: (details) {
-        if (!dragging) {
-          position = details.localPosition.dx;
-          setState(() {});
-        }
-      },
-      child: Container(
-        color: Colors.yellow,
-        width: width,
-        height: height,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // Positioned(
-            //   left: 0,
-            //   child: ShimmerBox(
-            //     isLoading: position > width / 2,
-            //     loadingChild: Container(color: Colors.red),
-            //     child: Container(
-            //       color: Colors.blue,
-            //       child: const Text('Left'),
-            //     ),
-            //   ),
-            // ),
-            // Positioned(
-            //   right: 0,
-            //   child: ShimmerBox(
-            //     isLoading: position > width / 2,
-            //     loadingChild: Container(color: Colors.red),
-            //     child: Container(
-            //       color: Colors.blue,
-            //       child: const Text('Right'),
-            //     ),
-            //   ),
-            // ),
-            TweenAnimationBuilder<double>(
-              duration: 100.mil,
-              tween: Tween<double>(
-                begin: position,
-                end: dragging ? position : (position < width / 2 ? 0 : width - radius),
-              ),
-              curve: Curves.easeInOut,
-              builder: (context, value, child) {
-                return Positioned(
-                  left: dragging ? position : value,
-                  top: height / 2 - radius / 2,
-                  child: Transform.rotate(
-                    angle: 2 * pi, // * ((dragging ? position : value) / (width - radius)),
-                    child: Container(
-                      color: Colors.red,
-                      width: radius,
-                      height: radius,
-                      child: Text(
-                        '$value ${position.toStringAsFixed(1)}',
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class AsyncLock<T> extends StatefulWidget {
-  const AsyncLock({
-    super.key,
-    required this.builder,
-  });
-
-  final Widget Function(
-    bool loading,
-    T? status,
-    void Function() lock,
-    void Function() open,
-    void Function(T? status) setStatus,
-  ) builder;
-
-  @override
-  State<AsyncLock<T>> createState() => _AsyncLockState<T>();
-}
-
-class _AsyncLockState<T> extends State<AsyncLock<T>> {
-  bool loading = false;
-  T? status;
-
-  @override
-  Widget build(BuildContext context) {
-    void setStatus(T? s) {
-      status = s;
-      if (mounted) {
-        setState(() {});
-      }
-    }
-
-    void lock() {
-      loading = true;
-      if (mounted) {
-        setState(() {});
-      }
-    }
-
-    void open() {
-      loading = false;
-      if (mounted) {
-        setState(() {});
-      }
-    }
-
-    return IgnorePointer(
-      ignoring: loading,
-      child: widget.builder(loading, status, lock, open, setStatus),
-    );
-  }
-}
 
 class GoogleLoader extends StatefulWidget {
   const GoogleLoader({super.key});
@@ -173,7 +9,8 @@ class GoogleLoader extends StatefulWidget {
   State<GoogleLoader> createState() => _GoogleLoaderState();
 }
 
-class _GoogleLoaderState extends State<GoogleLoader> with SingleTickerProviderStateMixin {
+class _GoogleLoaderState extends State<GoogleLoader>
+    with SingleTickerProviderStateMixin {
   late final AnimationController animationController;
   @override
   void dispose() {
@@ -184,7 +21,8 @@ class _GoogleLoaderState extends State<GoogleLoader> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
-    animationController = AnimationController(duration: const Duration(seconds: 2), vsync: this);
+    animationController =
+        AnimationController(duration: const Duration(seconds: 2), vsync: this);
     animationController.repeat();
   }
 
@@ -223,7 +61,8 @@ class NeonButton extends StatefulWidget {
   State<NeonButton> createState() => _NeonButtonState();
 }
 
-class _NeonButtonState extends State<NeonButton> with SingleTickerProviderStateMixin {
+class _NeonButtonState extends State<NeonButton>
+    with SingleTickerProviderStateMixin {
   AnimationController? _controller;
   final ValueNotifier<bool> _notifierCompleted = ValueNotifier(false);
 
@@ -291,7 +130,7 @@ class _NeonButtonState extends State<NeonButton> with SingleTickerProviderStateM
                             BoxShadow(
                               blurRadius: padding,
                               spreadRadius: padding,
-                              color: widget.color.withOpacity(0.8),
+                              color: widget.color.withAlpha(200),
                             ),
                           ]
                         : null,
@@ -303,7 +142,8 @@ class _NeonButtonState extends State<NeonButton> with SingleTickerProviderStateM
                         widget.text,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: completed ? widget.textActiveColor : widget.color,
+                          color:
+                              completed ? widget.textActiveColor : widget.color,
                         ),
                       ),
                     ),
@@ -388,14 +228,17 @@ class CircularProgress extends StatefulWidget {
   State<CircularProgress> createState() => _CircularProgressState();
 }
 
-class _CircularProgressState extends State<CircularProgress> with SingleTickerProviderStateMixin {
+class _CircularProgressState extends State<CircularProgress>
+    with SingleTickerProviderStateMixin {
   late final AnimationController controller;
   late final Animation animation;
 
   @override
   void initState() {
     super.initState();
-    controller = AnimationController(vsync: this, duration: Duration(milliseconds: widget.lapDuration))..repeat();
+    controller = AnimationController(
+        vsync: this, duration: Duration(milliseconds: widget.lapDuration))
+      ..repeat();
   }
 
   @override
@@ -414,7 +257,8 @@ class _CircularProgressState extends State<CircularProgress> with SingleTickerPr
       child: CustomPaint(
         painter: CirclePaint(
           // progress: animation.value,
-          secondaryColor: widget.secondaryColor ?? Theme.of(context).scaffoldBackgroundColor,
+          secondaryColor: widget.secondaryColor ??
+              Theme.of(context).scaffoldBackgroundColor,
           primaryColor: widget.primaryColor ?? Theme.of(context).primaryColor,
           strokeWidth: widget.strokeWidth,
         ),
@@ -453,15 +297,16 @@ class CirclePaint extends CustomPainter {
       tileMode: TileMode.repeated,
       startAngle: _degreeToRad(270),
       endAngle: _degreeToRad(270 + 360.0),
-    ).createShader(Rect.fromCircle(center: Offset(centerPoint, centerPoint), radius: 0));
+    ).createShader(
+        Rect.fromCircle(center: Offset(centerPoint, centerPoint), radius: 0));
 
     var scapSize = strokeWidth * 0.70;
     double scapToDegree = scapSize / centerPoint;
     double startAngle = _degreeToRad(270) + scapToDegree;
     double sweepAngle = _degreeToRad(360) - (2 * scapToDegree);
 
-    canvas.drawArc(const Offset(0.0, 0.0) & Size(size.width, size.width), startAngle, sweepAngle, false,
-        paint..color = primaryColor);
+    canvas.drawArc(const Offset(0.0, 0.0) & Size(size.width, size.width),
+        startAngle, sweepAngle, false, paint..color = primaryColor);
   }
 
   @override

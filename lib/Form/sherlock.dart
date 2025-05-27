@@ -22,6 +22,9 @@ class _SherlockState extends State<Sherlock> {
   late final StreamController<String> debounce;
   late final CachedStreamable<Set<String>> searchHistory;
 
+  // Add this variable to track the last text value
+  String _lastText = '';
+
   @override
   void initState() {
     searchController = SearchController();
@@ -49,20 +52,15 @@ class _SherlockState extends State<Sherlock> {
   }
 
   void fetch(String v) async {
-    // print('-${searchController.text}-');
-    if (searchController.text != oldtext) {
+    if (searchController.text != _lastText) {
       oldtext.add('');
       await 2.sec.delay();
       data.add(
         List.generate(100, (index) => math.Random().nextInt(200).toString()),
       );
+      _lastText = searchController.text;
       oldtext.add(searchController.text);
-      // controller.closeView(null);
-      // controller.openView();
     }
-    // if (controller.text.isEmpty) {
-    //   controller.closeView('');
-    // }
   }
 
   @override

@@ -40,7 +40,8 @@ class CachedStreamable<T> {
 
   /// Update the cached value.
   set value(T value) {
-    final shouldUpdate = updateWhen?.call(_value, value) ?? defaultUpdateWhen(_value, value);
+    final shouldUpdate =
+        updateWhen?.call(_value, value) ?? defaultUpdateWhen(_value, value);
     if (!shouldUpdate) return;
     _controller.add(_value = value);
   }

@@ -1,4 +1,4 @@
-import 'dart:math' show max, min, Random;
+import 'dart:math' show Random;
 import 'package:flutter/material.dart' show Color, Colors, HSVColor, immutable;
 import 'package:moonspace/helper/extensions/string.dart';
 
@@ -20,56 +20,11 @@ class HexColor extends Color {
 }
 
 extension Shade on Color {
-  Color shade(int r, [int? g, int? b, int? a]) {
-    g = g ?? r;
-    b = b ?? r;
-    a = a ?? 0;
-    return Color.fromARGB(
-      max(min(alpha + a, 255), 0),
-      max(min(red + r, 255), 0),
-      max(min(green + g, 255), 0),
-      max(min(blue + b, 255), 0),
-    );
-  }
-
   HSVColor get hsv => HSVColor.fromColor(this);
   bool get isDark => hsv.value < 0.6;
   Color get op => isDark ? Colors.white : Colors.black;
-  Color get mop => isDark ? lighten(.9) : darken(.8);
 
-  Color get i {
-    return Color.fromARGB(alpha, 255 - red, 255 - green, 255 - blue);
-  }
-
-  Color darken(double v) {
-    assert(v >= 0 && v <= 1);
-    return Color.fromARGB(
-      alpha,
-      (red * (1 - v)).round(),
-      (green * (1 - v)).round(),
-      (blue * (1 - v)).round(),
-    );
-  }
-
-  Color lighten(double v) {
-    assert(v >= 0 && v <= 1);
-    return Color.fromARGB(
-      alpha,
-      (red + ((255 - red) * v)).round(),
-      (green + ((255 - green) * v)).round(),
-      (blue + ((255 - blue) * v)).round(),
-    );
-  }
-
-  Color avg(Color other) {
-    final red = (this.red + other.red) ~/ 2;
-    final green = (this.green + other.green) ~/ 2;
-    final blue = (this.blue + other.blue) ~/ 2;
-    final alpha = (this.alpha + other.alpha) ~/ 2;
-    return Color.fromARGB(alpha, red, green, blue);
-  }
-
-  String get hexCode => '0x${value.toRadixString(16)}';
+  String get hexCode => '0x${toARGB32().toRadixString(16)}';
 }
 
 extension AsHtmlColorToColor on String {
