@@ -2,7 +2,7 @@ name: example
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -30,10 +30,38 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  vector_math: ^2.1.4
+  dev: ^1.0.0
+
+  flutter_riverpod: ^3.0.0-dev.15
+  riverpod_annotation: ^3.0.0-dev.15
+  freezed: ^3.0.6
+  json_serializable: ^6.9.5
+  http: ^1.4.0
+  go_router: ^15.1.2
+  provider: ^6.1.5
+  url_launcher: ^6.3.1
+  adaptive_navigation: ^0.0.10
+  shelf_router: ^1.1.4
+  shared_preferences: ^2.5.3
+  share_plus: ^11.0.0
+  cached_network_image: ^3.4.1
+  intl: ^0.20.2
+  google_fonts: ^6.2.1
+  flutter_svg: ^2.1.0
+  flutter_custom_carousel: ^0.1.0+1
+  flutter_animate: ^4.5.2
+  smooth_sheets: ^0.12.0
+  faker: ^2.2.0
+
+  moonspace:
+    path: ../
 
 dev_dependencies:
   flutter_test:
@@ -45,13 +73,18 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  build_runner: ^2.4.15
+  riverpod_generator: ^3.0.0-dev.15
+  riverpod_lint: ^3.0.0-dev.15
+  custom_lint: ^0.7.5
+  freezed_annotation: ^3.0.0
+  go_router_builder: ^2.9.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -87,3 +120,106 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+  assets:
+    - assets/
+    - images/
+    - assets/images/
+    - assets/images/desserts/
+
+    - assets/activities.json
+    - assets/destinations.json
+    - assets/logo.svg
+    - assets/user.jpg
+
+    - assets/images/home/
+    - assets/images/card_deck/
+    - assets/images/cover_slider/
+    - assets/images/digital_wallet/
+    - assets/images/circular_menu/
+    - assets/images/record_box/
+
+    - assets/images/ink_mask.png
+    - assets/images/wipe_mask.png
+    - assets/images/tendril_mask.png
+    - assets/images/icon-moon.png
+    - assets/images/icon-sun.png
+    - assets/images/icon-r.png
+
+    - images/Paris/
+    - images/Small-Cards/
+
+    - images/London/
+    - images/Pisa/
+    - images/Budapest/
+    - images/
+
+    - assets/buttons/
+
+  fonts:
+    - family: OpenSans
+      fonts:
+        - asset: fonts/Open-Sans/OpenSans-Regular.ttf
+        - asset: fonts/Open-Sans/OpenSans-Semibold.ttf
+          weight: 600
+        - asset: fonts/Open-Sans/OpenSans-Bold.ttf
+          weight: 700
+        - asset: fonts/OpenSans-Regular.ttf
+        - asset: fonts/OpenSans-SemiBold.ttf
+          weight: 600
+        - asset: fonts/Open-Sans/OpenSans-Regular.ttf
+          style: italic
+          weight: 300
+
+    - family: DMSerifDisplay
+      fonts:
+        - asset: fonts/DM-Serif-Display/DMSerifDisplay-Regular.ttf
+
+    - family: FjallaOne
+      fonts:
+        - asset: fonts/FjallaOne-Regular.ttf
+    - family: Montserrat
+      fonts:
+        - asset: fonts/Montserrat-SemiBold.ttf
+        - asset: fonts/Montserrat-Regular.ttf
+
+    - family: DMSerif
+      fonts:
+        - asset: fonts/DMSerifDisplay-Regular.ttf
+
+    - family: Playfair
+      fonts:
+        - asset: fonts/PlayfairDisplay-Regular.ttf
+
+    - family: Merriweather
+      fonts:
+        - asset: assets/fonts/Merriweather-Bold.otf
+        - asset: assets/fonts/Merriweather-Black.otf
+
+    - family: Barlow
+      fonts:
+        - asset: fonts/Barlow-Regular.otf
+        - asset: fonts/Barlow-Medium.otf
+          weight: 500
+        - asset: fonts/Barlow-MediumItalic.otf
+          weight: 500
+          style: italic
+        - asset: fonts/Barlow-SemiBold.otf
+          weight: 600
+        - asset: fonts/Barlow-Bold.otf
+          weight: 700
+        - asset: fonts/Barlow-ExtraBold.ttf
+          weight: 800
+    - family: Baloo
+      fonts:
+        - asset: fonts/Baloo-Regular.ttf
+
+    - family: Rubik
+      fonts:
+        - asset: assets/fonts/Rubik-Regular.ttf
+        - asset: assets/fonts/Rubik-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Rubik-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Rubik-Light.ttf
+          weight: 300
