@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'widgets/choice_tab.dart';
 import 'widgets/expandable.dart';
 import 'widgets/models.dart';
 import 'widgets/player.dart';
@@ -129,7 +128,20 @@ class _ArianaMusicState extends State<ArianaMusic> {
               title: Column(
                 children: [
                   SizedBox(height: _offset),
-                  const ChoiceTab(),
+                  const DefaultTabController(
+                    length: 4,
+                    child: TabBar(
+                      isScrollable: true,
+                      indicatorSize: TabBarIndicatorSize.label,
+                      indicatorColor: Colors.white,
+                      tabs: [
+                        Tab(text: 'Popular'),
+                        Tab(text: 'Albums'),
+                        Tab(text: 'Songs'),
+                        Tab(text: 'Fans also like'),
+                      ],
+                    ),
+                  ),
                 ],
               ),
               primary: false,

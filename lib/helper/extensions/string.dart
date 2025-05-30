@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/widgets.dart';
@@ -14,16 +15,19 @@ extension RemoveAll on String {
 
 String randomString(int length) {
   var result = '';
-  var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var characters =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   var charactersLength = characters.length;
   for (var i = 0; i < length; i++) {
-    result += characters.characters.elementAt((Random().nextDouble() * charactersLength) ~/ 1);
+    result += characters.characters
+        .elementAt((Random().nextDouble() * charactersLength) ~/ 1);
   }
   return result;
 }
 
 String stringSting(String text) {
-  String res = text.replaceAllMapped(RegExp(r'(?<=[a-z])[A-Z]'), (Match m) => (' ${m.group(0)}'));
+  String res = text.replaceAllMapped(
+      RegExp(r'(?<=[a-z])[A-Z]'), (Match m) => (' ${m.group(0)}'));
   String finalResult = res[0].toUpperCase() + res.substring(1);
   return finalResult;
 }
@@ -70,4 +74,17 @@ double normEditDistance(String s1, String s2) {
     return 0.0;
   }
   return editDistance(s1, s2) / maxLength;
+}
+
+Map<String, dynamic>? decodeJWT(String? refreshToken) {
+  final jwt = refreshToken?.split('.');
+  if (jwt != null && jwt.length > 1) {
+    String token = jwt[1];
+    int l = (token.length % 4);
+    token += List.generate((4 - l) % 4, (index) => '=').join();
+    final decoded = base64.decode(token);
+    token = utf8.decode(decoded);
+    return json.decode(token) as Map<String, dynamic>;
+  }
+  return null;
 }

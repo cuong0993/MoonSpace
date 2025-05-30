@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import 'package:moonspace/helper/extensions/theme_ext.dart';
 import 'package:moonspace/helper/validator/type_check.dart';
-import 'package:moonspace/widgets/functions.dart';
 
 class MAction {
   final String text;
@@ -28,10 +27,7 @@ class MAction {
         // const SizedBox(width: 10),
         if (icon != null) Icon(icon),
         const SizedBox(width: 8),
-        Text(
-          text,
-          style: destructive ? context.tm.c(Colors.red) : context.tm,
-        ),
+        Text(text, style: destructive ? context.tm.c(Colors.red) : context.tm),
       ],
     );
   }
@@ -65,29 +61,27 @@ class MAction {
 
 extension SuperMAction on List<MAction> {
   List<Widget> toButtonBar(BuildContext context) => fold(
-        [],
-        (previousValue, e) => [
-          ...previousValue,
+    [],
+    (previousValue, e) => [
+      ...previousValue,
 
-          //
-          (e == last)
-              ? FilledButton(
-                  onPressed: () => e.fn.call(context),
-                  style:
-                      FilledButton.styleFrom(padding: const EdgeInsets.all(0)),
-                  child: Text(e.text),
-                )
-              : OutlinedButton(
-                  onPressed: () => e.fn.call(context),
-                  style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.all(0)),
-                  child: Text(e.text),
-                ),
+      //
+      (e == last)
+          ? FilledButton(
+              onPressed: () => e.fn.call(context),
+              style: FilledButton.styleFrom(padding: const EdgeInsets.all(0)),
+              child: Text(e.text),
+            )
+          : OutlinedButton(
+              onPressed: () => e.fn.call(context),
+              style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(0)),
+              child: Text(e.text),
+            ),
 
-          //
-          // const SizedBox(width: 4),
-        ],
-      );
+      //
+      // const SizedBox(width: 4),
+    ],
+  );
 }
 
 class PopupMenu extends StatelessWidget {
@@ -115,8 +109,9 @@ class PopupMenu extends StatelessWidget {
                     (e.value != null)
                         ? PopupMenuItem<int>(
                             value: e.key,
-                            child: /*e.value?.widget ??*/
-                                e.value?.popup(context),
+                            child: /*e.value?.widget ??*/ e.value?.popup(
+                              context,
+                            ),
                           )
                         : const PopupMenuDivider(),
                   ) ??
@@ -128,124 +123,6 @@ class PopupMenu extends StatelessWidget {
         (actions[value]?.fn ?? () {})();
       },
       child: child,
-    );
-  }
-}
-
-class MarioChoice<T> extends StatelessWidget {
-  const MarioChoice({
-    super.key,
-    required this.choices,
-    this.selected = const {},
-    this.multi = false,
-    required this.child,
-    this.semanticLabel,
-    required this.title,
-    required this.actions,
-  });
-
-  final Widget child;
-  final Set<T> choices;
-  final Set<T> selected;
-  final bool multi;
-  final String? semanticLabel;
-  final Widget title;
-  final Widget Function(BuildContext context, Set<T> selectedRadio) actions;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label: semanticLabel,
-      button: true,
-      enabled: true,
-      child: InkWell(
-        child: child,
-        onTap: () {
-          context.showFormDialog(
-            title: title,
-            height: 400,
-            children: (context) => [
-              MarioChoiceBox(
-                choices: choices,
-                title: title,
-                actions: actions,
-                multi: multi,
-                child: child,
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
-class MarioChoiceBox<T> extends StatefulWidget {
-  const MarioChoiceBox({
-    super.key,
-    required this.choices,
-    this.selected = const {},
-    this.multi = false,
-    required this.child,
-    this.semanticLabel,
-    required this.title,
-    required this.actions,
-  });
-
-  final Widget child;
-  final Set<T> choices;
-  final Set<T> selected;
-  final bool multi;
-  final String? semanticLabel;
-  final Widget title;
-  final Widget Function(BuildContext context, Set<T> selectedRadio) actions;
-
-  @override
-  State<MarioChoiceBox<T>> createState() => _MarioChoiceBoxState<T>();
-}
-
-class _MarioChoiceBoxState<T> extends State<MarioChoiceBox<T>> {
-  Set<T> selectedRadio = {};
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ...List<Widget>.generate(
-          widget.choices.length,
-          (index) {
-            return widget.multi
-                ? CheckboxListTile(
-                    contentPadding: const EdgeInsets.only(left: 10),
-                    title: Text(widget.choices.elementAt(index).toString()),
-                    value:
-                        selectedRadio.contains(widget.choices.elementAt(index)),
-                    onChanged: (value) {
-                      if (value == true) {
-                        setState(() =>
-                            selectedRadio.add(widget.choices.elementAt(index)));
-                      } else {
-                        setState(() => selectedRadio
-                            .remove(widget.choices.elementAt(index)));
-                      }
-                    },
-                  )
-                : RadioListTile<T>(
-                    contentPadding: const EdgeInsets.only(left: 10),
-                    title: Text(widget.choices.elementAt(index).toString()),
-                    value: widget.choices.elementAt(index),
-                    groupValue:
-                        selectedRadio.length == 1 ? selectedRadio.first : null,
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() => selectedRadio = {value});
-                      }
-                    },
-                  );
-          },
-        ),
-        widget.actions.call(context, selectedRadio),
-      ],
     );
   }
 }

@@ -3,7 +3,6 @@ import 'package:example/ariana/main.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:example/compass/app/main.dart';
 import 'package:example/cool_card_swiper/main.dart';
 import 'package:example/cover_carousel.dart';
 import 'package:example/flutter_custom_carousel/main.dart';
@@ -49,8 +48,8 @@ void main() {
   // runApp(TicketFoldApp());
 
   // Compassmain();
-  CoolCardSwipermain();
-  // Recipesmain();
+  // CoolCardSwipermain();
+  Recipesmain();
   // runApp(CoverCarouselPage());
   // runApp(CarouselApp());
   // runApp(Ariana());

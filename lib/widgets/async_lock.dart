@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 
 class AsyncLock<T> extends StatefulWidget {
-  const AsyncLock({
-    super.key,
-    required this.builder,
-  });
+  const AsyncLock({super.key, required this.builder});
 
   final Widget Function(
     bool loading,
     T? status,
     void Function() lock,
-    void Function() open,
+    void Function() unlock,
     void Function(T? status) setStatus,
-  ) builder;
+  )
+  builder;
 
   @override
   State<AsyncLock<T>> createState() => _AsyncLockState<T>();
