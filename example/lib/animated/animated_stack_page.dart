@@ -1,29 +1,5 @@
 import 'package:flutter/material.dart';
 
-class AnimatedStackPageListTile extends StatelessWidget {
-  const AnimatedStackPageListTile({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      title: Text("Animated Stack Page"),
-      onTap: () {
-        Navigator.of(context).push(
-          PageRouteBuilder(
-            transitionDuration: const Duration(seconds: 1),
-            pageBuilder: (context, animation, secondaryAnimation) {
-              return AnimatedLogoPage(animation: animation);
-            },
-            transitionsBuilder: (context, animation, _, child) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-          ),
-        );
-      },
-    );
-  }
-}
-
 class AnimatedLogoPage extends StatelessWidget {
   final Animation<double> animation;
 

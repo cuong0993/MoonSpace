@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:example/vignettes/product_detail_zoom/lib/product_details_hero_flight.dart';
-import 'package:example/vignettes/_shared/ui/sprite.dart';
+import 'package:moonspace/ui/sprite.dart';
 
 import 'components/fade_color_page_route.dart';
 import 'details.dart';

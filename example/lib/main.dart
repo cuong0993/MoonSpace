@@ -10,10 +10,10 @@ import 'package:example/flutter_custom_carousel/views/hooa.dart';
 import 'package:example/recipes/main.dart';
 import 'package:example/renderobject/main.dart';
 import 'package:example/vignettes/basketball_ptr/lib/main.dart';
-import 'package:example/vignettes/bubble_tab_bar/lib/main.dart';
+import 'package:example/vignettes/bubble_tab_bar/main.dart';
 import 'package:example/vignettes/constellations_list/lib/main.dart';
-import 'package:example/vignettes/dark_ink_transition/lib/main.dart';
-import 'package:example/vignettes/drink_rewards_list/lib/main.dart';
+import 'package:example/vignettes/dark_ink_transition/main.dart';
+import 'package:example/vignettes/drink_rewards_list/main.dart';
 import 'package:example/vignettes/fluid_nav_bar/lib/main.dart';
 import 'package:example/vignettes/gooey_edge/lib/main.dart';
 import 'package:example/vignettes/indie_3d/lib/main.dart';
@@ -29,17 +29,18 @@ import 'package:example/vignettes/ticket_fold/lib/main.dart';
 part 'main.g.dart';
 
 void main() {
-  // runApp(BasketballPtr());
   // runApp(BubbleTabBar());
-  // runApp(ConstellationsList());
   // runApp(DarkInkTransition());
   // runApp(DrinkRewardList());
+  // runApp(Indie3D());
+
+  // runApp(BasketballPtr());
+  // runApp(ConstellationsList());
   // runApp(DarkInkTransition());
   // runApp(FluidNavBarApp());
   // runApp(GooeyEdgeApp());
-  // runApp(Indie3D());
   // runApp(ParallaxTravelcardsHero());
-  // runApp(ParallaxTravelCardsList());
+  runApp(ParallaxTravelCardsList());
   // runApp(ParticleSwipe());
   // runApp(PlantForms());
   // runApp(ProductDetailZoom());
@@ -49,7 +50,7 @@ void main() {
 
   // Compassmain();
   // CoolCardSwipermain();
-  Recipesmain();
+  // runApp(const ProviderScope(child: RecipesApp()));
   // runApp(CoverCarouselPage());
   // runApp(CarouselApp());
   // runApp(Ariana());

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:example/vignettes/_shared/ui/app_scroll_behavior.dart';
+import 'package:moonspace/controller/app_scroll_behavior.dart';
 
 import './content/home.dart';
 import './content/account.dart';

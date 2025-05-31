@@ -1,7 +1,6 @@
-import 'dart:ui';
-
 import 'package:example/flutter_custom_carousel/views/views.dart';
 import 'package:flutter/material.dart';
+import 'package:moonspace/controller/app_scroll_behavior.dart';
 
 void main() {
   runApp(const CarouselApp());
@@ -22,15 +21,5 @@ class CarouselApp extends StatelessWidget {
       home: const HomeView(),
       // home: const HomeView(),
     );
-  }
-}
-
-// Create a subclass of ScrollBehavior that enables scrolling via mouse drag.
-class AppScrollBehavior extends ScrollBehavior {
-  @override
-  Set<PointerDeviceKind> get dragDevices {
-    final devices = Set<PointerDeviceKind>.from(super.dragDevices);
-    devices.add(PointerDeviceKind.mouse);
-    return devices;
   }
 }

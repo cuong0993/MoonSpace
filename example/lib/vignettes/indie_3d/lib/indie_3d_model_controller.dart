@@ -52,17 +52,17 @@ class Indie3dModelController extends ChangeNotifier {
   Future<void> _loadMeshes(BuildContext context) async {
     final meshTorus = await loadVertexMeshFromOBJAsset(
       context,
-      "${Indie3D.bundle}/assets",
+      "assets",
       'torus.obj',
     );
     final meshStar = await loadVertexMeshFromOBJAsset(
       context,
-      "${Indie3D.bundle}/assets",
+      "assets",
       'star.obj',
     );
     final meshCube = await loadVertexMeshFromOBJAsset(
       context,
-      "${Indie3D.bundle}/assets",
+      "assets",
       'cube.obj',
     );
 

@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
-import 'package:example/vignettes/_shared/ui/animated_sprite.dart';
+import 'package:moonspace/ui/animated_sprite.dart';
 
 import 'scaling_info.dart';
 import 'main.dart';

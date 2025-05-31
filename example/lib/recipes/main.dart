@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'core/styles/app_themes.dart';
-import 'features/recipes/models/recipe.dart';
-import 'features/recipes/recipes_data.dart';
-import 'features/recipes/views/pages/recipes_page.dart';
+import 'styles/app_themes.dart';
+import 'models/recipe.dart';
+import 'models/recipes_data.dart';
+import 'widgets/recipes_page.dart';
 
-void Recipesmain() {
-  runApp(const ProviderScope(child: MyApp()));
+void main() {
+  runApp(const ProviderScope(child: RecipesApp()));
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+class RecipesApp extends StatefulWidget {
+  const RecipesApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<RecipesApp> createState() => _RecipesAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _RecipesAppState extends State<RecipesApp> {
   bool _isInit = true;
 
   @override

@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:moonspace/controller/app_scroll_behavior.dart';
 import 'package:moonspace/feedback/feedback_form.dart';
 import 'package:moonspace/helper/extensions/theme_ext.dart';
 import 'package:moonspace/helper/validator/debug_functions.dart';
@@ -129,6 +130,7 @@ class SpaceMoonHome extends ConsumerWidget {
             themeAnimationCurve: Curves.ease,
             debugShowCheckedModeBanner: debugUi,
             restorationScopeId: appRestorationScopeId,
+            scrollBehavior: AppScrollBehavior(),
 
             // showSemanticsDebugger: true,
             // showPerformanceOverlay: true,

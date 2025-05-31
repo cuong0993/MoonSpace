@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:example/vignettes/_shared/ui/animated_sprite.dart';
+import 'package:moonspace/ui/animated_sprite.dart';
 
 import 'main.dart';
 import 'product_details_transition.dart';

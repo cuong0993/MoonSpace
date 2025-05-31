@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:example/vignettes/product_detail_zoom/lib/pulsing_button.dart';
-import 'package:example/vignettes/_shared/ui/sprite.dart';
+import 'package:moonspace/ui/sprite.dart';
 
 import 'components/delayed_fade_in.dart';
 import 'main.dart';

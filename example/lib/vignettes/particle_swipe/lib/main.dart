@@ -4,7 +4,7 @@ import 'package:example/vignettes/particle_swipe/lib/components/particle_app_bar
 import 'package:example/vignettes/_shared/env.dart';
 
 import 'demo.dart';
-import 'package:example/vignettes/_shared/ui/app_scroll_behavior.dart';
+import 'package:moonspace/controller/app_scroll_behavior.dart';
 
 class ParticleSwipe extends StatelessWidget {
   static String _pkg = "particle_swipe";
