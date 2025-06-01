@@ -5,12 +5,9 @@ import 'package:flutter/widgets.dart';
 
 extension RemoveAll on String {
   String removeAll(Iterable<String> values) => values.fold(
-      this,
-      (
-        String result,
-        String pattern,
-      ) =>
-          result.replaceAll(pattern, ''));
+    this,
+    (String result, String pattern) => result.replaceAll(pattern, ''),
+  );
 }
 
 String randomString(int length) {
@@ -19,15 +16,18 @@ String randomString(int length) {
       'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   var charactersLength = characters.length;
   for (var i = 0; i < length; i++) {
-    result += characters.characters
-        .elementAt((Random().nextDouble() * charactersLength) ~/ 1);
+    result += characters.characters.elementAt(
+      (Random().nextDouble() * charactersLength) ~/ 1,
+    );
   }
   return result;
 }
 
 String stringSting(String text) {
   String res = text.replaceAllMapped(
-      RegExp(r'(?<=[a-z])[A-Z]'), (Match m) => (' ${m.group(0)}'));
+    RegExp(r'(?<=[a-z])[A-Z]'),
+    (Match m) => (' ${m.group(0)}'),
+  );
   String finalResult = res[0].toUpperCase() + res.substring(1);
   return finalResult;
 }

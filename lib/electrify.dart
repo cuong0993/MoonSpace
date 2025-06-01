@@ -17,48 +17,6 @@ import 'package:moonspace/provider/pref.dart';
 import 'package:moonspace/theme.dart';
 import 'package:moonspace/provider/global_theme.dart';
 
-class ElectricWrap extends StatelessWidget {
-  const ElectricWrap({
-    super.key,
-    required this.child,
-    required this.theme,
-    required this.brightness,
-    required this.electricKey,
-  });
-
-  final Key electricKey;
-  final Widget child;
-  final ThemeType theme;
-  final Brightness brightness;
-
-  @override
-  Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.ltr,
-      child: Scaffold(
-        key: ValueKey(theme),
-        resizeToAvoidBottomInset: false,
-        body: Overlay(
-          initialEntries: [
-            OverlayEntry(
-              builder: (context) {
-                return CupertinoTheme(
-                  key: electricKey,
-                  data: CupertinoThemeData(
-                    brightness: brightness,
-                    primaryColor: AppTheme.seedColor,
-                  ),
-                  child: child,
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey();
 const String spacemoonRestorationScopeId = 'SpacemoonRestorationScopeId';
 const String appRestorationScopeId = 'AppRestorationScopeId';
@@ -80,7 +38,7 @@ class SpaceMoonHome extends ConsumerWidget {
   final List<LocalizationsDelegate<dynamic>>? localizationsDelegates;
   final List<Locale>? supportedLocales;
 
-  final GoRouter router;
+  final GoRouter? router;
 
   final Key electricKey;
   final bool debugUi;
@@ -134,7 +92,7 @@ class SpaceMoonHome extends ConsumerWidget {
 
             // showSemanticsDebugger: true,
             // showPerformanceOverlay: true,
-            supportedLocales: [...?supportedLocales],
+            supportedLocales: [Locale('en', 'US'), ...?supportedLocales],
 
             builder: (context, child) {
               initializeDateFormatting();
@@ -151,11 +109,28 @@ class SpaceMoonHome extends ConsumerWidget {
               //   );
               // }
 
-              return ElectricWrap(
-                electricKey: electricKey,
-                theme: globalAppTheme.theme,
-                brightness: brightness,
-                child: child ?? errorChild,
+              return Directionality(
+                textDirection: TextDirection.ltr,
+                child: Scaffold(
+                  key: ValueKey(globalAppTheme.theme),
+                  resizeToAvoidBottomInset: false,
+                  body: Overlay(
+                    initialEntries: [
+                      OverlayEntry(
+                        builder: (context) {
+                          return CupertinoTheme(
+                            key: electricKey,
+                            data: CupertinoThemeData(
+                              brightness: brightness,
+                              primaryColor: AppTheme.seedColor,
+                            ),
+                            child: child ?? errorChild,
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
               );
             },
           );
@@ -170,7 +145,7 @@ void electrify({
   required void Function(WidgetsBinding widgetsBinding) before,
   required void Function() after,
   required Key electricKey,
-  required GoRouter router,
+  required GoRouter? router,
   final List<LocalizationsDelegate<dynamic>>? localizationsDelegates,
   final List<Locale>? supportedLocales,
   required AsyncCallback init,
@@ -191,6 +166,7 @@ void electrify({
       // debugPrintMarkNeedsPaintStacks = true;
 
       //
+      BindingBase.debugZoneErrorsAreFatal = true;
       WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
 
       before(widgetsBinding);

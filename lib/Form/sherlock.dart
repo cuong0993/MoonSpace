@@ -7,9 +7,7 @@ import 'package:moonspace/helper/stream/cached_stream.dart';
 import 'package:moonspace/helper/stream/functions.dart';
 
 class Sherlock extends StatefulWidget {
-  const Sherlock({
-    super.key,
-  });
+  const Sherlock({super.key});
 
   @override
   State<Sherlock> createState() => _SherlockState();
@@ -154,7 +152,8 @@ class SherlockBox extends StatelessWidget {
                 return Wrap(
                   runSpacing: 2,
                   spacing: 2,
-                  children: snapshot.data
+                  children:
+                      snapshot.data
                           ?.map(
                             (e) => ChoiceChip(
                               selected: controller.text == e,
@@ -193,30 +192,14 @@ class SherlockBox extends StatelessWidget {
                 child: GridView.count(
                   crossAxisCount: 2,
                   children: [
-                    Container(
-                      color: Colors.blue,
-                    ),
-                    Container(
-                      color: Colors.red,
-                    ),
-                    Container(
-                      color: Colors.green,
-                    ),
-                    Container(
-                      color: Colors.yellow,
-                    ),
-                    Container(
-                      color: Colors.blue,
-                    ),
-                    Container(
-                      color: Colors.red,
-                    ),
-                    Container(
-                      color: Colors.green,
-                    ),
-                    Container(
-                      color: Colors.yellow,
-                    ),
+                    Container(color: Colors.blue),
+                    Container(color: Colors.red),
+                    Container(color: Colors.green),
+                    Container(color: Colors.yellow),
+                    Container(color: Colors.blue),
+                    Container(color: Colors.red),
+                    Container(color: Colors.green),
+                    Container(color: Colors.yellow),
                   ],
                 ),
               );

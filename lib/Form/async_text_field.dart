@@ -17,19 +17,20 @@ class AsyncTextFormField extends StatefulWidget {
     this.decoration,
     this.autofocus = false,
     this.enabled = true,
-    this.showPrefix = true,
+    this.showPrefix = false,
     this.showSubmitSuffix = true,
     this.showClear = false,
     this.autocorrect = true,
     this.enableSuggestions = true,
     this.suffix = const [],
-    this.heading,
     this.milliseconds = 300,
     this.textAlign = TextAlign.start,
     this.textAlignVertical = TextAlignVertical.center,
     this.minLines,
     this.maxLines,
     this.maxLength,
+    this.autofillHints,
+    this.keyboardType,
     this.textInputAction,
     this.onChanged,
     this.onSubmit,
@@ -43,7 +44,10 @@ class AsyncTextFormField extends StatefulWidget {
   final TextEditingController? controller;
   final Future<String?> Function(String value) asyncValidator;
   final InputDecoration Function(
-      AsyncText asyncText, TextEditingController textCon)? decoration;
+    AsyncText asyncText,
+    TextEditingController textCon,
+  )?
+  decoration;
   final String? initialValue;
   final bool autofocus;
   final bool showPrefix;
@@ -53,7 +57,6 @@ class AsyncTextFormField extends StatefulWidget {
   final bool autocorrect;
   final bool enableSuggestions;
   final List<Widget> suffix;
-  final Widget? heading;
   final int milliseconds;
   final TextStyle? style;
   final TextAlign textAlign;
@@ -61,17 +64,22 @@ class AsyncTextFormField extends StatefulWidget {
   final int? minLines;
   final int? maxLines;
   final int? maxLength;
+  final Iterable<String>? autofillHints;
+  final TextInputType? keyboardType;
 
   final TextInputAction? textInputAction;
   final void Function(String)? onChanged;
   final Future<void> Function(TextEditingController controller)? onSubmit;
   final Future<void> Function(TextEditingController controller)? onTap;
   final Future<void> Function(TextEditingController controller)?
-      onEditingComplete;
-  final Widget? Function(BuildContext,
-      {required int currentLength,
-      required bool isFocused,
-      required int? maxLength})? buildCounter;
+  onEditingComplete;
+  final Widget? Function(
+    BuildContext, {
+    required int currentLength,
+    required bool isFocused,
+    required int? maxLength,
+  })?
+  buildCounter;
   final void Function()? clearFunc;
   final ScrollPhysics? scrollPhysics;
 
@@ -113,7 +121,7 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
 
   @override
   Widget build(BuildContext context) {
-    final child = TextFormField(
+    return TextFormField(
       controller: textCon,
       key: key,
       textAlign: widget.textAlign,
@@ -151,7 +159,9 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
       //
       style: widget.style,
 
-      decoration: widget.decoration?.call(asyncText, textCon).copyWith(
+      decoration: widget.decoration
+          ?.call(asyncText, textCon)
+          .copyWith(
             isDense: true,
             prefixIcon: !widget.showPrefix
                 ? null
@@ -163,8 +173,8 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
                     child: (asyncText.error == null)
                         ? const Icon(Icons.done)
                         : (asyncText.load == true
-                            ? const CircularProgressIndicator()
-                            : const Icon(Icons.error_outline)),
+                              ? const CircularProgressIndicator()
+                              : const Icon(Icons.error_outline)),
                   ),
             suffixIcon: !widget.enabled
                 ? null
@@ -189,25 +199,24 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
                                 child: CircularProgressIndicator(),
                               )
                             : (widget.initialValue == textCon.text)
-                                ? const Icon(Icons.edit)
-                                : (asyncText.error != null)
-                                    ? const Icon(Icons.error)
-                                    : (widget.onSubmit == null)
-                                        ? const SizedBox()
-                                        : AsyncLock(
-                                            builder: (isLoading, status, lock,
-                                                open, setStatus) {
-                                              return IconButton.filledTonal(
-                                                icon: const Icon(Icons.done),
-                                                onPressed: () async {
-                                                  lock();
-                                                  await widget.onSubmit
-                                                      ?.call(textCon);
-                                                  open();
-                                                },
-                                              );
-                                            },
-                                          )
+                            ? const Icon(Icons.edit)
+                            : (asyncText.error != null)
+                            ? const Icon(Icons.error)
+                            : (widget.onSubmit == null)
+                            ? const SizedBox()
+                            : AsyncLock(
+                                builder:
+                                    (isLoading, status, lock, open, setStatus) {
+                                      return IconButton.filledTonal(
+                                        icon: const Icon(Icons.done),
+                                        onPressed: () async {
+                                          lock();
+                                          await widget.onSubmit?.call(textCon);
+                                          open();
+                                        },
+                                      );
+                                    },
+                              ),
                     ],
                   ),
           ),
@@ -222,17 +231,9 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
         }
         return asyncText.error;
       },
-      textInputAction: widget.textInputAction,
+      textInputAction: widget.textInputAction ?? TextInputAction.next,
+      autofillHints: widget.autofillHints,
+      keyboardType: widget.keyboardType,
     );
-
-    return widget.heading == null
-        ? child
-        : Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              widget.heading!,
-              child,
-            ],
-          );
   }
 }

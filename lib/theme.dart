@@ -141,23 +141,33 @@ class AppTheme {
   TabBarThemeData get tabBarTheme => const TabBarThemeData();
 
   static InputDecorationTheme get inputDecoration => InputDecorationTheme(
-    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: BorderSide(color: seedColor),
-    ),
+    // border: OutlineInputBorder(
+    //   borderSide: BorderSide(),
+    //   borderRadius: BorderRadius.circular(8),
+    // ),
+    // focusedBorder: OutlineInputBorder(
+    //   borderRadius: BorderRadius.circular(8),
+    //   borderSide: BorderSide(color: seedColor),
+    // ),
+    border: OutlineInputBorder(),
+    filled: true,
 
     // labelStyle: AppTheme.tx.titleMedium,
     // contentPadding: EdgeInsets.all(12.c),
   );
 
-  static InputDecoration get uInputDecoration => InputDecoration(
-    enabledBorder: InputBorder.none,
-    disabledBorder: InputBorder.none,
-    // border: InputBorder.none,
-    focusedBorder: 1.bs.c(const Color.fromARGB(50, 103, 103, 103)).uline,
-    errorBorder: 1.bs.c(const Color.fromARGB(139, 255, 116, 116)).uline,
-    focusedErrorBorder: 1.bs.c(const Color.fromARGB(139, 255, 116, 116)).uline,
+  static InputDecoration get inputDecorationOutlined => InputDecoration(
+    border: OutlineInputBorder(),
+    filled: true,
+    // focusedBorder: 1.bs.c(const Color.fromARGB(50, 103, 103, 103)).uline,
+    // errorBorder: 1.bs.c(const Color.fromARGB(139, 255, 116, 116)).uline,
+    // focusedErrorBorder: 1.bs.c(const Color.fromARGB(139, 255, 116, 116)).uline,
+  );
+
+  static InputDecoration get inputDecorationUnderline => InputDecoration(
+    // focusedBorder: 1.bs.c(const Color.fromARGB(50, 103, 103, 103)).uline,
+    // errorBorder: 1.bs.c(const Color.fromARGB(139, 255, 116, 116)).uline,
+    // focusedErrorBorder: 1.bs.c(const Color.fromARGB(139, 255, 116, 116)).uline,
   );
 
   DialogThemeData get dialogTheme => DialogThemeData(
@@ -280,21 +290,21 @@ class AppTheme {
     //
     brightness: dark ? Brightness.dark : Brightness.light,
     useMaterial3: true,
-    colorScheme: colorScheme,
-    textTheme: textTheme,
+    // colorScheme: colorScheme,
+    // textTheme: textTheme,
 
     //
     // dividerTheme: DividerThemeData(color: seedColor),
 
     //
-    inputDecorationTheme: inputDecoration,
+    // inputDecorationTheme: inputDecoration,
 
-    scaffoldBackgroundColor: AppTheme.background,
+    // scaffoldBackgroundColor: AppTheme.background,
     // splashColor: ,
-    appBarTheme: appBarTheme,
+    // appBarTheme: appBarTheme,
 
     //
-    listTileTheme: listTileTheme,
+    // listTileTheme: listTileTheme,
 
     //
     // iconTheme: IconThemeData(size: 35),
@@ -302,19 +312,19 @@ class AppTheme {
     // floatingActionButtonTheme: FloatingActionButtonThemeData(),
 
     //
-    outlinedButtonTheme: outlinedButtonTheme,
-    filledButtonTheme: filledButtonTheme,
-    elevatedButtonTheme: elevatedButtonTheme,
-    textButtonTheme: textButton,
+    // outlinedButtonTheme: outlinedButtonTheme,
+    // filledButtonTheme: filledButtonTheme,
+    // elevatedButtonTheme: elevatedButtonTheme,
+    // textButtonTheme: textButton,
 
-    bottomNavigationBarTheme: bottomNavigationBarTheme,
-    tabBarTheme: tabBarTheme,
+    // bottomNavigationBarTheme: bottomNavigationBarTheme,
+    // tabBarTheme: tabBarTheme,
 
-    //
-    dialogTheme: dialogTheme,
+    // //
+    // dialogTheme: dialogTheme,
 
-    //
-    cardTheme: cardTheme,
+    // //
+    // cardTheme: cardTheme,
   );
 
   @override

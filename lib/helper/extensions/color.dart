@@ -28,12 +28,8 @@ extension Shade on Color {
 }
 
 extension AsHtmlColorToColor on String {
-  Color htmlColorToColor() => Color(
-        int.parse(
-          removeAll(['0x', '#']).padLeft(8, 'ff'),
-          radix: 16,
-        ),
-      );
+  Color htmlColorToColor() =>
+      Color(int.parse(removeAll(['0x', '#']).padLeft(8, 'ff'), radix: 16));
 
   Color? tryToColor() {
     final rgbRegex = RegExp(r'^rgb\((\d+),\s*(\d+),\s*(\d+)\)$');

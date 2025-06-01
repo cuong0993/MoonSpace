@@ -85,11 +85,13 @@ class AnimatedSnackbar extends StatelessWidget {
           child: Opacity(
             opacity: v,
             child: Container(
-              decoration: decoration ??
+              decoration:
+                  decoration ??
                   BoxDecoration(
                     color: context.theme.csOnSur,
                     border: const Border(
-                        left: BorderSide(width: 10, color: Colors.green)),
+                      left: BorderSide(width: 10, color: Colors.green),
+                    ),
                     borderRadius: 16.br,
                   ),
               margin: margin ?? const EdgeInsets.all(8),
@@ -105,7 +107,8 @@ class AnimatedSnackbar extends StatelessWidget {
                       children: [
                         Padding(
                           padding: const EdgeInsets.all(8),
-                          child: icon ??
+                          child:
+                              icon ??
                               Icon(
                                 Icons.star_border,
                                 color: context.theme.csSur,
@@ -116,11 +119,15 @@ class AnimatedSnackbar extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(title,
-                                  style: context.tl.c(context.theme.csSur)),
+                              Text(
+                                title,
+                                style: context.tl.c(context.theme.csSur),
+                              ),
                               // const Divider(),
-                              Text(content,
-                                  style: context.ts.c(context.theme.csSur)),
+                              Text(
+                                content,
+                                style: context.ts.c(context.theme.csSur),
+                              ),
                             ],
                           ),
                         ),
@@ -133,7 +140,7 @@ class AnimatedSnackbar extends StatelessWidget {
                             AnimatedOverlay.hide();
                           },
                           icon: const Icon(Icons.close),
-                        )
+                        ),
                       ],
                     ),
                   ),

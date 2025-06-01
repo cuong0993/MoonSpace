@@ -88,9 +88,9 @@ extension SuperContext on BuildContext {
   //
   ThemeData get theme => Theme.of(this);
   CupertinoThemeData get cupertinoTheme => CupertinoThemeData(
-        brightness: theme.brightness,
-        textTheme: CupertinoTextThemeData(primaryColor: theme.pri),
-      );
+    brightness: theme.brightness,
+    textTheme: CupertinoTextThemeData(primaryColor: theme.pri),
+  );
 
   TextStyle? get dl => theme.textTheme.displayLarge;
   TextStyle? get dm => theme.textTheme.displayMedium;
@@ -183,78 +183,76 @@ extension SuperContext on BuildContext {
   NavigatorState get nav => Navigator.of(this);
 
   Future<T?> rSlidePush<T>(Widget widget) => nav.push<T?>(
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => widget,
-          transitionDuration: const Duration(milliseconds: 500),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            var tween =
-                Tween<Offset>(begin: const Offset(1.0, 0.0), end: Offset.zero);
-            var curvedAnimation = CurvedAnimation(
-                parent: animation, curve: Curves.easeInOutCubic);
+    PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => widget,
+      transitionDuration: const Duration(milliseconds: 500),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        var tween = Tween<Offset>(
+          begin: const Offset(1.0, 0.0),
+          end: Offset.zero,
+        );
+        var curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeInOutCubic,
+        );
 
-            return SlideTransition(
-              position: tween.animate(curvedAnimation),
-              child: child,
-            );
-          },
-        ),
-      );
+        return SlideTransition(
+          position: tween.animate(curvedAnimation),
+          child: child,
+        );
+      },
+    ),
+  );
   Future<T?> bSlidePush<T>(Widget widget) => nav.push<T?>(
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => widget,
-          transitionDuration: const Duration(milliseconds: 500),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            var tween =
-                Tween<Offset>(begin: const Offset(0, 1.0), end: Offset.zero);
-            var curvedAnimation = CurvedAnimation(
-                parent: animation, curve: Curves.easeInOutCubic);
+    PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => widget,
+      transitionDuration: const Duration(milliseconds: 500),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        var tween = Tween<Offset>(
+          begin: const Offset(0, 1.0),
+          end: Offset.zero,
+        );
+        var curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeInOutCubic,
+        );
 
-            return SlideTransition(
-              position: tween.animate(curvedAnimation),
-              child: child,
-            );
-          },
-        ),
-      );
+        return SlideTransition(
+          position: tween.animate(curvedAnimation),
+          child: child,
+        );
+      },
+    ),
+  );
   Future<T?> fPush<T>(Widget widget) => nav.push<T?>(
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => widget,
-          transitionDuration: const Duration(milliseconds: 500),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            var curvedAnimation = CurvedAnimation(
-                parent: animation, curve: Curves.easeInOutCubic);
+    PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => widget,
+      transitionDuration: const Duration(milliseconds: 500),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        var curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeInOutCubic,
+        );
 
-            return FadeTransition(
-              opacity: curvedAnimation,
-              child: child,
-            );
-          },
-        ),
-      );
+        return FadeTransition(opacity: curvedAnimation, child: child);
+      },
+    ),
+  );
   Future<T?> scalePush<T>(Widget widget) => nav.push<T?>(
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => widget,
-          transitionDuration: const Duration(milliseconds: 500),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return ScaleTransition(
-              scale: animation,
-              child: child,
-            );
-          },
-        ),
-      );
+    PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => widget,
+      transitionDuration: const Duration(milliseconds: 500),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return ScaleTransition(scale: animation, child: child);
+      },
+    ),
+  );
   Future<T?> mPush<T>(Widget widget) => nav.push<T?>(
-        MaterialPageRoute(
-          fullscreenDialog: true,
-          builder: (_) => widget,
-        ),
-      );
+    MaterialPageRoute(fullscreenDialog: true, builder: (_) => widget),
+  );
   Future<T?> cPush<T>(Widget widget) => nav.push<T?>(
-        CupertinoPageRoute(
-          fullscreenDialog: true,
-          builder: (_) => widget,
-        ),
-      );
+    CupertinoPageRoute(fullscreenDialog: true, builder: (_) => widget),
+  );
 
   // T? pop<T extends Object>([T? result]) {
   //   nav.pop(result);
@@ -273,21 +271,21 @@ extension SuperInt on int {
 
 extension SuperDuration on Duration {
   Duration operator +(Duration d) => Duration(
-        microseconds: d.inMicroseconds + inMicroseconds,
-        milliseconds: d.inMilliseconds + inMilliseconds,
-        seconds: d.inSeconds + inSeconds,
-        minutes: d.inMinutes + inMinutes,
-        hours: d.inHours + inHours,
-        days: d.inDays + inDays,
-      );
+    microseconds: d.inMicroseconds + inMicroseconds,
+    milliseconds: d.inMilliseconds + inMilliseconds,
+    seconds: d.inSeconds + inSeconds,
+    minutes: d.inMinutes + inMinutes,
+    hours: d.inHours + inHours,
+    days: d.inDays + inDays,
+  );
   Duration operator -(Duration d) => Duration(
-        microseconds: inMicroseconds - d.inMicroseconds,
-        milliseconds: inMilliseconds - d.inMilliseconds,
-        seconds: inSeconds - d.inSeconds,
-        minutes: inMinutes - d.inMinutes,
-        hours: inHours - d.inHours,
-        days: inDays - d.inDays,
-      );
+    microseconds: inMicroseconds - d.inMicroseconds,
+    milliseconds: inMilliseconds - d.inMilliseconds,
+    seconds: inSeconds - d.inSeconds,
+    minutes: inMinutes - d.inMinutes,
+    hours: inHours - d.inHours,
+    days: inDays - d.inDays,
+  );
 
   Future<T> delay<T>([Future<T> Function()? computation]) =>
       Future.delayed(this, computation);
@@ -361,56 +359,49 @@ extension SuperNumber2 on (num, num) {
   SizedBox get s => SizedBox(height: $1.toDouble(), width: $2.toDouble());
 
   EdgeInsets get e => EdgeInsets.symmetric(
-        vertical: this.$1.toDouble(),
-        horizontal: this.$2.toDouble(),
-      );
+    vertical: this.$1.toDouble(),
+    horizontal: this.$2.toDouble(),
+  );
 
-  Radius get r => Radius.elliptical(
-        this.$1.toDouble(),
-        this.$2.toDouble(),
-      );
+  Radius get r => Radius.elliptical(this.$1.toDouble(), this.$2.toDouble());
 
-  BorderRadius get brh => BorderRadius.horizontal(
-        left: this.$1.r,
-        right: this.$2.r,
-      );
+  BorderRadius get brh =>
+      BorderRadius.horizontal(left: this.$1.r, right: this.$2.r);
 
-  BorderRadius get brv => BorderRadius.vertical(
-        top: this.$1.r,
-        bottom: this.$2.r,
-      );
+  BorderRadius get brv =>
+      BorderRadius.vertical(top: this.$1.r, bottom: this.$2.r);
 }
 
 extension SuperNumber3 on (num l, num t, num r, num b) {
   EdgeInsets get e => EdgeInsets.only(
-        left: this.$1.toDouble(),
-        top: this.$2.toDouble(),
-        right: this.$3.toDouble(),
-        bottom: this.$4.toDouble(),
-      );
+    left: this.$1.toDouble(),
+    top: this.$2.toDouble(),
+    right: this.$3.toDouble(),
+    bottom: this.$4.toDouble(),
+  );
 
   BorderRadius get br => BorderRadius.only(
-        topLeft: this.$1.toDouble().r,
-        topRight: this.$2.toDouble().r,
-        bottomRight: this.$3.toDouble().r,
-        bottomLeft: this.$4.toDouble().r,
-      );
+    topLeft: this.$1.toDouble().r,
+    topRight: this.$2.toDouble().r,
+    bottomRight: this.$3.toDouble().r,
+    bottomLeft: this.$4.toDouble().r,
+  );
 }
 
 extension SuperNumber4 on ({num l, num t, num r, num b}) {
   EdgeInsets get e => EdgeInsets.only(
-        left: this.l.toDouble(),
-        right: this.r.toDouble(),
-        top: this.t.toDouble(),
-        bottom: this.b.toDouble(),
-      );
+    left: this.l.toDouble(),
+    right: this.r.toDouble(),
+    top: this.t.toDouble(),
+    bottom: this.b.toDouble(),
+  );
 
   BorderRadius get br => BorderRadius.only(
-        topLeft: this.l.toDouble().r,
-        topRight: this.r.toDouble().r,
-        bottomRight: this.t.toDouble().r,
-        bottomLeft: this.b.toDouble().r,
-      );
+    topLeft: this.l.toDouble().r,
+    topRight: this.r.toDouble().r,
+    bottomRight: this.t.toDouble().r,
+    bottomLeft: this.b.toDouble().r,
+  );
 }
 
 extension SuperTextStyle on TextStyle? {
@@ -418,8 +409,10 @@ extension SuperTextStyle on TextStyle? {
   Text text(String text) => Text(text, style: this);
 
   //
-  TextStyle? get normal => this
-      ?.copyWith(fontWeight: FontWeight.normal, fontStyle: FontStyle.normal);
+  TextStyle? get normal => this?.copyWith(
+    fontWeight: FontWeight.normal,
+    fontStyle: FontStyle.normal,
+  );
   TextStyle? get bold => this?.copyWith(fontWeight: FontWeight.bold);
   TextStyle? get w1 => this?.copyWith(fontWeight: FontWeight.w100);
   TextStyle? get w2 => this?.copyWith(fontWeight: FontWeight.w200);

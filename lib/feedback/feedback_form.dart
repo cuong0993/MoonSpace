@@ -43,7 +43,11 @@ class _FeedbackFormState extends State<FeedbackForm> {
               ListView(
                 controller: widget.scrollController,
                 padding: EdgeInsets.fromLTRB(
-                    16, widget.scrollController != null ? 20 : 16, 16, 0),
+                  16,
+                  widget.scrollController != null ? 20 : 16,
+                  16,
+                  0,
+                ),
                 children: <Widget>[
                   Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -65,8 +69,9 @@ class _FeedbackFormState extends State<FeedbackForm> {
                             child: const Icon(Icons.send),
                           ),
                         ),
-                        labelText: FeedbackLocalizations.of(context)
-                            .feedbackDescriptionText,
+                        labelText: FeedbackLocalizations.of(
+                          context,
+                        ).feedbackDescriptionText,
                         labelStyle: context.tm,
                       ),
                       textInputAction: TextInputAction.done,

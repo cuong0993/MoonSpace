@@ -2,21 +2,22 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:moonspace/helper/extensions/theme_ext.dart';
-import 'package:moonspace/helper/validator/type_check.dart';
 
-class MAction {
+class ButtonData {
   final String text;
   final Function(BuildContext context) fn;
   final bool destructive;
   final bool defaultAction;
   final IconData? icon;
+  final bool enabled;
 
-  MAction({
+  ButtonData({
     required this.text,
     required this.fn,
     this.icon,
     this.destructive = false,
     this.defaultAction = false,
+    this.enabled = true,
   });
 
   Widget popup(BuildContext context) {
@@ -59,7 +60,7 @@ class MAction {
       );
 }
 
-extension SuperMAction on List<MAction> {
+extension SuperMAction on List<ButtonData> {
   List<Widget> toButtonBar(BuildContext context) => fold(
     [],
     (previousValue, e) => [
@@ -87,7 +88,7 @@ extension SuperMAction on List<MAction> {
 class PopupMenu extends StatelessWidget {
   const PopupMenu({super.key, required this.actions, this.child});
 
-  final List<MAction?> actions;
+  final List<ButtonData?> actions;
   final Widget? child;
 
   @override
@@ -96,28 +97,20 @@ class PopupMenu extends StatelessWidget {
       icon: child == null ? const Icon(Icons.more_vert) : null,
       iconSize: 20,
       color: context.theme.canvas,
+      tooltip: 'tooltip',
       surfaceTintColor: Colors.white,
       splashRadius: 24,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       itemBuilder: (context) {
-        return actions
-            .asMap()
-            .entries
-            .map<PopupMenuEntry<int>>(
-              (e) =>
-                  cast<PopupMenuEntry<int>>(
-                    (e.value != null)
-                        ? PopupMenuItem<int>(
-                            value: e.key,
-                            child: /*e.value?.widget ??*/ e.value?.popup(
-                              context,
-                            ),
-                          )
-                        : const PopupMenuDivider(),
-                  ) ??
-                  const PopupMenuDivider(),
-            )
-            .toList();
+        return actions.asMap().entries.map<PopupMenuEntry<int>>((e) {
+          return (e.value != null)
+              ? PopupMenuItem<int>(
+                  value: e.key,
+                  enabled: e.value!.enabled,
+                  child: /*e.value?.widget ??*/ e.value?.popup(context),
+                )
+              : const PopupMenuDivider();
+        }).toList();
       },
       onSelected: (value) {
         (actions[value]?.fn ?? () {})();
@@ -176,10 +169,6 @@ class MarioBox extends StatelessWidget {
               color: titleColor,
               padding: const EdgeInsets.all(8.0),
               child: actions?.call(context),
-              // child: Row(
-              //   mainAxisAlignment: mEnd,
-              //   children: actions.toButtonBar(context),
-              // ),
             ),
           if (sheet) const SizedBox(height: 20),
         ],

@@ -61,23 +61,17 @@ class DashedBorderPainter extends CustomPainter {
       ..strokeWidth = borderWidth
       ..style = PaintingStyle.stroke;
 
-    _drawDashedPath(
-      canvas,
-      paint,
-      RRect.fromLTRBAndCorners(
-        0,
-        0,
-        size.width,
-        size.height,
-        bottomLeft: borderRadius.bottomLeft,
-        topLeft: borderRadius.topLeft,
-        topRight: borderRadius.topRight,
-        bottomRight: borderRadius.bottomRight,
-      ),
+    final rrect = RRect.fromLTRBAndCorners(
+      0,
+      0,
+      size.width,
+      size.height,
+      bottomLeft: borderRadius.bottomLeft,
+      topLeft: borderRadius.topLeft,
+      topRight: borderRadius.topRight,
+      bottomRight: borderRadius.bottomRight,
     );
-  }
 
-  void _drawDashedPath(Canvas canvas, Paint paint, RRect rrect) {
     final path = Path()..addRRect(rrect);
     final dashLength = dash + gap;
 

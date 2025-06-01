@@ -81,7 +81,7 @@ extension FunctionContext on BuildContext {
   Future<T?> showActionSheet<T>({
     String? title,
     String? message,
-    required List<MAction> actions,
+    required List<ButtonData> actions,
   }) async {
     return await showCupertinoModalPopup<T>(
       context: this,
@@ -89,11 +89,7 @@ extension FunctionContext on BuildContext {
         return CupertinoActionSheet(
           title: title != null ? Text(title) : null,
           message: message != null ? Text(message) : null,
-          actions: actions
-              .map(
-                (e) => e.cupertinoSheetAction(context),
-              )
-              .toList(),
+          actions: actions.map((e) => e.cupertinoSheetAction(context)).toList(),
           cancelButton: CupertinoActionSheetAction(
             onPressed: () {
               context.nav.pop();
@@ -127,15 +123,12 @@ extension FunctionContext on BuildContext {
       useSafeArea: true,
       shape: border, //1.bs.c(Colors.green).round.r(12),
       clipBehavior: Clip.hardEdge,
-      constraints: BoxConstraints(
-        maxWidth: mq.w - horizontalPadding,
-      ),
+      constraints: BoxConstraints(maxWidth: mq.w - horizontalPadding),
       backgroundColor: color,
 
       //
       // useRootNavigator: true,
       // isScrollControlled: true,
-
       builder: (context) {
         return PopScope(
           onPopInvokedWithResult: onPopInvokedWithResult,
@@ -177,7 +170,8 @@ extension FunctionContext on BuildContext {
         return PopScope(
           onPopInvokedWithResult: onPopInvokedWithResult,
           child: Dialog(
-            insetPadding: insetPadding ??
+            insetPadding:
+                insetPadding ??
                 const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
             backgroundColor: color,
             clipBehavior: Clip.hardEdge,
@@ -205,7 +199,7 @@ extension FunctionContext on BuildContext {
     required String title,
     String? content,
     IconData? icon,
-    required List<MAction> Function(BuildContext context) actions,
+    required List<ButtonData> Function(BuildContext context) actions,
   }) {
     if (Device.isWeb || !Device.isIos) {
       return showDialog<T>(
@@ -228,9 +222,9 @@ extension FunctionContext on BuildContext {
           return CupertinoAlertDialog(
             title: Text(title),
             content: content != null ? Text(content) : null,
-            actions: actions(context)
-                .map((e) => e.cupertinoDialogAction(context))
-                .toList(),
+            actions: actions(
+              context,
+            ).map((e) => e.cupertinoDialogAction(context)).toList(),
           );
         },
       );
@@ -244,11 +238,11 @@ extension FunctionContext on BuildContext {
           content: content,
           actions: (context) {
             return [
-              MAction(
+              ButtonData(
                 text: 'cancel',
                 fn: (context) => Navigator.pop(context, false),
               ),
-              MAction(
+              ButtonData(
                 text: 'yes',
                 fn: (context) => Navigator.pop(context, true),
               ),

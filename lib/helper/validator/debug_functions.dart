@@ -8,8 +8,9 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 const String
-    //
-    reset = "\x1B[0m",
+        //
+        reset =
+        "\x1B[0m",
     fBlack = "\x1B[30m",
     fRed = "\x1B[31m",
     fGreen = "\x1B[32m",
@@ -61,21 +62,16 @@ void dividerline() {
 
 StreamController<Map<String, String>> logStream =
     StreamController<Map<String, String>>()
-      ..stream.debounceTime(const Duration(seconds: 2)).listen(
-        (event) {
-          dividerline();
-        },
-      );
+      ..stream.debounceTime(const Duration(seconds: 2)).listen((event) {
+        dividerline();
+      });
 
-final JsonEncoder _encoder = JsonEncoder.withIndent(
-  '  ',
-  (object) {
-    return object.toString();
-  },
-);
+final JsonEncoder _encoder = JsonEncoder.withIndent('  ', (object) {
+  return object.toString();
+});
 
 dynamic beautifyMap(dynamic obj) {
-  if (obj is Map /*obj.runtimeType.toString().contains("Map")*/) {
+  if (obj is Map /*obj.runtimeType.toString().contains("Map")*/ ) {
     // final dividerline = {
     //   'Deco': Map.fromEntries(
     //     obj.entries.where((e) => e.value != null).map(
@@ -98,15 +94,17 @@ String _stack(bool s) {
   Trace st = Trace.from(StackTrace.current).terse;
   List<String> frame2 = st.frames[2].toString().split(" ");
   String fileHash = color.elementAt(
-    (frame2[0]
-            .codeUnits
-            .fold<int>(0, (previousValue, element) => previousValue + element) %
+    (frame2[0].codeUnits.fold<int>(
+          0,
+          (previousValue, element) => previousValue + element,
+        ) %
         color.length),
   );
   if (s) {
     // log("  🍪 ${color['fYellow']} ${st.frames.length > 4 ? "[${st.frames[4].member}] -> " : ""}<${st.frames[3].member}> -> (${st.frames[2].member}) ->${color['bBlack']} ${("${frame2[0]}:${frame2[1].split(":").first}").replaceAll("../../lib", "E:\\_Temp\\tamannaah\\lib").replaceAll("package:monkey", "E:\\_Temp\\cracker\\lib").replaceAll("/", "\\")} $reset");
     debugLog(
-        '$fileHash ${("${frame2[0]}:${frame2[1].split(":").first}").replaceAll("../../lib", "E:\\_Temp\\tamannaah\\lib").replaceAll("package:monkey", "E:\\_Temp\\cracker\\lib").replaceAll("/", "\\")} ');
+      '$fileHash ${("${frame2[0]}:${frame2[1].split(":").first}").replaceAll("../../lib", "E:\\_Temp\\tamannaah\\lib").replaceAll("package:monkey", "E:\\_Temp\\cracker\\lib").replaceAll("/", "\\")} ',
+    );
   }
   return '$fileHash ${frame2[0].split('/').last.split('.').first.toUpperCase()} $reset';
 }
@@ -120,7 +118,8 @@ taco(dynamic obj, {String name = '', bool stack = false}) {
     logs.add({"Taco $name": text});
     logStream.add({"Taco $name": text});
     debugLog(
-        "  🌮 ${_stack(false)} ${name == '' ? '' : '$name : '} $fBlack $text $reset");
+      "  🌮 ${_stack(false)} ${name == '' ? '' : '$name : '} $fBlack $text $reset",
+    );
     // log(text);
   }
 }
@@ -132,7 +131,8 @@ lava(dynamic obj, {String name = '', bool stack = false}) {
     logs.add({"Lava $name": text});
     logStream.add({"Lava $name": text});
     debugLog(
-        "  🌋 ${_stack(false)} ${name == '' ? '' : '$name : '} $fRed $text $reset");
+      "  🌋 ${_stack(false)} ${name == '' ? '' : '$name : '} $fRed $text $reset",
+    );
     // log(text);
   }
 }
@@ -144,7 +144,8 @@ unicorn(dynamic obj, {String name = '', bool stack = false}) {
     logs.add({"Unicorn $name": text});
     logStream.add({"Unicorn $name": text});
     debugLog(
-        "  🦄 ${_stack(false)} $fMagenta ${name == '' ? '' : '$name : '} $text $reset");
+      "  🦄 ${_stack(false)} $fMagenta ${name == '' ? '' : '$name : '} $text $reset",
+    );
     // log(text);
   }
 }
@@ -156,7 +157,8 @@ dino(dynamic obj, {String name = '', bool stack = false}) {
     logs.add({"Dino $name": text});
     logStream.add({"Dino $name": text});
     debugLog(
-        "  🦖 ${_stack(false)} ${name == '' ? '' : '$name : '} $text $reset");
+      "  🦖 ${_stack(false)} ${name == '' ? '' : '$name : '} $text $reset",
+    );
     // log(text);$fGreen $text $reset");
     // log(text);
   }
@@ -169,7 +171,8 @@ owl(dynamic obj, {String name = '', bool stack = false}) {
     logs.add({"Owl $name": text});
     logStream.add({"Owl $name": text});
     debugLog(
-        "  🦉 ${_stack(false)} ${name == '' ? '' : '$name : '} $fCyan $text $reset");
+      "  🦉 ${_stack(false)} ${name == '' ? '' : '$name : '} $fCyan $text $reset",
+    );
     // log(text);
   }
 }
