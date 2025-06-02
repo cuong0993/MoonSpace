@@ -83,10 +83,11 @@ class Device {
 
 extension SuperContext on BuildContext {
   //
-  Brightness get b => theme.brightness;
+  Brightness get brightness => theme.brightness;
 
   //
   ThemeData get theme => Theme.of(this);
+  ColorScheme get cs => Theme.of(this).colorScheme;
   CupertinoThemeData get cupertinoTheme => CupertinoThemeData(
     brightness: theme.brightness,
     textTheme: CupertinoTextThemeData(primaryColor: theme.pri),
@@ -100,6 +101,10 @@ extension SuperContext on BuildContext {
   TextStyle? get hm => theme.textTheme.headlineMedium;
   TextStyle? get hs => theme.textTheme.headlineSmall;
   //
+  TextStyle? get tl => theme.textTheme.titleLarge;
+  TextStyle? get tm => theme.textTheme.titleMedium;
+  TextStyle? get ts => theme.textTheme.titleSmall;
+  //
   TextStyle? get bl => theme.textTheme.bodyLarge;
   TextStyle? get bm => theme.textTheme.bodyMedium;
   TextStyle? get bs => theme.textTheme.bodySmall;
@@ -107,10 +112,6 @@ extension SuperContext on BuildContext {
   TextStyle? get ll => theme.textTheme.labelLarge;
   TextStyle? get lm => theme.textTheme.labelMedium;
   TextStyle? get ls => theme.textTheme.labelSmall;
-  //
-  TextStyle? get tl => theme.textTheme.titleLarge;
-  TextStyle? get tm => theme.textTheme.titleMedium;
-  TextStyle? get ts => theme.textTheme.titleSmall;
 
   //
   TargetPlatform get platform => theme.platform;

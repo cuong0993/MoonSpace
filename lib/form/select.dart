@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:moonspace/form/form.dart';
 
 import 'package:moonspace/widgets/functions.dart';
 
@@ -32,20 +33,22 @@ class OptionDialog<T> extends StatelessWidget {
         child: child,
         onTap: () {
           context.showFormDialog(
-            title: title,
-            height: 400,
-            children: (context) => [
-              OptionBox(
-                options: options,
-                onChange: (selected) {
-                  selected = selected;
-                },
-                multi: multi,
-              ),
-            ],
-            actions: (context) {
-              return actions(context, selected);
-            },
+            builder: (context) => Box(
+              title: title,
+              height: 400,
+              children: (context) => [
+                OptionBox(
+                  options: options,
+                  onChange: (selected) {
+                    selected = selected;
+                  },
+                  multi: multi,
+                ),
+              ],
+              actions: (context) {
+                return actions(context, selected);
+              },
+            ),
           );
         },
       ),
@@ -69,7 +72,7 @@ class Option<T> {
   });
 }
 
-enum OptionDisplay { list, chip }
+enum OptionDisplay { list, chip, switchTile }
 
 class OptionBox<T> extends StatefulWidget {
   const OptionBox({
@@ -180,6 +183,15 @@ class _OptionBoxState<T> extends State<OptionBox<T>> {
         final groupValue = selectedKeys.length == 1
             ? widget.options.firstWhere((opt) => _isSelected(opt)).value
             : null;
+
+        if (widget.display == OptionDisplay.switchTile) {
+          return SwitchListTile(
+            title: option.title ?? Text(option.value.toString()),
+            subtitle: option.subtitle,
+            value: isSelected,
+            onChanged: (value) => _onSelect(option, value),
+          );
+        }
 
         return widget.multi
             ? CheckboxListTile(

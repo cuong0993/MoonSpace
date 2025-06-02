@@ -120,25 +120,23 @@ class PopupMenu extends StatelessWidget {
   }
 }
 
-class MarioBox extends StatelessWidget {
-  const MarioBox({
+class Box extends StatelessWidget {
+  const Box({
     super.key,
     this.title,
     required this.children,
     this.actions,
     this.width,
     this.height,
-    this.sheet = false,
-    this.titleColor,
+    this.padbottom = false,
   });
 
   final Widget? title;
   final List<Widget> Function(BuildContext context) children;
-  final bool sheet;
+  final bool padbottom;
   final Widget Function(BuildContext context)? actions;
   final double? width;
   final double? height;
-  final Color? titleColor;
 
   @override
   Widget build(BuildContext context) {
@@ -149,12 +147,14 @@ class MarioBox extends StatelessWidget {
         children: [
           if (title != null)
             Container(
-              color: titleColor,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: title,
             ),
           ConstrainedBox(
-            constraints: BoxConstraints(minHeight: 0, maxHeight: height ?? 500),
+            constraints: BoxConstraints(
+              maxWidth: width ?? double.infinity,
+              maxHeight: height ?? double.infinity,
+            ),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: ListView(
@@ -166,11 +166,10 @@ class MarioBox extends StatelessWidget {
           ),
           if (actions != null)
             Container(
-              color: titleColor,
               padding: const EdgeInsets.all(8.0),
               child: actions?.call(context),
             ),
-          if (sheet) const SizedBox(height: 20),
+          if (padbottom) const SizedBox(height: 20),
         ],
       ),
     );

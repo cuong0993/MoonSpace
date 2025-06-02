@@ -17,142 +17,30 @@ import 'package:moonspace/provider/pref.dart';
 import 'package:moonspace/theme.dart';
 import 'package:moonspace/provider/global_theme.dart';
 
-final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey();
-const String spacemoonRestorationScopeId = 'SpacemoonRestorationScopeId';
-const String appRestorationScopeId = 'AppRestorationScopeId';
+class Electric {
+  static final GlobalKey<NavigatorState> electricNavigatorKey =
+      GlobalKey<NavigatorState>();
+  static final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+      GlobalKey();
+  static const String spacemoonRestorationScopeId =
+      'SpacemoonRestorationScopeId';
+  static const String appRestorationScopeId = 'AppRestorationScopeId';
 
-class SpaceMoonHome extends ConsumerWidget {
-  const SpaceMoonHome({
-    super.key,
-    required this.electricKey,
-    required this.router,
-    required this.title,
-    this.localizationsDelegates,
-    this.supportedLocales,
-    required this.debugUi,
-    required this.errorChild,
-  });
-
-  final String title;
-
-  final List<LocalizationsDelegate<dynamic>>? localizationsDelegates;
-  final List<Locale>? supportedLocales;
-
-  final GoRouter? router;
-
-  final Key electricKey;
-  final bool debugUi;
-
-  final Widget errorChild;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // return AppThemeWidget(
-    //   dark: false,
-    //   designSize: const Size(430, 932),
-    //   maxSize: const Size(1366, 1024),
-    //   size: MediaQuery.of(context).size,
-    //   child: Builder(builder: (context) {
-    //     return MaterialApp(
-    //       title: title,
-    //       theme: AppTheme.currentAppTheme.theme,
-    //       debugShowCheckedModeBanner: kDebugMode,
-    //     );
-    //   }),
-    // );
-
-    final globalAppTheme = ref.watch(globalThemeProvider);
-    final brightness = globalAppTheme.theme.brightness;
-    final appColor = globalAppTheme.color;
-
-    return RootRestorationScope(
-      restorationId: spacemoonRestorationScopeId,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          AppTheme.currentAppTheme = AppTheme(
-            dark: brightness == Brightness.dark,
-            size: constraints.biggest,
-            maxSize: const Size(1366, 1024),
-            designSize: const Size(430, 932),
-            appColor: appColor,
-          );
-
-          dino('SpaceMoon Rebuild ${constraints.biggest} \n');
-
-          return MaterialApp.router(
-            routerConfig: router,
-            title: title,
-            scaffoldMessengerKey: scaffoldMessengerKey,
-            localizationsDelegates: localizationsDelegates,
-            theme: AppTheme.currentAppTheme.theme,
-            themeAnimationCurve: Curves.ease,
-            debugShowCheckedModeBanner: debugUi,
-            restorationScopeId: appRestorationScopeId,
-            scrollBehavior: AppScrollBehavior(),
-
-            // showSemanticsDebugger: true,
-            // showPerformanceOverlay: true,
-            supportedLocales: [Locale('en', 'US'), ...?supportedLocales],
-
-            builder: (context, child) {
-              initializeDateFormatting();
-
-              // if (kIsWeb) {
-              //   return DevicePreview(
-              //     builder: (context) {
-              //       return ElectricWrap(
-              //         theme: globalAppTheme.theme,
-              //         brightness: brightness,
-              //         child: child,
-              //       );
-              //     },
-              //   );
-              // }
-
-              return Directionality(
-                textDirection: TextDirection.ltr,
-                child: Scaffold(
-                  key: ValueKey(globalAppTheme.theme),
-                  resizeToAvoidBottomInset: false,
-                  body: Overlay(
-                    initialEntries: [
-                      OverlayEntry(
-                        builder: (context) {
-                          return CupertinoTheme(
-                            key: electricKey,
-                            data: CupertinoThemeData(
-                              brightness: brightness,
-                              primaryColor: AppTheme.seedColor,
-                            ),
-                            child: child ?? errorChild,
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
+  static BuildContext get context => electricNavigatorKey.currentContext!;
 }
 
 void electrify({
   required String title,
-  required void Function(WidgetsBinding widgetsBinding) before,
-  required void Function() after,
-  required Key electricKey,
-  required GoRouter? router,
+  // required GoRouter? router,
   final List<LocalizationsDelegate<dynamic>>? localizationsDelegates,
   final List<Locale>? supportedLocales,
-  required AsyncCallback init,
+  required GoRouter Function() router,
   required Widget errorChild,
+  required void Function(WidgetsBinding widgetsBinding) before,
+  required void Function() after,
+  required Future<void> Function(ProviderContainer providerContainer) init,
   required void Function(FlutterErrorDetails details) recordFlutterFatalError,
   required void Function(Object error, StackTrace stack) recordError,
-  required void Function(ProviderContainer providerContainer) providerInit,
   required bool debugUi,
 }) async {
   runZonedGuarded(
@@ -234,9 +122,7 @@ void electrify({
 
       container.listen(prefProvider, (prev, next) {});
 
-      await init();
-
-      providerInit(container);
+      await init(container);
 
       await Future.delayed(const Duration(milliseconds: 100));
 
@@ -254,8 +140,7 @@ void electrify({
             localizationsDelegates: [GlobalFeedbackLocalizationsDelegate()],
             child: SpaceMoonHome(
               title: title,
-              electricKey: electricKey,
-              router: router,
+              router: router(),
               localizationsDelegates: localizationsDelegates,
               supportedLocales: supportedLocales,
               errorChild: errorChild,
@@ -278,4 +163,126 @@ void electrify({
       }
     },
   );
+}
+
+class SpaceMoonHome extends ConsumerWidget {
+  const SpaceMoonHome({
+    super.key,
+    required this.router,
+    required this.title,
+    this.localizationsDelegates,
+    this.supportedLocales,
+    required this.debugUi,
+    required this.errorChild,
+  });
+
+  final String title;
+
+  final List<LocalizationsDelegate<dynamic>>? localizationsDelegates;
+  final List<Locale>? supportedLocales;
+
+  final GoRouter? router;
+
+  final bool debugUi;
+
+  final Widget errorChild;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final globalAppTheme = ref.watch(globalThemeProvider);
+    final brightness = globalAppTheme.theme.brightness;
+    final appColor = globalAppTheme.color;
+
+    return RootRestorationScope(
+      restorationId: Electric.spacemoonRestorationScopeId,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          AppTheme.currentAppTheme = AppTheme(
+            dark: brightness == Brightness.dark,
+            size: constraints.biggest,
+            maxSize: const Size(1366, 1024),
+            designSize: const Size(430, 932),
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: appColor,
+              brightness: brightness,
+              dynamicSchemeVariant: DynamicSchemeVariant.tonalSpot,
+            ),
+            borderRadius: (8, 10),
+            padding: (14, 16),
+          );
+
+          dino('SpaceMoon Rebuild ${constraints.biggest} \n');
+
+          return CupertinoTheme(
+            data: CupertinoThemeData(
+              brightness: brightness,
+              primaryColor: appColor,
+            ),
+            child: MaterialApp.router(
+              routerConfig: router,
+              title: title,
+              scaffoldMessengerKey: Electric.scaffoldMessengerKey,
+
+              theme: AppTheme.currentAppTheme.theme,
+              themeAnimationCurve: Curves.ease,
+              debugShowCheckedModeBanner: debugUi,
+              restorationScopeId: Electric.appRestorationScopeId,
+              scrollBehavior: AppScrollBehavior(),
+
+              // showSemanticsDebugger: true,
+              // showPerformanceOverlay: true,
+              supportedLocales: [Locale('en', 'US'), ...?supportedLocales],
+              localizationsDelegates: localizationsDelegates,
+
+              builder: (context, child) {
+                initializeDateFormatting();
+
+                // if (kIsWeb) {
+                //   return DevicePreview(
+                //     builder: (context) {
+                //       return ElectricWrap(
+                //         theme: globalAppTheme.theme,
+                //         brightness: brightness,
+                //         child: child,
+                //       );
+                //     },
+                //   );
+                // }
+
+                return Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Scaffold(
+                    key: ValueKey(globalAppTheme.theme),
+                    resizeToAvoidBottomInset: false,
+                    body: Overlay(
+                      initialEntries: [
+                        OverlayEntry(
+                          builder: (context) {
+                            return Builder(
+                              key: Electric.electricNavigatorKey,
+                              builder: (context) {
+                                return child ?? errorChild;
+                              },
+                            );
+                            // return CupertinoTheme(
+                            //   key: Electric.electricNavigatorKey,
+                            //   data: CupertinoThemeData(
+                            //     brightness: globalAppTheme.theme.brightness,
+                            //     primaryColor: AppTheme.appColorScheme.primary,
+                            //   ),
+                            //   child: child ?? errorChild,
+                            // );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
 }

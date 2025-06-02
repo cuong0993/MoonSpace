@@ -103,19 +103,14 @@ extension FunctionContext on BuildContext {
   }
 
   Future<T?> showBottomSheet<T>({
-    required List<Widget> Function(BuildContext context) children,
+    required Widget Function(BuildContext context) builder,
     void Function(bool, T?)? onPopInvokedWithResult,
     GlobalKey<FormState>? formKey,
     VoidCallback? onChanged,
-    double? width,
-    double? height,
-    Widget? title,
-    Color? color,
-    Color? titleColor,
+    Color? background,
     bool showDragHandle = true,
     double horizontalPadding = 12,
     ShapeBorder? border,
-    Widget Function(BuildContext context)? actions,
   }) async {
     return await showModalBottomSheet<T>(
       context: this,
@@ -124,7 +119,7 @@ extension FunctionContext on BuildContext {
       shape: border, //1.bs.c(Colors.green).round.r(12),
       clipBehavior: Clip.hardEdge,
       constraints: BoxConstraints(maxWidth: mq.w - horizontalPadding),
-      backgroundColor: color,
+      backgroundColor: background,
 
       //
       // useRootNavigator: true,
@@ -135,15 +130,7 @@ extension FunctionContext on BuildContext {
           child: Form(
             key: formKey,
             onChanged: onChanged,
-            child: MarioBox(
-              title: title,
-              sheet: true,
-              actions: actions,
-              width: width,
-              height: height,
-              titleColor: titleColor,
-              children: children,
-            ),
+            child: builder(context),
           ),
         );
       },
@@ -151,18 +138,13 @@ extension FunctionContext on BuildContext {
   }
 
   Future<T?> showFormDialog<T>({
-    required List<Widget> Function(BuildContext context) children,
+    required Widget Function(BuildContext context) builder,
+    void Function(bool, T?)? onPopInvokedWithResult,
     GlobalKey<FormState>? formKey,
     VoidCallback? onChanged,
-    void Function(bool, T?)? onPopInvokedWithResult,
-    double? width,
-    double? height,
-    Widget? title,
-    Color? color,
-    Color? titleColor,
+    Color? background,
     ShapeBorder? border,
     EdgeInsets? insetPadding,
-    Widget Function(BuildContext context)? actions,
   }) {
     return showDialog<T>(
       context: this,
@@ -173,20 +155,13 @@ extension FunctionContext on BuildContext {
             insetPadding:
                 insetPadding ??
                 const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
-            backgroundColor: color,
+            backgroundColor: background,
             clipBehavior: Clip.hardEdge,
             shape: border,
             child: Form(
               key: formKey,
               onChanged: onChanged,
-              child: MarioBox(
-                title: title,
-                actions: actions,
-                width: width,
-                height: height,
-                titleColor: titleColor,
-                children: children,
-              ),
+              child: builder(context),
             ),
           ),
         );
