@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class Error404Page extends StatelessWidget {
-  const Error404Page({
-    super.key,
-    this.child,
-  });
+  const Error404Page({super.key, this.child});
 
   final Widget? child;
 
@@ -19,10 +16,11 @@ class Error404Page extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             // Text('${state.uri} does not exist'),
-            ?child,
+            if (child != null) child!,
             ElevatedButton(
-                onPressed: () => context.go('/'),
-                child: const Text('Go to home')),
+              onPressed: () => context.go('/'),
+              child: const Text('Go to home'),
+            ),
           ],
         ),
       ),
@@ -31,10 +29,7 @@ class Error404Page extends StatelessWidget {
 }
 
 class ErrorPage extends StatelessWidget {
-  const ErrorPage({
-    super.key,
-    required this.error,
-  });
+  const ErrorPage({super.key, required this.error});
 
   final dynamic error;
 

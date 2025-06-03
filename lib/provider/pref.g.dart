@@ -12,15 +12,15 @@ const prefProvider = PrefProvider._();
 final class PrefProvider
     extends $AsyncNotifierProvider<Pref, SharedPreferences> {
   const PrefProvider._()
-      : super(
-          from: null,
-          argument: null,
-          retry: null,
-          name: r'prefProvider',
-          isAutoDispose: false,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'prefProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
   @override
   String debugGetCreateSourceHash() => _$prefHash();
@@ -32,11 +32,11 @@ final class PrefProvider
   @$internal
   @override
   $AsyncNotifierProviderElement<Pref, SharedPreferences> $createElement(
-          $ProviderPointer pointer) =>
-      $AsyncNotifierProviderElement(pointer);
+    $ProviderPointer pointer,
+  ) => $AsyncNotifierProviderElement(pointer);
 }
 
-String _$prefHash() => r'7f8662c4aafa61e3ec264870c5237197f9ca22f7';
+String _$prefHash() => r'85d3935b874dab33bc3e28690e7b9f2f9e80d389';
 
 abstract class _$Pref extends $AsyncNotifier<SharedPreferences> {
   FutureOr<SharedPreferences> build();
@@ -45,11 +45,14 @@ abstract class _$Pref extends $AsyncNotifier<SharedPreferences> {
   void runBuild() {
     final created = build();
     final ref = this.ref as $Ref<AsyncValue<SharedPreferences>>;
-    final element = ref.element as $ClassProviderElement<
-        AnyNotifier<AsyncValue<SharedPreferences>>,
-        AsyncValue<SharedPreferences>,
-        Object?,
-        Object?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<SharedPreferences>>,
+              AsyncValue<SharedPreferences>,
+              Object?,
+              Object?
+            >;
     element.handleValue(ref, created);
   }
 }

@@ -12,15 +12,15 @@ const globalThemeProvider = GlobalThemeProvider._();
 final class GlobalThemeProvider
     extends $NotifierProvider<GlobalTheme, GlobalAppTheme> {
   const GlobalThemeProvider._()
-      : super(
-          from: null,
-          argument: null,
-          retry: null,
-          name: r'globalThemeProvider',
-          isAutoDispose: false,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'globalThemeProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
   @override
   String debugGetCreateSourceHash() => _$globalThemeHash();
@@ -32,8 +32,8 @@ final class GlobalThemeProvider
   @$internal
   @override
   $NotifierProviderElement<GlobalTheme, GlobalAppTheme> $createElement(
-          $ProviderPointer pointer) =>
-      $NotifierProviderElement(pointer);
+    $ProviderPointer pointer,
+  ) => $NotifierProviderElement(pointer);
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(GlobalAppTheme value) {
@@ -44,7 +44,7 @@ final class GlobalThemeProvider
   }
 }
 
-String _$globalThemeHash() => r'cb60d81d0307874c0905f80fd5142f91143d8ea4';
+String _$globalThemeHash() => r'b23907efebfc6d1c53c352ea2ce7e7ed75f9e741';
 
 abstract class _$GlobalTheme extends $Notifier<GlobalAppTheme> {
   GlobalAppTheme build();
@@ -53,8 +53,14 @@ abstract class _$GlobalTheme extends $Notifier<GlobalAppTheme> {
   void runBuild() {
     final created = build();
     final ref = this.ref as $Ref<GlobalAppTheme>;
-    final element = ref.element as $ClassProviderElement<
-        AnyNotifier<GlobalAppTheme>, GlobalAppTheme, Object?, Object?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<GlobalAppTheme>,
+              GlobalAppTheme,
+              Object?,
+              Object?
+            >;
     element.handleValue(ref, created);
   }
 }

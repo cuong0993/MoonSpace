@@ -190,40 +190,52 @@ class SpaceMoonHome extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final globalAppTheme = ref.watch(globalThemeProvider);
+    final appThemeIndex = globalAppTheme.appThemeIndex;
+    final theme = globalAppTheme.theme;
     final brightness = globalAppTheme.theme.brightness;
-    final appColor = globalAppTheme.color;
+    final primaryColor = globalAppTheme.primary;
+    final secondaryColor = globalAppTheme.secondary;
+    final tertiaryColor = globalAppTheme.tertiary;
 
     return RootRestorationScope(
       restorationId: Electric.spacemoonRestorationScopeId,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          AppTheme.currentAppTheme = AppTheme(
-            dark: brightness == Brightness.dark,
-            size: constraints.biggest,
-            maxSize: const Size(1366, 1024),
-            designSize: const Size(430, 932),
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: appColor,
-              brightness: brightness,
-              dynamicSchemeVariant: DynamicSchemeVariant.tonalSpot,
-            ),
-            borderRadius: (8, 10),
-            padding: (14, 16),
-          );
+          AppTheme.currentThemeIndex = appThemeIndex;
+          if (theme == ThemeType.custom) {
+            AppTheme.currentTheme = AppTheme(
+              name: "custom",
+              dark: brightness == Brightness.dark,
+              size: constraints.biggest,
+              maxSize: const Size(1366, 1024),
+              designSize: const Size(430, 932),
+
+              primary: primaryColor,
+              secondary: secondaryColor,
+              tertiary: tertiaryColor,
+
+              borderRadius: (8, 10),
+              padding: (14, 16),
+            );
+          } else {
+            AppTheme.currentTheme = AppTheme.themes[appThemeIndex].copyWith(
+              size: constraints.biggest,
+            );
+          }
 
           dino('SpaceMoon Rebuild ${constraints.biggest} \n');
 
           return CupertinoTheme(
             data: CupertinoThemeData(
               brightness: brightness,
-              primaryColor: appColor,
+              primaryColor: primaryColor,
             ),
             child: MaterialApp.router(
               routerConfig: router,
               title: title,
               scaffoldMessengerKey: Electric.scaffoldMessengerKey,
 
-              theme: AppTheme.currentAppTheme.theme,
+              theme: AppTheme.currentTheme.theme,
               themeAnimationCurve: Curves.ease,
               debugShowCheckedModeBanner: debugUi,
               restorationScopeId: Electric.appRestorationScopeId,

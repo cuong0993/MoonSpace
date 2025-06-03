@@ -1,5 +1,6 @@
 import 'dart:math' show Random;
-import 'package:flutter/material.dart' show Color, Colors, HSVColor, immutable;
+import 'package:flutter/material.dart'
+    show Color, Colors, HSVColor, immutable, HSLColor;
 import 'package:moonspace/helper/extensions/string.dart';
 
 @immutable
@@ -19,12 +20,37 @@ class HexColor extends Color {
   }
 }
 
+Color colorFromHex(String hexColor) {
+  final buffer = StringBuffer();
+  if (hexColor.length == 6 || hexColor.length == 7) {
+    buffer.write('ff'); // Add alpha value if not present
+    buffer.write(hexColor.replaceFirst('#', ''));
+  } else if (hexColor.length == 8) {
+    buffer.write(hexColor.replaceFirst('#', ''));
+  }
+  return Color(int.parse(buffer.toString(), radix: 16));
+}
+
 extension Shade on Color {
   HSVColor get hsv => HSVColor.fromColor(this);
   bool get isDark => hsv.value < 0.6;
   Color get op => isDark ? Colors.white : Colors.black;
 
   String get hexCode => '0x${toARGB32().toRadixString(16)}';
+
+  Color lighten(double amount) {
+    assert(amount >= -1.0 && amount <= 1.0);
+
+    final hsl = HSLColor.fromColor(this);
+    final adjusted = hsl.withLightness(
+      (hsl.lightness + amount).clamp(0.0, 1.0),
+    );
+    return adjusted.toColor();
+  }
+
+  Color getOnColor() {
+    return computeLuminance() > 0.5 ? Colors.black : Colors.white;
+  }
 }
 
 extension AsHtmlColorToColor on String {

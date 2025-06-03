@@ -26,6 +26,8 @@ class Pref extends _$Pref {
       await _pref?.setInt(key, value);
   int? getInt(String key) => _pref?.getInt(key);
 
+  Future<void>? clear() => _pref?.clear();
+
   Future<void> saveDouble(String key, double value) async =>
       await _pref?.setDouble(key, value);
   double? getDouble(String key) => _pref?.getDouble(key);
