@@ -34,6 +34,7 @@ void electrify({
   // required GoRouter? router,
   final List<LocalizationsDelegate<dynamic>>? localizationsDelegates,
   final List<Locale>? supportedLocales,
+  final List<AppTheme>? themes,
   required GoRouter Function() router,
   required Widget errorChild,
   required void Function(WidgetsBinding widgetsBinding) before,
@@ -58,6 +59,10 @@ void electrify({
       WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
 
       before(widgetsBinding);
+
+      if (themes != null) {
+        AppTheme.themes.addAll(themes);
+      }
 
       await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
       await SystemChrome.setPreferredOrientations([
@@ -190,45 +195,21 @@ class SpaceMoonHome extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final globalAppTheme = ref.watch(globalThemeProvider);
-    final appThemeIndex = globalAppTheme.appThemeIndex;
-    final theme = globalAppTheme.theme;
-    final brightness = globalAppTheme.theme.brightness;
-    final primaryColor = globalAppTheme.primary;
-    final secondaryColor = globalAppTheme.secondary;
-    final tertiaryColor = globalAppTheme.tertiary;
 
     return RootRestorationScope(
       restorationId: Electric.spacemoonRestorationScopeId,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          AppTheme.currentThemeIndex = appThemeIndex;
-          if (theme == ThemeType.custom) {
-            AppTheme.currentTheme = AppTheme(
-              name: "custom",
-              dark: brightness == Brightness.dark,
-              size: constraints.biggest,
-              maxSize: const Size(1366, 1024),
-              designSize: const Size(430, 932),
-
-              primary: primaryColor,
-              secondary: secondaryColor,
-              tertiary: tertiaryColor,
-
-              borderRadius: (8, 10),
-              padding: (14, 16),
-            );
-          } else {
-            AppTheme.currentTheme = AppTheme.themes[appThemeIndex].copyWith(
-              size: constraints.biggest,
-            );
-          }
+          AppTheme.currentTheme = AppTheme.currentTheme.copyWith(
+            size: constraints.biggest,
+          );
 
           dino('SpaceMoon Rebuild ${constraints.biggest} \n');
 
           return CupertinoTheme(
             data: CupertinoThemeData(
-              brightness: brightness,
-              primaryColor: primaryColor,
+              brightness: globalAppTheme.type.brightness,
+              primaryColor: globalAppTheme.primary,
             ),
             child: MaterialApp.router(
               routerConfig: router,
@@ -264,7 +245,7 @@ class SpaceMoonHome extends ConsumerWidget {
                 return Directionality(
                   textDirection: TextDirection.ltr,
                   child: Scaffold(
-                    key: ValueKey(globalAppTheme.theme),
+                    key: ValueKey(globalAppTheme.type),
                     resizeToAvoidBottomInset: false,
                     body: Overlay(
                       initialEntries: [

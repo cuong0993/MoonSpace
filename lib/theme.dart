@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:moonspace/helper/extensions/color.dart';
 
@@ -20,6 +21,8 @@ extension AppThemeRange on (num, num) {
 
 class AppTheme {
   final String name;
+  final IconData icon;
+
   final Size size;
   final Size maxSize;
   final Size designSize;
@@ -28,6 +31,7 @@ class AppTheme {
   final Color primary;
   final Color secondary;
   final Color tertiary;
+  final ColorScheme? themedata;
 
   final (int, int) borderRadius;
   final (int, int) padding;
@@ -35,13 +39,18 @@ class AppTheme {
   AppTheme copyWith({Size? size}) {
     return AppTheme(
       name: name,
+      icon: icon,
+
       size: size ?? this.size,
       maxSize: maxSize,
       designSize: designSize,
+
       dark: dark,
       primary: primary,
       secondary: secondary,
       tertiary: tertiary,
+      themedata: themedata,
+
       borderRadius: borderRadius,
       padding: padding,
     );
@@ -49,20 +58,28 @@ class AppTheme {
 
   AppTheme({
     required this.name,
+    required this.icon,
+
     required this.size,
     required this.maxSize,
     required this.designSize,
+
     required this.dark,
     required this.primary,
     required this.secondary,
     required this.tertiary,
+    this.themedata,
+
     required this.borderRadius,
     required this.padding,
   });
 
+  // static List<AppTheme> get themes => [
   static List<AppTheme> themes = [
     AppTheme(
-      name: "Light",
+      name: "Sun",
+      icon: CupertinoIcons.sun_min,
+
       dark: false,
 
       size: const Size(360, 780),
@@ -72,12 +89,14 @@ class AppTheme {
       borderRadius: (8, 10),
       padding: (14, 16),
 
-      primary: Colors.blue,
-      secondary: Colors.pink,
-      tertiary: Colors.yellow,
+      primary: const Color.fromARGB(255, 105, 187, 255),
+      secondary: const Color.fromARGB(255, 255, 109, 157),
+      tertiary: const Color.fromARGB(255, 255, 246, 165),
     ),
     AppTheme(
-      name: "Night",
+      name: "Moon",
+      icon: CupertinoIcons.moon,
+
       dark: true,
 
       size: const Size(360, 780),
@@ -89,16 +108,17 @@ class AppTheme {
 
       primary: Colors.blue,
       secondary: Colors.pink,
-      tertiary: Colors.yellow,
+      tertiary: const Color.fromARGB(255, 255, 246, 165),
     ),
   ];
 
   static int currentThemeIndex = 0;
   static AppTheme currentTheme = themes[currentThemeIndex];
 
-  static bool get isMobile => currentTheme.size.width < 500;
-  static bool get isTab => currentTheme.size.width < 900;
-  static bool get isDesktop => currentTheme.size.width < 1200;
+  static bool get isMobile => currentTheme.size.width < 800;
+  static bool get isTab =>
+      currentTheme.size.width < 800 && currentTheme.size.width < 1400;
+  static bool get isDesktop => currentTheme.size.width > 1400;
 
   static bool get isDark => currentTheme.dark;
 
@@ -148,8 +168,8 @@ class AppTheme {
 
       tertiary: tertiary,
       onTertiary: tertiary.getOnColor(),
-      tertiaryContainer: tertiary,
-      onTertiaryContainer: tertiary.getOnColor(),
+      tertiaryContainer: Colors.red, //tertiary,
+      onTertiaryContainer: Colors.red, //tertiary.getOnColor(),
 
       surface: surface,
       onSurface: surface.getOnColor(),
@@ -157,7 +177,7 @@ class AppTheme {
       onSurfaceVariant: surface.lighten(isDark ? 0.6 : -0.6),
       surfaceTint: primary,
 
-      error: isDark ? Color(0xffffb4ab) : Color(0xffba1a1a),
+      error: isDark ? Color(0xffffb4ab) : Color.fromARGB(255, 238, 70, 70),
       onError: isDark ? Color(0xff690005) : Color(0xffffffff),
       errorContainer: isDark ? Color(0xff93000a) : Color(0xffffdad6),
       onErrorContainer: isDark ? Color(0xffffdad6) : Color(0xff93000a),
@@ -172,18 +192,18 @@ class AppTheme {
 
       primaryFixed: primary,
       onPrimaryFixed: primary.getOnColor(),
-      primaryFixedDim: primary,
-      onPrimaryFixedVariant: primary.getOnColor(),
+      primaryFixedDim: Colors.red, //primary,
+      onPrimaryFixedVariant: Colors.red, //primary.getOnColor(),
 
       secondaryFixed: secondary,
       onSecondaryFixed: secondary.getOnColor(),
-      secondaryFixedDim: secondary,
-      onSecondaryFixedVariant: secondary.getOnColor(),
+      secondaryFixedDim: Colors.red, // secondary,
+      onSecondaryFixedVariant: Colors.red, //secondary.getOnColor(),
 
       tertiaryFixed: tertiary,
       onTertiaryFixed: tertiary.getOnColor(),
-      tertiaryFixedDim: tertiary,
-      onTertiaryFixedVariant: tertiary.getOnColor(),
+      tertiaryFixedDim: Colors.red, // tertiary,
+      onTertiaryFixedVariant: Colors.red, //tertiary.getOnColor(),
 
       surfaceDim: surface.lighten(isDark ? -0.04 : 0.04),
       surfaceBright: surface.lighten(isDark ? -0.03 : 0.03),
@@ -233,18 +253,14 @@ class AppTheme {
   );
 
   ThemeData get theme {
-    final colorScheme = buildColorScheme();
+    final colorScheme = themedata ?? buildColorScheme();
 
     return ThemeData(
       //
-      brightness: dark ? Brightness.dark : Brightness.light,
       useMaterial3: true,
+      brightness: dark ? Brightness.dark : Brightness.light,
       colorScheme: colorScheme,
-
-      textTheme: textTheme.apply(
-        // bodyColor: colorScheme.onSurface,
-        // displayColor: colorScheme.onSurface,
-      ),
+      textTheme: textTheme,
 
       //
       dividerTheme: DividerThemeData(),
@@ -255,10 +271,10 @@ class AppTheme {
         //   borderRadius: BorderRadius.circular(8),
         //   borderSide: BorderSide(color: seedColor),
         // ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(borderRadius.c),
-        ),
-        filled: true,
+        // border: OutlineInputBorder(
+        //   borderRadius: BorderRadius.circular(borderRadius.c),
+        // ),
+        // filled: true,
         contentPadding: EdgeInsets.all(padding.c),
       ),
 
@@ -276,7 +292,10 @@ class AppTheme {
 
       //
       iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom()),
-      floatingActionButtonTheme: FloatingActionButtonThemeData(),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: colorScheme.tertiary,
+        foregroundColor: colorScheme.onTertiary,
+      ),
 
       //
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -345,6 +364,6 @@ class AppTheme {
 
   @override
   String toString() {
-    return 'AppTheme(size: $size, maxSize: $maxSize, designSize: $designSize, dark: $dark)';
+    return 'AppTheme(size: $size, maxSize: $maxSize, designSize: $designSize, dark: $dark, primary: ${primary.hexCode}, secondary: ${secondary.hexCode}, tertiary: ${tertiary.hexCode})';
   }
 }

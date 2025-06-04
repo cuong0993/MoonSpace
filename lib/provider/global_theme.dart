@@ -6,7 +6,6 @@ import 'package:moonspace/form/color.dart';
 import 'package:moonspace/helper/extensions/color.dart';
 import 'package:moonspace/helper/extensions/theme_ext.dart';
 import 'package:moonspace/theme.dart';
-import 'package:moonspace/widgets/functions.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:moonspace/provider/pref.dart';
 
@@ -40,41 +39,25 @@ enum ThemeType {
 }
 
 class GlobalAppTheme {
-  final ThemeType theme;
+  final ThemeType type;
 
-  final int appThemeIndex;
+  final int themeIndex;
 
   final Color primary;
   final Color secondary;
   final Color tertiary;
 
   GlobalAppTheme({
-    required this.theme,
-    required this.appThemeIndex,
+    required this.type,
+    required this.themeIndex,
     required this.primary,
     required this.secondary,
     required this.tertiary,
   });
-
-  GlobalAppTheme copyWith({
-    ThemeType? type,
-    int? appThemeIndex,
-    Color? primary,
-    Color? secondary,
-    Color? tertiary,
-  }) {
-    return GlobalAppTheme(
-      theme: type ?? this.theme,
-      appThemeIndex: appThemeIndex ?? this.appThemeIndex,
-      primary: primary ?? this.primary,
-      secondary: secondary ?? this.secondary,
-      tertiary: tertiary ?? this.tertiary,
-    );
-  }
 }
 
-const String _theme = 'theme';
-const String _apptheme = 'apptheme';
+const String _themetype = 'themetype';
+const String _themeindex = 'themeindex';
 const String _primary = 'primary';
 const String _secondary = 'secondary';
 const String _tertiary = 'tertiary';
@@ -85,9 +68,10 @@ class GlobalTheme extends _$GlobalTheme {
   GlobalAppTheme build() {
     ref.watch(prefProvider);
     ThemeType theme = ThemeType.from(
-      ref.read(prefProvider.notifier).getString(_theme),
+      ref.read(prefProvider.notifier).getString(_themetype),
     );
-    int? appthemeIndex = ref.read(prefProvider.notifier).getInt(_apptheme);
+    int appthemeIndex =
+        ref.read(prefProvider.notifier).getInt(_themeindex) ?? 0;
     Color? primary = ref
         .read(prefProvider.notifier)
         .getString(_primary)
@@ -101,151 +85,158 @@ class GlobalTheme extends _$GlobalTheme {
         .getString(_tertiary)
         ?.tryToColor();
 
+    if (theme == ThemeType.custom) {
+      AppTheme.currentTheme = AppTheme(
+        name: "custom",
+        icon: CupertinoIcons.cloud_sun_bolt,
+
+        dark: false,
+        size: const Size(100, 100),
+        maxSize: const Size(1366, 1024),
+        designSize: const Size(430, 932),
+
+        primary: primary ?? Colors.red,
+        secondary: secondary ?? Colors.blue,
+        tertiary: tertiary ?? Colors.green,
+
+        borderRadius: (8, 10),
+        padding: (14, 16),
+      );
+    } else {
+      AppTheme.currentThemeIndex = appthemeIndex;
+      AppTheme.currentTheme = AppTheme.themes[appthemeIndex];
+    }
+
     return GlobalAppTheme(
-      theme: theme,
-      appThemeIndex: appthemeIndex ?? 0,
+      type: theme,
+      themeIndex: appthemeIndex,
       primary: primary ?? const Color.fromARGB(255, 143, 111, 223),
       secondary: secondary ?? const Color.fromARGB(255, 255, 126, 193),
       tertiary: tertiary ?? Colors.yellow,
     );
   }
 
-  void setThemeType(ThemeType type) {
-    final themeIndex = AppTheme.themes.indexWhere((t) {
-      if ((type.brightness == Brightness.dark) == t.dark) {
-        return true;
-      }
-      return false;
-    });
+  void setTheme({
+    ThemeType? type,
+    String? name,
+    Color? primary,
+    Color? secondary,
+    Color? tertiary,
+  }) {
+    int? themeIndex = -1;
+    if (name != null) {
+      themeIndex = AppTheme.themes.indexWhere((t) => name == t.name);
+    }
+    if (type != null) {
+      themeIndex = AppTheme.themes.indexWhere((apptheme) {
+        if ((type.brightness == Brightness.dark) == apptheme.dark) {
+          return true;
+        }
+        return false;
+      });
+    }
 
-    AppTheme.currentThemeIndex = themeIndex;
+    final ctype = type ?? state.type;
+    final cthemeIndex = themeIndex >= 0 ? themeIndex : state.themeIndex;
+    final cPrimary = primary ?? state.primary;
+    final cSecondary = secondary ?? state.secondary;
+    final cTertiary = tertiary ?? state.tertiary;
 
-    state = state.copyWith(type: type, appThemeIndex: themeIndex);
-    ref.read(prefProvider.notifier).saveString(_theme, state.theme.toString());
-    ref.read(prefProvider.notifier).saveInt(_apptheme, themeIndex);
-  }
+    if (ctype == ThemeType.custom) {
+      AppTheme.currentTheme = AppTheme(
+        name: "custom",
+        icon: CupertinoIcons.cloud_sun_bolt,
 
-  void setThemeIndex(int themeIndex) {
-    state = state.copyWith(appThemeIndex: themeIndex);
-    ref.read(prefProvider.notifier).saveInt(_apptheme, themeIndex);
-  }
+        dark: false,
+        size: const Size(100, 100),
+        maxSize: const Size(1366, 1024),
+        designSize: const Size(430, 932),
 
-  void setPrimary(Color primary) {
-    state = state.copyWith(primary: primary);
-    ref.read(prefProvider.notifier).saveString(_primary, primary.hexCode);
-  }
+        primary: cPrimary,
+        secondary: cSecondary,
+        tertiary: cTertiary,
 
-  void setSecondary(Color secondary) {
-    state = state.copyWith(secondary: secondary);
-    ref.read(prefProvider.notifier).saveString(_secondary, secondary.hexCode);
-  }
+        borderRadius: (8, 10),
+        padding: (14, 16),
+      );
+    } else {
+      AppTheme.currentThemeIndex = cthemeIndex;
+      AppTheme.currentTheme = AppTheme.themes[cthemeIndex];
+    }
 
-  void setTertiary(Color tertiary) {
-    state = state.copyWith(tertiary: tertiary);
-    ref.read(prefProvider.notifier).saveString(_tertiary, tertiary.hexCode);
+    state = GlobalAppTheme(
+      type: ctype,
+      themeIndex: cthemeIndex,
+      primary: cPrimary,
+      secondary: cSecondary,
+      tertiary: cTertiary,
+    );
+
+    ref
+        .read(prefProvider.notifier)
+        .saveString(_themetype, state.type.toString());
+    ref.read(prefProvider.notifier).saveInt(_themeindex, cthemeIndex);
+    ref.read(prefProvider.notifier).saveString(_primary, cPrimary.hexCode);
+    ref.read(prefProvider.notifier).saveString(_secondary, cSecondary.hexCode);
+    ref.read(prefProvider.notifier).saveString(_tertiary, cTertiary.hexCode);
   }
 }
 
-class ThemeColorSelector extends ConsumerWidget {
-  const ThemeColorSelector({super.key});
+class ThemeSelector extends ConsumerWidget {
+  const ThemeSelector({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     GlobalAppTheme globalAppTheme = ref.watch(globalThemeProvider);
 
-    return IconButton(
-      onPressed: () {
-        context.showFormDialog(
-          builder: (context) {
-            return Container(
-              width: 200,
-              padding: const EdgeInsets.all(8.0),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    DropdownButtonFormField(
-                      hint: Text("Type"),
-                      value: globalAppTheme.theme,
-                      items: ThemeType.values
-                          .map(
-                            (e) =>
-                                DropdownMenuItem(value: e, child: Text(e.name)),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          ref
-                              .read(globalThemeProvider.notifier)
-                              .setThemeType(value);
-                        }
-                      },
-                    ),
+    return SizedBox(
+      width: 200,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ThemeTypePopupButton(),
 
-                    DropdownButtonFormField(
-                      hint: Text("Theme"),
-                      value: AppTheme.currentTheme.name,
-                      items: AppTheme.themes.indexed
-                          .map(
-                            (e) => DropdownMenuItem(
-                              value: e.$2.name,
-                              child: Text(e.$2.name.toString()),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          ref
-                              .read(globalThemeProvider.notifier)
-                              .setThemeIndex(
-                                AppTheme.themes.indexWhere(
-                                  (t) => t.name == value,
-                                ),
-                              );
-                        }
-                      },
-                    ),
+            if (globalAppTheme.type != ThemeType.custom) ThemePopupButton(),
 
-                    ColorPicker(
-                      title: Text("Primary"),
-                      showHexCode: true,
-                      initialColor: globalAppTheme.primary,
-                      onChange: (color) {
-                        ref
-                            .read(globalThemeProvider.notifier)
-                            .setPrimary(color);
-                      },
-                    ),
-
-                    ColorPicker(
-                      title: Text("Secondary"),
-                      showHexCode: true,
-                      initialColor: globalAppTheme.secondary,
-                      onChange: (color) {
-                        ref
-                            .read(globalThemeProvider.notifier)
-                            .setSecondary(color);
-                      },
-                    ),
-
-                    ColorPicker(
-                      title: Text("Tertiary"),
-                      showHexCode: true,
-                      initialColor: globalAppTheme.tertiary,
-                      onChange: (color) {
-                        ref
-                            .read(globalThemeProvider.notifier)
-                            .setTertiary(color);
-                      },
-                    ),
-                  ],
-                ),
+            if (globalAppTheme.type == ThemeType.custom)
+              ColorPicker(
+                title: Text("Primary"),
+                showHexCode: true,
+                initialColor: globalAppTheme.primary,
+                onChange: (color) {
+                  ref
+                      .read(globalThemeProvider.notifier)
+                      .setTheme(primary: color);
+                },
               ),
-            );
-          },
-        );
-      },
-      icon: Icon(Icons.color_lens_outlined),
+
+            if (globalAppTheme.type == ThemeType.custom)
+              ColorPicker(
+                title: Text("Secondary"),
+                showHexCode: true,
+                initialColor: globalAppTheme.secondary,
+                onChange: (color) {
+                  ref
+                      .read(globalThemeProvider.notifier)
+                      .setTheme(secondary: color);
+                },
+              ),
+
+            if (globalAppTheme.type == ThemeType.custom)
+              ColorPicker(
+                title: Text("Tertiary"),
+                showHexCode: true,
+                initialColor: globalAppTheme.tertiary,
+                onChange: (color) {
+                  ref
+                      .read(globalThemeProvider.notifier)
+                      .setTheme(tertiary: color);
+                },
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -255,8 +246,40 @@ class ThemePopupButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    GlobalAppTheme globalAppTheme = ref.watch(globalThemeProvider);
+    return PopupMenuButton<AppTheme>(
+      itemBuilder: (context) {
+        return AppTheme.themes
+            .map<PopupMenuEntry<AppTheme>>(
+              (e) => PopupMenuItem(
+                value: e,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [Text(e.name.toUpperCase()), Icon(e.icon)],
+                ),
+              ),
+            )
+            .toList();
+      },
+      onSelected: (apptheme) {
+        ref.read(globalThemeProvider.notifier).setTheme(name: apptheme.name);
+      },
+      position: PopupMenuPosition.under,
+      offset: const Offset(1, -120),
+      child: ListTile(
+        visualDensity: VisualDensity.compact,
+        title: Text('Theme', style: context.tm),
+        subtitle: Text(AppTheme.currentTheme.name),
+        trailing: Icon(AppTheme.currentTheme.icon),
+      ),
+    );
+  }
+}
 
+class ThemeTypePopupButton extends ConsumerWidget {
+  const ThemeTypePopupButton({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     return PopupMenuButton<ThemeType>(
       itemBuilder: (context) {
         return ThemeType.values
@@ -271,16 +294,16 @@ class ThemePopupButton extends ConsumerWidget {
             )
             .toList();
       },
-      onSelected: (v) {
-        ref.read(globalThemeProvider.notifier).setThemeType(v);
+      onSelected: (type) {
+        ref.read(globalThemeProvider.notifier).setTheme(type: type);
       },
       position: PopupMenuPosition.under,
       offset: const Offset(1, -120),
       child: ListTile(
         visualDensity: VisualDensity.compact,
-        title: Text('Theme', style: context.tm),
-        subtitle: Text(globalAppTheme.theme.name),
-        trailing: globalAppTheme.theme.icon,
+        title: Text('Type', style: context.tm),
+        subtitle: Text(AppTheme.currentTheme.name),
+        trailing: Icon(AppTheme.currentTheme.icon),
       ),
     );
   }
@@ -295,16 +318,17 @@ class ThemeBrightnessButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     GlobalAppTheme globalAppTheme = ref.watch(globalThemeProvider);
 
-    final isBright = Theme.of(context).brightness == Brightness.light;
     return Tooltip(
       preferBelow: showTooltipBelow,
       message: 'Toggle brightness',
       child: IconButton(
-        icon: globalAppTheme.theme.icon,
+        icon: globalAppTheme.type.icon,
         onPressed: () {
-          ref
-              .read(globalThemeProvider.notifier)
-              .setThemeType(isBright ? ThemeType.dark : ThemeType.light);
+          final type = AppTheme.currentTheme.dark
+              ? ThemeType.light
+              : ThemeType.dark;
+
+          ref.read(globalThemeProvider.notifier).setTheme(type: type);
         },
       ),
     );

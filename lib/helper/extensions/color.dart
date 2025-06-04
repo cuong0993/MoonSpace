@@ -49,7 +49,9 @@ extension Shade on Color {
   }
 
   Color getOnColor() {
-    return computeLuminance() > 0.5 ? Colors.black : Colors.white;
+    return computeLuminance() > 0.5
+        ? const Color.fromARGB(255, 45, 45, 45)
+        : Colors.white;
   }
 }
 
