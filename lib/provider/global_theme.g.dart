@@ -44,7 +44,7 @@ final class GlobalThemeProvider
   }
 }
 
-String _$globalThemeHash() => r'b23907efebfc6d1c53c352ea2ce7e7ed75f9e741';
+String _$globalThemeHash() => r'5a2ed32eba3024c76238d7e4e19dc5860fa3449c';
 
 abstract class _$GlobalTheme extends $Notifier<GlobalAppTheme> {
   GlobalAppTheme build();

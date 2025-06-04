@@ -13,9 +13,10 @@ part 'global_theme.g.dart';
 
 enum ThemeType {
   system(Icon(CupertinoIcons.cloud_sun_rain)),
-  dark(Icon(CupertinoIcons.moon_stars)),
+  night(Icon(CupertinoIcons.moon_stars)),
   light(Icon(CupertinoIcons.sun_min)),
-  custom(Icon(CupertinoIcons.cloud_moon));
+  clight(Icon(CupertinoIcons.sun_dust)),
+  cnight(Icon(CupertinoIcons.cloud_moon));
 
   final Icon icon;
 
@@ -28,7 +29,7 @@ enum ThemeType {
   }
 
   Brightness get brightness {
-    if (this == ThemeType.dark) {
+    if (this == ThemeType.night) {
       return Brightness.dark;
     }
     if (this == ThemeType.light) {
@@ -47,12 +48,15 @@ class GlobalAppTheme {
   final Color secondary;
   final Color tertiary;
 
+  final double baseunit;
+
   GlobalAppTheme({
     required this.type,
     required this.themeIndex,
     required this.primary,
     required this.secondary,
     required this.tertiary,
+    required this.baseunit,
   });
 }
 
@@ -61,12 +65,14 @@ const String _themeindex = 'themeindex';
 const String _primary = 'primary';
 const String _secondary = 'secondary';
 const String _tertiary = 'tertiary';
+const String _baseunit = 'baseunit';
 
 @Riverpod(keepAlive: true)
 class GlobalTheme extends _$GlobalTheme {
   @override
   GlobalAppTheme build() {
     ref.watch(prefProvider);
+
     ThemeType theme = ThemeType.from(
       ref.read(prefProvider.notifier).getString(_themetype),
     );
@@ -84,35 +90,17 @@ class GlobalTheme extends _$GlobalTheme {
         .read(prefProvider.notifier)
         .getString(_tertiary)
         ?.tryToColor();
+    double? baseunit = ref.read(prefProvider.notifier).getDouble(_baseunit);
 
-    if (theme == ThemeType.custom) {
-      AppTheme.currentTheme = AppTheme(
-        name: "custom",
-        icon: CupertinoIcons.cloud_sun_bolt,
-
-        dark: false,
-        size: const Size(100, 100),
-        maxSize: const Size(1366, 1024),
-        designSize: const Size(430, 932),
-
-        primary: primary ?? Colors.red,
-        secondary: secondary ?? Colors.blue,
-        tertiary: tertiary ?? Colors.green,
-
-        borderRadius: (8, 10),
-        padding: (14, 16),
-      );
-    } else {
-      AppTheme.currentThemeIndex = appthemeIndex;
-      AppTheme.currentTheme = AppTheme.themes[appthemeIndex];
-    }
+    changeTheme(theme, primary, secondary, tertiary, appthemeIndex, baseunit);
 
     return GlobalAppTheme(
       type: theme,
       themeIndex: appthemeIndex,
-      primary: primary ?? const Color.fromARGB(255, 143, 111, 223),
-      secondary: secondary ?? const Color.fromARGB(255, 255, 126, 193),
-      tertiary: tertiary ?? Colors.yellow,
+      primary: primary ?? const Color.fromARGB(255, 255, 0, 0),
+      secondary: secondary ?? const Color.fromARGB(255, 255, 0, 0),
+      tertiary: tertiary ?? const Color.fromARGB(255, 255, 59, 59),
+      baseunit: baseunit ?? 1.0,
     );
   }
 
@@ -122,6 +110,7 @@ class GlobalTheme extends _$GlobalTheme {
     Color? primary,
     Color? secondary,
     Color? tertiary,
+    double? baseunit,
   }) {
     int? themeIndex = -1;
     if (name != null) {
@@ -141,28 +130,9 @@ class GlobalTheme extends _$GlobalTheme {
     final cPrimary = primary ?? state.primary;
     final cSecondary = secondary ?? state.secondary;
     final cTertiary = tertiary ?? state.tertiary;
+    final cBaseunit = baseunit ?? state.baseunit;
 
-    if (ctype == ThemeType.custom) {
-      AppTheme.currentTheme = AppTheme(
-        name: "custom",
-        icon: CupertinoIcons.cloud_sun_bolt,
-
-        dark: false,
-        size: const Size(100, 100),
-        maxSize: const Size(1366, 1024),
-        designSize: const Size(430, 932),
-
-        primary: cPrimary,
-        secondary: cSecondary,
-        tertiary: cTertiary,
-
-        borderRadius: (8, 10),
-        padding: (14, 16),
-      );
-    } else {
-      AppTheme.currentThemeIndex = cthemeIndex;
-      AppTheme.currentTheme = AppTheme.themes[cthemeIndex];
-    }
+    changeTheme(ctype, cPrimary, cSecondary, cTertiary, cthemeIndex, cBaseunit);
 
     state = GlobalAppTheme(
       type: ctype,
@@ -170,6 +140,7 @@ class GlobalTheme extends _$GlobalTheme {
       primary: cPrimary,
       secondary: cSecondary,
       tertiary: cTertiary,
+      baseunit: cBaseunit,
     );
 
     ref
@@ -179,6 +150,38 @@ class GlobalTheme extends _$GlobalTheme {
     ref.read(prefProvider.notifier).saveString(_primary, cPrimary.hexCode);
     ref.read(prefProvider.notifier).saveString(_secondary, cSecondary.hexCode);
     ref.read(prefProvider.notifier).saveString(_tertiary, cTertiary.hexCode);
+  }
+
+  void changeTheme(
+    ThemeType theme,
+    Color? primary,
+    Color? secondary,
+    Color? tertiary,
+    int appthemeIndex,
+    double? baseunit,
+  ) {
+    if (theme == ThemeType.clight || theme == ThemeType.cnight) {
+      AppTheme.currentTheme = AppTheme(
+        name: "custom",
+        icon: CupertinoIcons.cloud_sun_bolt,
+
+        dark: theme == ThemeType.cnight,
+        size: const Size(100, 100),
+        maxSize: const Size(1366, 1024),
+        designSize: const Size(430, 932),
+
+        primary: primary ?? Colors.red,
+        secondary: secondary ?? Colors.red,
+        tertiary: tertiary ?? Colors.red,
+
+        borderRadius: (8, 10),
+        padding: (14, 16),
+        baseunit: baseunit ?? 1.0,
+      );
+    } else {
+      AppTheme.currentThemeIndex = appthemeIndex;
+      AppTheme.currentTheme = AppTheme.themes[appthemeIndex];
+    }
   }
 }
 
@@ -190,16 +193,19 @@ class ThemeSelector extends ConsumerWidget {
     GlobalAppTheme globalAppTheme = ref.watch(globalThemeProvider);
 
     return SizedBox(
-      width: 200,
+      width: 250,
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ThemeTypePopupButton(),
 
-            if (globalAppTheme.type != ThemeType.custom) ThemePopupButton(),
+            if (globalAppTheme.type != ThemeType.clight &&
+                globalAppTheme.type != ThemeType.cnight)
+              ThemePopupButton(),
 
-            if (globalAppTheme.type == ThemeType.custom)
+            if (globalAppTheme.type == ThemeType.clight ||
+                globalAppTheme.type == ThemeType.cnight)
               ColorPicker(
                 title: Text("Primary"),
                 showHexCode: true,
@@ -211,7 +217,8 @@ class ThemeSelector extends ConsumerWidget {
                 },
               ),
 
-            if (globalAppTheme.type == ThemeType.custom)
+            if (globalAppTheme.type == ThemeType.clight ||
+                globalAppTheme.type == ThemeType.cnight)
               ColorPicker(
                 title: Text("Secondary"),
                 showHexCode: true,
@@ -223,7 +230,8 @@ class ThemeSelector extends ConsumerWidget {
                 },
               ),
 
-            if (globalAppTheme.type == ThemeType.custom)
+            if (globalAppTheme.type == ThemeType.clight ||
+                globalAppTheme.type == ThemeType.cnight)
               ColorPicker(
                 title: Text("Tertiary"),
                 showHexCode: true,
@@ -233,6 +241,34 @@ class ThemeSelector extends ConsumerWidget {
                       .read(globalThemeProvider.notifier)
                       .setTheme(tertiary: color);
                 },
+              ),
+
+            if (globalAppTheme.type == ThemeType.clight ||
+                globalAppTheme.type == ThemeType.cnight)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 0,
+                  horizontal: 10,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Baseunit"),
+                    Slider(
+                      label: globalAppTheme.baseunit.toStringAsFixed(1),
+                      value: globalAppTheme.baseunit,
+                      divisions: 35,
+                      max: 4.0,
+                      min: 0.5,
+                      padding: EdgeInsets.zero,
+                      onChanged: (value) {
+                        ref
+                            .read(globalThemeProvider.notifier)
+                            .setTheme(baseunit: value);
+                      },
+                    ),
+                  ],
+                ),
               ),
           ],
         ),
@@ -326,7 +362,7 @@ class ThemeBrightnessButton extends ConsumerWidget {
         onPressed: () {
           final type = AppTheme.currentTheme.dark
               ? ThemeType.light
-              : ThemeType.dark;
+              : ThemeType.night;
 
           ref.read(globalThemeProvider.notifier).setTheme(type: type);
         },

@@ -25,7 +25,7 @@ class _ColorPickerState extends State<ColorPicker> {
   double hue = 0;
   double x = 1.0;
   double y = 0.5;
-  late Color selectedColor;
+  Color selectedColor = Colors.transparent;
 
   @override
   void initState() {
@@ -34,9 +34,12 @@ class _ColorPickerState extends State<ColorPicker> {
     final c = widget.initialColor;
     if (c != null) {
       final hsl = HSLColor.fromColor(c);
+
+      final (xx, yy) = reverseBlend(hsl.saturation, hsl.lightness);
+
       hue = hsl.hue;
-      x = hsl.saturation;
-      y = hsl.lightness;
+      x = xx;
+      y = yy;
       updateColor(true);
     }
   }
@@ -81,7 +84,15 @@ class _ColorPickerState extends State<ColorPicker> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               if (widget.title != null) widget.title!,
-              if (widget.showHexCode) Text(selectedColor.hexCode),
+              if (widget.showHexCode) SelectableText(selectedColor.hexCode),
+              Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(100),
+                  color: selectedColor,
+                ),
+              ),
             ],
           ),
 
@@ -228,13 +239,13 @@ class _SLBoxPainter extends CustomPainter {
       oldDelegate.hue != hue || oldDelegate.nx != nx || oldDelegate.ny != ny;
 }
 
-(double, double) blend(double nx, double ny) {
-  // Define the four corner points with their (saturation, lightness) values
-  final bottomLeft = Point(0.0, 0.0); // (0,0)
-  final bottomRight = Point(1.0, 0.0); // (1,0)
-  final topLeft = Point(0.0, 1.0); // (0,1)
-  final topRight = Point(1.0, 0.5); // (1,0.5)
+// Define the four corner points with their (saturation, lightness) values
+final bottomLeft = Point(0.0, 0.0); // (0,0)
+final bottomRight = Point(1.0, 0.0); // (1,0)
+final topLeft = Point(0.0, 1.0); // (0,1)
+final topRight = Point(1.0, 0.5); // (1,0.5)
 
+(double, double) blend(double nx, double ny) {
   // Calculate bilinear weights
   final wx = nx; // x interpolation factor
   final wy = ny; // y interpolation factor
@@ -254,6 +265,50 @@ class _SLBoxPainter extends CustomPainter {
   final result = Point(lerp(bottom.x, top.x, wy), lerp(bottom.y, top.y, wy));
 
   return (result.x, result.y);
+}
+
+(double, double) reverseBlend(double saturation, double lightness) {
+  // Binary search to find nx (x coordinate)
+  double low = 0.0;
+  double high = 1.0;
+  double nx = 0.5;
+
+  for (int i = 0; i < 10; i++) {
+    // 10 iterations for precision
+    final top = Point(
+      lerp(topLeft.x, topRight.x, nx),
+      lerp(topLeft.y, topRight.y, nx),
+    );
+    final bottom = Point(
+      lerp(bottomLeft.x, bottomRight.x, nx),
+      lerp(bottomLeft.y, bottomRight.y, nx),
+    );
+
+    // Find ny that would give us the target lightness
+    final ny = (lightness - bottom.y) / (top.y - bottom.y);
+    final resultS = lerp(bottom.x, top.x, ny);
+
+    if (resultS < saturation) {
+      low = nx;
+    } else {
+      high = nx;
+    }
+    nx = (low + high) / 2;
+  }
+
+  // Calculate ny using the found nx
+  final top = Point(
+    lerp(topLeft.x, topRight.x, nx),
+    lerp(topLeft.y, topRight.y, nx),
+  );
+  final bottom = Point(
+    lerp(bottomLeft.x, bottomRight.x, nx),
+    lerp(bottomLeft.y, bottomRight.y, nx),
+  );
+
+  final ny = (lightness - bottom.y) / (top.y - bottom.y);
+
+  return (nx, ny);
 }
 
 // Helper function for linear interpolation

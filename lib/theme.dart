@@ -16,7 +16,9 @@ extension AppThemeNumber on num {
 
 extension AppThemeRange on (num, num) {
   double get s => ($1 + ($2 - $1) * AppTheme.rs).toDouble();
-  double get c => ($1 + ($2 - $1) * AppTheme.rc).toDouble();
+  double get c =>
+      AppTheme.currentTheme.baseunit *
+      ($1 + ($2 - $1) * AppTheme.rc).toDouble();
 }
 
 class AppTheme {
@@ -36,6 +38,8 @@ class AppTheme {
   final (int, int) borderRadius;
   final (int, int) padding;
 
+  final double baseunit;
+
   AppTheme copyWith({Size? size}) {
     return AppTheme(
       name: name,
@@ -53,6 +57,8 @@ class AppTheme {
 
       borderRadius: borderRadius,
       padding: padding,
+
+      baseunit: baseunit,
     );
   }
 
@@ -72,10 +78,12 @@ class AppTheme {
 
     required this.borderRadius,
     required this.padding,
+
+    required this.baseunit,
   });
 
-  // static List<AppTheme> get themes => [
-  static List<AppTheme> themes = [
+  // static List<AppTheme> themes = [
+  static List<AppTheme> get themes => [
     AppTheme(
       name: "Sun",
       icon: CupertinoIcons.sun_min,
@@ -89,9 +97,11 @@ class AppTheme {
       borderRadius: (8, 10),
       padding: (14, 16),
 
-      primary: const Color.fromARGB(255, 105, 187, 255),
-      secondary: const Color.fromARGB(255, 255, 109, 157),
-      tertiary: const Color.fromARGB(255, 255, 246, 165),
+      primary: const Color(0xff717171),
+      secondary: const Color(0xff7e73c0),
+      tertiary: const Color(0xff71c783),
+
+      baseunit: 1.0,
     ),
     AppTheme(
       name: "Moon",
@@ -106,9 +116,99 @@ class AppTheme {
       borderRadius: (8, 10),
       padding: (14, 16),
 
-      primary: Colors.blue,
-      secondary: Colors.pink,
-      tertiary: const Color.fromARGB(255, 255, 246, 165),
+      primary: const Color(0xff8a73cf),
+      secondary: const Color(0xffbed18c),
+      tertiary: const Color(0xffffffff),
+
+      baseunit: 1.0,
+    ),
+    AppTheme(
+      name: "Happy",
+      icon: Icons.icecream_outlined,
+
+      dark: false,
+
+      size: const Size(360, 780),
+      maxSize: const Size(1366, 1024),
+      designSize: const Size(360, 780),
+
+      borderRadius: (8, 10),
+      padding: (14, 16),
+
+      primary: const Color(0xfff7ec1a),
+      secondary: const Color(0xff4281d4),
+      tertiary: const Color(0xffefae35),
+
+      baseunit: 1.0,
+    ),
+    AppTheme(
+      name: "HappyNight",
+      icon: Icons.icecream_outlined,
+
+      dark: true,
+
+      size: const Size(360, 780),
+      maxSize: const Size(1366, 1024),
+      designSize: const Size(360, 780),
+
+      borderRadius: (8, 10),
+      padding: (14, 16),
+
+      primary: const Color(0xfff7ec1a),
+      secondary: const Color(0xff4281d4),
+      tertiary: const Color(0xffefae35),
+
+      baseunit: 1.0,
+    ),
+    AppTheme(
+      name: "Monochrome",
+      icon: Icons.icecream_outlined,
+
+      dark: false,
+
+      size: const Size(360, 780),
+      maxSize: const Size(1366, 1024),
+      designSize: const Size(360, 780),
+
+      borderRadius: (8, 10),
+      padding: (14, 16),
+
+      primary: const Color.fromARGB(255, 105, 187, 255),
+      secondary: const Color.fromARGB(255, 255, 109, 157),
+      tertiary: Colors.yellow,
+
+      themedata: ColorScheme.fromSeed(
+        seedColor: Colors.green,
+        brightness: Brightness.light,
+        dynamicSchemeVariant: DynamicSchemeVariant.monochrome,
+      ),
+
+      baseunit: 1.0,
+    ),
+    AppTheme(
+      name: "MonochromeNight",
+      icon: Icons.icecream_outlined,
+
+      dark: true,
+
+      size: const Size(360, 780),
+      maxSize: const Size(1366, 1024),
+      designSize: const Size(360, 780),
+
+      borderRadius: (8, 10),
+      padding: (14, 16),
+
+      primary: const Color.fromARGB(255, 105, 187, 255),
+      secondary: const Color.fromARGB(255, 255, 109, 157),
+      tertiary: Colors.yellow,
+
+      themedata: ColorScheme.fromSeed(
+        seedColor: Colors.green,
+        brightness: Brightness.dark,
+        dynamicSchemeVariant: DynamicSchemeVariant.monochrome,
+      ),
+
+      baseunit: 1.0,
     ),
   ];
 
@@ -158,8 +258,8 @@ class AppTheme {
 
       primary: primary,
       onPrimary: primary.getOnColor(),
-      primaryContainer: primary,
-      onPrimaryContainer: primary.getOnColor(),
+      primaryContainer: Colors.red, //primary,
+      onPrimaryContainer: Colors.red, //primary.getOnColor(),
 
       secondary: secondary,
       onSecondary: secondary.getOnColor(),
@@ -216,40 +316,40 @@ class AppTheme {
   }
 
   TextTheme get textTheme => TextTheme(
-    displayLarge: TextStyle(letterSpacing: 1.c, fontSize: (50, 60).c),
-    displayMedium: TextStyle(letterSpacing: 1.c, fontSize: (44, 54).c),
-    displaySmall: TextStyle(letterSpacing: 1.c, fontSize: (36, 46).c),
+    displayLarge: TextStyle(letterSpacing: 1.c, fontSize: (46, 50).c),
+    displayMedium: TextStyle(letterSpacing: 1.c, fontSize: (40, 46).c),
+    displaySmall: TextStyle(letterSpacing: 1.c, fontSize: (36, 40).c),
 
-    headlineLarge: TextStyle(letterSpacing: 1.c, fontSize: (32, 42).c),
-    headlineMedium: TextStyle(letterSpacing: 1.c, fontSize: (30, 40).c),
-    headlineSmall: TextStyle(fontSize: (26, 32).c),
+    headlineLarge: TextStyle(letterSpacing: 1.c, fontSize: (30, 36).c),
+    headlineMedium: TextStyle(letterSpacing: 1.c, fontSize: (24, 30).c),
+    headlineSmall: TextStyle(fontSize: (20, 24).c),
 
     //Appbar
-    titleLarge: TextStyle(letterSpacing: 0.c, fontSize: (22, 24).c),
+    titleLarge: TextStyle(letterSpacing: 0.c, fontSize: (17, 20).c),
 
     //CupertinoListTile, ListTile Title, Textfield label
     titleMedium: TextStyle(
       letterSpacing: 1.c,
-      fontSize: (17, 19).c,
+      fontSize: (14, 15).c,
       fontWeight: FontWeight.w400,
     ),
 
     //TextFormField, CupertinoFormSection header, ListTile, SwitchTile, RadioTile
-    bodyLarge: TextStyle(fontSize: (16, 18).c),
+    bodyLarge: TextStyle(fontSize: (13, 14).c),
 
     // Tabs
-    titleSmall: TextStyle(fontSize: (14, 16).c, fontWeight: FontWeight.w400),
+    titleSmall: TextStyle(fontSize: (12, 13).c, fontWeight: FontWeight.w400),
     //Text,  Textfield font, Tile subtitle
-    bodyMedium: TextStyle(fontSize: (14, 16).c, fontWeight: FontWeight.w400),
+    bodyMedium: TextStyle(fontSize: (12, 13).c, fontWeight: FontWeight.w400),
     //Buttons
-    labelLarge: TextStyle(fontSize: (14, 16).c, fontWeight: FontWeight.w400),
+    labelLarge: TextStyle(fontSize: (12, 13).c, fontWeight: FontWeight.w400),
 
     //ListTile subtitle, errortext
-    bodySmall: TextStyle(fontSize: (12, 14).c),
+    bodySmall: TextStyle(fontSize: (11, 12).c),
     //BottomNavBar, Navigation
-    labelMedium: TextStyle(fontSize: (12, 14).c, fontWeight: FontWeight.w400),
+    labelMedium: TextStyle(fontSize: (11, 12).c, fontWeight: FontWeight.w400),
 
-    labelSmall: TextStyle(fontSize: (30, 12).c, fontWeight: FontWeight.w400),
+    labelSmall: TextStyle(fontSize: (10, 11).c, fontWeight: FontWeight.w400),
   );
 
   ThemeData get theme {
@@ -286,8 +386,6 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(borderRadius.c),
         ),
-        // titleTextStyle: AppTheme.tx.bodyLarge,
-        // subtitleTextStyle: AppTheme.tx.bodySmall,
       ),
 
       //
@@ -304,7 +402,6 @@ class AppTheme {
             borderRadius: BorderRadius.circular(borderRadius.c),
           ),
           padding: EdgeInsets.all(padding.c),
-          textStyle: TextStyle(fontSize: (15, 17).c),
           // foregroundColor: const Color.fromARGB(255, 255, 255, 255),
         ),
       ),
@@ -314,7 +411,6 @@ class AppTheme {
             borderRadius: BorderRadius.circular(borderRadius.c),
           ),
           padding: EdgeInsets.all(padding.c),
-          // textStyle: TextStyle(fontSize: (15, 17).c),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -323,7 +419,6 @@ class AppTheme {
             borderRadius: BorderRadius.circular(borderRadius.c),
           ),
           padding: EdgeInsets.all(padding.c),
-          // textStyle: TextStyle(fontSize: (15, 17).c),
         ),
       ),
       textButtonTheme: TextButtonThemeData(

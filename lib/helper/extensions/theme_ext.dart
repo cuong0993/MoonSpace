@@ -113,6 +113,14 @@ extension SuperContext on BuildContext {
   TextStyle? get lm => theme.textTheme.labelMedium;
   TextStyle? get ls => theme.textTheme.labelSmall;
 
+  TextStyle? get h1 => theme.textTheme.displaySmall;
+  TextStyle? get h2 => theme.textTheme.headlineMedium;
+  TextStyle? get h3 => theme.textTheme.titleLarge;
+  TextStyle? get h4 => theme.textTheme.titleMedium;
+  TextStyle? get h5 => theme.textTheme.bodyLarge;
+  TextStyle? get h6 => theme.textTheme.bodyMedium;
+  TextStyle? get p => theme.textTheme.bodySmall;
+
   //
   TargetPlatform get platform => theme.platform;
   TargetPlatform get ios => TargetPlatform.iOS;
