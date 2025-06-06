@@ -322,21 +322,20 @@ extension SuperNumber on num {
   BeveledRectangleBorder get bBev => BeveledRectangleBorder(side: bs);
   OutlineInputBorder get bOut => OutlineInputBorder(borderSide: bs);
   UnderlineInputBorder get bUline => UnderlineInputBorder(borderSide: bs);
-
-  RoundedRectangleBorder get rRound => RoundedRectangleBorder(borderRadius: br);
-  BeveledRectangleBorder get rBev => BeveledRectangleBorder(borderRadius: br);
-  OutlineInputBorder get rOut => OutlineInputBorder(borderRadius: br);
-  UnderlineInputBorder get rUline => UnderlineInputBorder(borderRadius: br);
 }
 
 extension SuperRoundedRectangleBorder on RoundedRectangleBorder {
   RoundedRectangleBorder r(num r) => copyWith(borderRadius: r.br);
   RoundedRectangleBorder w(num r) => copyWith(side: r.bs);
+  RoundedRectangleBorder c(Color color) =>
+      copyWith(side: side.copyWith(width: 2, color: color));
 }
 
 extension SuperBeveledRectangleBorder on BeveledRectangleBorder {
   BeveledRectangleBorder r(num r) => copyWith(borderRadius: r.br);
   BeveledRectangleBorder w(num r) => copyWith(side: r.bs);
+  BeveledRectangleBorder c(Color color) =>
+      copyWith(side: side.copyWith(width: 2, color: color));
 }
 
 extension SuperOutlineInputBorder on OutlineInputBorder {
@@ -433,7 +432,6 @@ extension SuperTextStyle on TextStyle? {
   TextStyle? get w8 => this?.copyWith(fontWeight: FontWeight.w800);
   TextStyle? get w9 => this?.copyWith(fontWeight: FontWeight.w900);
 
-  //
   TextStyle? get dot =>
       this?.copyWith(decorationStyle: TextDecorationStyle.dotted);
   TextStyle? get dash =>

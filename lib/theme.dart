@@ -82,8 +82,8 @@ class AppTheme {
     required this.baseunit,
   });
 
-  // static List<AppTheme> themes = [
-  static List<AppTheme> get themes => [
+  static List<AppTheme> themes = [
+    // static List<AppTheme> get themes => [
     AppTheme(
       name: "Sun",
       icon: CupertinoIcons.sun_min,
@@ -249,6 +249,10 @@ class AppTheme {
     final surface = isDark
         ? const Color.fromARGB(255, 28, 28, 28)
         : Colors.white;
+    final onSurface = isDark
+        ? Colors.white
+        : const Color.fromARGB(255, 83, 83, 83);
+
     final outline = isDark
         ? const Color.fromARGB(255, 117, 117, 117)
         : const Color.fromARGB(255, 208, 208, 208);
@@ -272,7 +276,7 @@ class AppTheme {
       onTertiaryContainer: Colors.red, //tertiary.getOnColor(),
 
       surface: surface,
-      onSurface: surface.getOnColor(),
+      onSurface: onSurface,
 
       onSurfaceVariant: surface.lighten(isDark ? 0.6 : -0.6),
       surfaceTint: primary,
@@ -290,18 +294,18 @@ class AppTheme {
       inverseSurface: surface.lighten(isDark ? 0.25 : -0.25),
       inversePrimary: primary.lighten(isDark ? -.1 : .1),
 
-      primaryFixed: primary,
-      onPrimaryFixed: primary.getOnColor(),
+      primaryFixed: Colors.red, // primary,
+      onPrimaryFixed: Colors.red, //primary.getOnColor(),
       primaryFixedDim: Colors.red, //primary,
       onPrimaryFixedVariant: Colors.red, //primary.getOnColor(),
 
-      secondaryFixed: secondary,
-      onSecondaryFixed: secondary.getOnColor(),
+      secondaryFixed: Colors.red, //secondary,
+      onSecondaryFixed: Colors.red, //secondary.getOnColor(),
       secondaryFixedDim: Colors.red, // secondary,
       onSecondaryFixedVariant: Colors.red, //secondary.getOnColor(),
 
-      tertiaryFixed: tertiary,
-      onTertiaryFixed: tertiary.getOnColor(),
+      tertiaryFixed: Colors.red, //tertiary,
+      onTertiaryFixed: Colors.red, //tertiary.getOnColor(),
       tertiaryFixedDim: Colors.red, // tertiary,
       onTertiaryFixedVariant: Colors.red, //tertiary.getOnColor(),
 
@@ -402,7 +406,6 @@ class AppTheme {
             borderRadius: BorderRadius.circular(borderRadius.c),
           ),
           padding: EdgeInsets.all(padding.c),
-          // foregroundColor: const Color.fromARGB(255, 255, 255, 255),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
@@ -453,6 +456,19 @@ class AppTheme {
         //     ? const Color.fromARGB(255, 68, 61, 71)
         //     : const Color.fromARGB(255, 250, 239, 255),
         elevation: 0,
+      ),
+
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: colorScheme.secondary,
+        circularTrackColor: colorScheme.surfaceContainerHighest,
+        linearTrackColor: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(100),
+      ),
+
+      sliderTheme: SliderThemeData(
+        activeTrackColor: colorScheme.secondary,
+        thumbColor: colorScheme.tertiary,
+        padding: EdgeInsets.zero,
       ),
     );
   }
