@@ -192,86 +192,78 @@ class ThemeSelector extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     GlobalAppTheme globalAppTheme = ref.watch(globalThemeProvider);
 
-    return SizedBox(
-      width: 250,
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ThemeTypePopupButton(),
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ThemeTypePopupButton(),
 
-            if (globalAppTheme.type != ThemeType.clight &&
-                globalAppTheme.type != ThemeType.cnight)
-              ThemePopupButton(),
+          if (globalAppTheme.type != ThemeType.clight &&
+              globalAppTheme.type != ThemeType.cnight)
+            ThemePopupButton(),
 
-            if (globalAppTheme.type == ThemeType.clight ||
-                globalAppTheme.type == ThemeType.cnight)
-              ColorPicker(
-                title: Text("Primary"),
-                showHexCode: true,
-                initialColor: globalAppTheme.primary,
-                onChange: (color) {
-                  ref
-                      .read(globalThemeProvider.notifier)
-                      .setTheme(primary: color);
-                },
+          if (globalAppTheme.type == ThemeType.clight ||
+              globalAppTheme.type == ThemeType.cnight)
+            ColorPicker(
+              title: Text("Primary"),
+              showHexCode: true,
+              initialColor: globalAppTheme.primary,
+              onChange: (color) {
+                ref.read(globalThemeProvider.notifier).setTheme(primary: color);
+              },
+            ),
+
+          if (globalAppTheme.type == ThemeType.clight ||
+              globalAppTheme.type == ThemeType.cnight)
+            ColorPicker(
+              title: Text("Secondary"),
+              showHexCode: true,
+              initialColor: globalAppTheme.secondary,
+              onChange: (color) {
+                ref
+                    .read(globalThemeProvider.notifier)
+                    .setTheme(secondary: color);
+              },
+            ),
+
+          if (globalAppTheme.type == ThemeType.clight ||
+              globalAppTheme.type == ThemeType.cnight)
+            ColorPicker(
+              title: Text("Tertiary"),
+              showHexCode: true,
+              initialColor: globalAppTheme.tertiary,
+              onChange: (color) {
+                ref
+                    .read(globalThemeProvider.notifier)
+                    .setTheme(tertiary: color);
+              },
+            ),
+
+          if (globalAppTheme.type == ThemeType.clight ||
+              globalAppTheme.type == ThemeType.cnight)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Baseunit"),
+                  Slider(
+                    label: globalAppTheme.baseunit.toStringAsFixed(1),
+                    value: globalAppTheme.baseunit,
+                    divisions: 35,
+                    max: 4.0,
+                    min: 0.5,
+                    padding: EdgeInsets.zero,
+                    onChanged: (value) {
+                      ref
+                          .read(globalThemeProvider.notifier)
+                          .setTheme(baseunit: value);
+                    },
+                  ),
+                ],
               ),
-
-            if (globalAppTheme.type == ThemeType.clight ||
-                globalAppTheme.type == ThemeType.cnight)
-              ColorPicker(
-                title: Text("Secondary"),
-                showHexCode: true,
-                initialColor: globalAppTheme.secondary,
-                onChange: (color) {
-                  ref
-                      .read(globalThemeProvider.notifier)
-                      .setTheme(secondary: color);
-                },
-              ),
-
-            if (globalAppTheme.type == ThemeType.clight ||
-                globalAppTheme.type == ThemeType.cnight)
-              ColorPicker(
-                title: Text("Tertiary"),
-                showHexCode: true,
-                initialColor: globalAppTheme.tertiary,
-                onChange: (color) {
-                  ref
-                      .read(globalThemeProvider.notifier)
-                      .setTheme(tertiary: color);
-                },
-              ),
-
-            if (globalAppTheme.type == ThemeType.clight ||
-                globalAppTheme.type == ThemeType.cnight)
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 0,
-                  horizontal: 10,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Baseunit"),
-                    Slider(
-                      label: globalAppTheme.baseunit.toStringAsFixed(1),
-                      value: globalAppTheme.baseunit,
-                      divisions: 35,
-                      max: 4.0,
-                      min: 0.5,
-                      padding: EdgeInsets.zero,
-                      onChanged: (value) {
-                        ref
-                            .read(globalThemeProvider.notifier)
-                            .setTheme(baseunit: value);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }

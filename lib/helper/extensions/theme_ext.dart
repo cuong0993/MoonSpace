@@ -113,12 +113,14 @@ extension SuperContext on BuildContext {
   TextStyle? get lm => theme.textTheme.labelMedium;
   TextStyle? get ls => theme.textTheme.labelSmall;
 
-  TextStyle? get h1 => theme.textTheme.displaySmall;
+  TextStyle? get h0 => theme.textTheme.displaySmall;
+  TextStyle? get h1 => theme.textTheme.headlineLarge;
   TextStyle? get h2 => theme.textTheme.headlineMedium;
-  TextStyle? get h3 => theme.textTheme.titleLarge;
-  TextStyle? get h4 => theme.textTheme.titleMedium;
-  TextStyle? get h5 => theme.textTheme.bodyLarge;
-  TextStyle? get h6 => theme.textTheme.bodyMedium;
+  TextStyle? get h3 => theme.textTheme.headlineSmall;
+  TextStyle? get h4 => theme.textTheme.titleLarge;
+  TextStyle? get h5 => theme.textTheme.titleMedium;
+  TextStyle? get h6 => theme.textTheme.bodyLarge;
+  TextStyle? get h7 => theme.textTheme.bodyMedium;
   TextStyle? get p => theme.textTheme.bodySmall;
 
   //
@@ -328,14 +330,14 @@ extension SuperRoundedRectangleBorder on RoundedRectangleBorder {
   RoundedRectangleBorder r(num r) => copyWith(borderRadius: r.br);
   RoundedRectangleBorder w(num r) => copyWith(side: r.bs);
   RoundedRectangleBorder c(Color color) =>
-      copyWith(side: side.copyWith(width: 2, color: color));
+      copyWith(side: side.copyWith(color: color));
 }
 
 extension SuperBeveledRectangleBorder on BeveledRectangleBorder {
   BeveledRectangleBorder r(num r) => copyWith(borderRadius: r.br);
   BeveledRectangleBorder w(num r) => copyWith(side: r.bs);
   BeveledRectangleBorder c(Color color) =>
-      copyWith(side: side.copyWith(width: 2, color: color));
+      copyWith(side: side.copyWith(color: color));
 }
 
 extension SuperOutlineInputBorder on OutlineInputBorder {

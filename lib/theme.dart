@@ -247,11 +247,11 @@ class AppTheme {
 
   ColorScheme buildColorScheme() {
     final surface = isDark
-        ? const Color.fromARGB(255, 28, 28, 28)
+        ? const Color.fromARGB(255, 20, 20, 20)
         : Colors.white;
     final onSurface = isDark
         ? Colors.white
-        : const Color.fromARGB(255, 83, 83, 83);
+        : const Color.fromARGB(255, 60, 60, 60);
 
     final outline = isDark
         ? const Color.fromARGB(255, 117, 117, 117)
@@ -325,7 +325,7 @@ class AppTheme {
     displaySmall: TextStyle(letterSpacing: 1.c, fontSize: (36, 40).c),
 
     headlineLarge: TextStyle(letterSpacing: 1.c, fontSize: (30, 36).c),
-    headlineMedium: TextStyle(letterSpacing: 1.c, fontSize: (24, 30).c),
+    headlineMedium: TextStyle(letterSpacing: 1.c, fontSize: (26, 32).c),
     headlineSmall: TextStyle(fontSize: (20, 24).c),
 
     //Appbar
@@ -334,26 +334,26 @@ class AppTheme {
     //CupertinoListTile, ListTile Title, Textfield label
     titleMedium: TextStyle(
       letterSpacing: 1.c,
-      fontSize: (14, 15).c,
+      fontSize: (15, 16).c,
       fontWeight: FontWeight.w400,
     ),
 
     //TextFormField, CupertinoFormSection header, ListTile, SwitchTile, RadioTile
-    bodyLarge: TextStyle(fontSize: (13, 14).c),
+    bodyLarge: TextStyle(fontSize: (14, 15).c),
 
     // Tabs
-    titleSmall: TextStyle(fontSize: (12, 13).c, fontWeight: FontWeight.w400),
+    titleSmall: TextStyle(fontSize: (13, 14).c, fontWeight: FontWeight.w400),
     //Text,  Textfield font, Tile subtitle
-    bodyMedium: TextStyle(fontSize: (12, 13).c, fontWeight: FontWeight.w400),
+    bodyMedium: TextStyle(fontSize: (13, 14).c, fontWeight: FontWeight.w400),
     //Buttons
-    labelLarge: TextStyle(fontSize: (12, 13).c, fontWeight: FontWeight.w400),
+    labelLarge: TextStyle(fontSize: (13, 14).c, fontWeight: FontWeight.w400),
 
     //ListTile subtitle, errortext
-    bodySmall: TextStyle(fontSize: (11, 12).c),
+    bodySmall: TextStyle(fontSize: (12, 13).c),
     //BottomNavBar, Navigation
-    labelMedium: TextStyle(fontSize: (11, 12).c, fontWeight: FontWeight.w400),
+    labelMedium: TextStyle(fontSize: (12, 13).c, fontWeight: FontWeight.w400),
 
-    labelSmall: TextStyle(fontSize: (10, 11).c, fontWeight: FontWeight.w400),
+    labelSmall: TextStyle(fontSize: (11, 12).c, fontWeight: FontWeight.w400),
   );
 
   ThemeData get theme {
@@ -452,10 +452,12 @@ class AppTheme {
 
       //
       cardTheme: CardThemeData(
-        // color: AppTheme.isDark
-        //     ? const Color.fromARGB(255, 68, 61, 71)
-        //     : const Color.fromARGB(255, 250, 239, 255),
         elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(borderRadius.c),
+          side: BorderSide.none,
+        ),
       ),
 
       progressIndicatorTheme: ProgressIndicatorThemeData(

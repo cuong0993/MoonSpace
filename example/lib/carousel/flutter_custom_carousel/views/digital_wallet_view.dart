@@ -1,4 +1,4 @@
-import 'package:example/flutter_custom_carousel/views/demo_chrome.dart';
+import 'package:example/carousel/flutter_custom_carousel/views/demo_chrome.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_carousel/flutter_custom_carousel.dart';
 import 'package:flutter_animate/flutter_animate.dart';
