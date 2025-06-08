@@ -21,6 +21,11 @@ extension AppThemeRange on (num, num) {
       ($1 + ($2 - $1) * AppTheme.rc).toDouble();
 }
 
+extension AppThemeRange3 on (num, num, num) {
+  double get r =>
+      (AppTheme.isMobile ? $1 : (AppTheme.isTab ? $2 : $3)).toDouble();
+}
+
 class AppTheme {
   final String name;
   final IconData icon;
@@ -215,10 +220,10 @@ class AppTheme {
   static int currentThemeIndex = 0;
   static AppTheme currentTheme = themes[currentThemeIndex];
 
-  static bool get isMobile => currentTheme.size.width < 800;
+  static bool get isMobile => currentTheme.size.width < 600;
   static bool get isTab =>
-      currentTheme.size.width < 800 && currentTheme.size.width < 1400;
-  static bool get isDesktop => currentTheme.size.width > 1400;
+      currentTheme.size.width > 600 && currentTheme.size.width < 1200;
+  static bool get isDesktop => currentTheme.size.width > 1200;
 
   static bool get isDark => currentTheme.dark;
 
@@ -320,35 +325,41 @@ class AppTheme {
   }
 
   TextTheme get textTheme => TextTheme(
-    displayLarge: TextStyle(letterSpacing: 1.c, fontSize: (46, 50).c),
-    displayMedium: TextStyle(letterSpacing: 1.c, fontSize: (40, 46).c),
-    displaySmall: TextStyle(letterSpacing: 1.c, fontSize: (36, 40).c),
+    //h0
+    displayLarge: TextStyle(letterSpacing: .5.c, fontSize: (42, 50).c),
+    //h1
+    displayMedium: TextStyle(letterSpacing: .5.c, fontSize: (36, 42).c),
+    //h2
+    displaySmall: TextStyle(letterSpacing: .5.c, fontSize: (32, 36).c),
 
-    headlineLarge: TextStyle(letterSpacing: 1.c, fontSize: (30, 36).c),
-    headlineMedium: TextStyle(letterSpacing: 1.c, fontSize: (26, 32).c),
-    headlineSmall: TextStyle(fontSize: (20, 24).c),
+    //h3
+    headlineLarge: TextStyle(letterSpacing: .5.c, fontSize: (28, 32).c),
+    //h4
+    headlineMedium: TextStyle(letterSpacing: .5.c, fontSize: (24, 28).c),
+    //h5
+    headlineSmall: TextStyle(fontSize: (19, 24).c),
 
-    //Appbar
-    titleLarge: TextStyle(letterSpacing: 0.c, fontSize: (17, 20).c),
+    //h6, Appbar
+    titleLarge: TextStyle(letterSpacing: 0.c, fontSize: (17, 19).c),
 
-    //CupertinoListTile, ListTile Title, Textfield label
+    //h7, CupertinoListTile, ListTile Title, Textfield label
     titleMedium: TextStyle(
       letterSpacing: 1.c,
       fontSize: (15, 16).c,
       fontWeight: FontWeight.w400,
     ),
 
+    //h8, Tabs
+    titleSmall: TextStyle(fontSize: (14, 14).c, fontWeight: FontWeight.w400),
     //TextFormField, CupertinoFormSection header, ListTile, SwitchTile, RadioTile
     bodyLarge: TextStyle(fontSize: (14, 15).c),
 
-    // Tabs
-    titleSmall: TextStyle(fontSize: (13, 14).c, fontWeight: FontWeight.w400),
-    //Text,  Textfield font, Tile subtitle
+    //h9, Text,  Textfield font, Tile subtitle
     bodyMedium: TextStyle(fontSize: (13, 14).c, fontWeight: FontWeight.w400),
     //Buttons
     labelLarge: TextStyle(fontSize: (13, 14).c, fontWeight: FontWeight.w400),
 
-    //ListTile subtitle, errortext
+    //p, ListTile subtitle, errortext
     bodySmall: TextStyle(fontSize: (12, 13).c),
     //BottomNavBar, Navigation
     labelMedium: TextStyle(fontSize: (12, 13).c, fontWeight: FontWeight.w400),

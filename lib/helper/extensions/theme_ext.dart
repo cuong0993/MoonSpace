@@ -113,14 +113,16 @@ extension SuperContext on BuildContext {
   TextStyle? get lm => theme.textTheme.labelMedium;
   TextStyle? get ls => theme.textTheme.labelSmall;
 
-  TextStyle? get h0 => theme.textTheme.displaySmall;
-  TextStyle? get h1 => theme.textTheme.headlineLarge;
-  TextStyle? get h2 => theme.textTheme.headlineMedium;
-  TextStyle? get h3 => theme.textTheme.headlineSmall;
-  TextStyle? get h4 => theme.textTheme.titleLarge;
-  TextStyle? get h5 => theme.textTheme.titleMedium;
-  TextStyle? get h6 => theme.textTheme.bodyLarge;
-  TextStyle? get h7 => theme.textTheme.bodyMedium;
+  TextStyle? get h0 => theme.textTheme.displayLarge;
+  TextStyle? get h1 => theme.textTheme.displayMedium;
+  TextStyle? get h2 => theme.textTheme.displaySmall;
+  TextStyle? get h3 => theme.textTheme.headlineLarge;
+  TextStyle? get h4 => theme.textTheme.headlineMedium;
+  TextStyle? get h5 => theme.textTheme.headlineSmall;
+  TextStyle? get h6 => theme.textTheme.titleLarge;
+  TextStyle? get h7 => theme.textTheme.titleMedium;
+  TextStyle? get h8 => theme.textTheme.bodyLarge;
+  TextStyle? get h9 => theme.textTheme.bodyMedium;
   TextStyle? get p => theme.textTheme.bodySmall;
 
   //
@@ -319,7 +321,6 @@ extension SuperNumber on num {
 
   StadiumBorder get stadium => StadiumBorder(side: bs);
   CircleBorder get circle => CircleBorder(side: bs);
-  StarBorder get star => StarBorder(side: bs);
   RoundedRectangleBorder get bRound => RoundedRectangleBorder(side: bs);
   BeveledRectangleBorder get bBev => BeveledRectangleBorder(side: bs);
   OutlineInputBorder get bOut => OutlineInputBorder(borderSide: bs);
@@ -359,7 +360,6 @@ extension SuperBorder on BorderSide {
   StadiumBorder get stadium => StadiumBorder(side: this);
   CircleBorder get circle => CircleBorder(side: this);
   RoundedRectangleBorder get round => RoundedRectangleBorder(side: this);
-  StarBorder get star => StarBorder(side: this);
   BeveledRectangleBorder get bev => BeveledRectangleBorder(side: this);
   OutlineInputBorder get out => OutlineInputBorder(borderSide: this);
   UnderlineInputBorder get uline => UnderlineInputBorder(borderSide: this);

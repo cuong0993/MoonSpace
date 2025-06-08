@@ -18,7 +18,7 @@ class AsyncTextFormField extends StatefulWidget {
     this.autofocus = false,
     this.enabled = true,
     this.showPrefix = false,
-    this.showSubmitSuffix = true,
+    this.showSubmitSuffix = false,
     this.showClear = false,
     this.autocorrect = true,
     this.enableSuggestions = true,
@@ -176,7 +176,11 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
                               ? const CircularProgressIndicator()
                               : const Icon(Icons.error_outline)),
                   ),
-            suffixIcon: !widget.enabled
+            suffixIcon:
+                (!widget.enabled ||
+                    (widget.suffix.isEmpty &&
+                        !widget.showSubmitSuffix &&
+                        !widget.showClear))
                 ? null
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.center,

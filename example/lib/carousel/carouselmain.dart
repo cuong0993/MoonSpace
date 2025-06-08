@@ -1,6 +1,7 @@
 import 'package:example/carousel/circularcarousel.dart';
 import 'package:example/carousel/contactListPage.dart';
 import 'package:example/carousel/flutter_custom_carousel/views/card_deck_view.dart';
+import 'package:example/carousel/flutter_custom_carousel/views/card_rotate_view.dart';
 import 'package:example/carousel/flutter_custom_carousel/views/circular_menu_view.dart';
 import 'package:example/carousel/flutter_custom_carousel/views/cover_slider_view.dart';
 import 'package:example/carousel/flutter_custom_carousel/views/digital_wallet_view.dart';
@@ -27,6 +28,10 @@ class Carouselmain extends StatelessWidget {
             children: [
               CarouselExample(),
 
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text("PerspectiveListView"),
+              ),
               SizedBox(
                 height: 400,
                 width: 400,
@@ -52,6 +57,10 @@ class Carouselmain extends StatelessWidget {
                 ),
               ),
 
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text("CustomCarousel"),
+              ),
               ClipRRect(
                 child: SizedBox(
                   width: 400,
@@ -90,6 +99,10 @@ class Carouselmain extends StatelessWidget {
                 ),
               ),
 
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text("CardDeckView"),
+              ),
               RepaintBoundary(
                 child: ClipRRect(
                   child: SizedBox(
@@ -100,6 +113,10 @@ class Carouselmain extends StatelessWidget {
                 ),
               ),
 
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text("CircularMenuView"),
+              ),
               RepaintBoundary(
                 child: ClipRRect(
                   child: SizedBox(
@@ -110,6 +127,10 @@ class Carouselmain extends StatelessWidget {
                 ),
               ),
 
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text("CoverSliderView"),
+              ),
               RepaintBoundary(
                 child: ClipRRect(
                   child: SizedBox(
@@ -120,6 +141,24 @@ class Carouselmain extends StatelessWidget {
                 ),
               ),
 
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text("CardRotateView"),
+              ),
+              RepaintBoundary(
+                child: ClipRRect(
+                  child: SizedBox(
+                    height: 400,
+                    width: 400,
+                    child: CardRotateView(),
+                  ),
+                ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text("CoverFlowCarouselPage"),
+              ),
               RepaintBoundary(
                 child: ClipRRect(
                   child: SizedBox(
@@ -130,6 +169,10 @@ class Carouselmain extends StatelessWidget {
                 ),
               ),
 
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text("DigitalWalletView"),
+              ),
               RepaintBoundary(
                 child: ClipRRect(
                   child: SizedBox(
@@ -140,6 +183,10 @@ class Carouselmain extends StatelessWidget {
                 ),
               ),
 
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text("ReadMeExample"),
+              ),
               RepaintBoundary(
                 child: ClipRRect(
                   child: SizedBox(
@@ -150,6 +197,10 @@ class Carouselmain extends StatelessWidget {
                 ),
               ),
 
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text("RecordBoxView"),
+              ),
               RepaintBoundary(
                 child: ClipRRect(
                   child: SizedBox(
@@ -160,6 +211,10 @@ class Carouselmain extends StatelessWidget {
                 ),
               ),
 
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text("RotateCoverFlowCarouselPage"),
+              ),
               RepaintBoundary(
                 child: ClipRRect(
                   child: SizedBox(
@@ -170,6 +225,10 @@ class Carouselmain extends StatelessWidget {
                 ),
               ),
 
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text("CircularCarousel"),
+              ),
               SizedBox(
                 height: 400,
                 width: 400,

@@ -82,7 +82,7 @@ void main() {
         designSize: const Size(360, 780),
 
         borderRadius: (24, 30),
-        padding: (18, 24),
+        padding: (16, 18),
 
         primary: const Color(0xff717171),
         secondary: Color(0xFF787bce),
