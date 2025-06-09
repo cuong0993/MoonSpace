@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:moonspace/helper/stream/functions.dart';
+import 'package:moonspace/helper/stream/debounce.dart';
 import 'package:moonspace/helper/validator/debug_functions.dart';
 import 'package:moonspace/widgets/async_lock.dart';
 
-typedef AsyncText = ({String? error, bool load});
+typedef AsyncTextType = ({String? error, bool load});
 
 class AsyncTextFormField extends StatefulWidget {
   const AsyncTextFormField({
@@ -44,7 +44,7 @@ class AsyncTextFormField extends StatefulWidget {
   final TextEditingController? controller;
   final Future<String?> Function(String value) asyncValidator;
   final InputDecoration Function(
-    AsyncText asyncText,
+    AsyncTextType asyncText,
     TextEditingController textCon,
   )?
   decoration;
@@ -88,24 +88,26 @@ class AsyncTextFormField extends StatefulWidget {
 }
 
 class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
-  AsyncText asyncText = (error: null, load: false);
+  AsyncTextType asynctype = (error: null, load: false);
   final focusNode = FocusNode(debugLabel: 'AsyncTextFormField');
   final key = GlobalKey<FormFieldState>();
 
   late TextEditingController textCon;
 
-  late final StreamController<String> fnStream;
+  late final StreamController<String> validateStream;
 
   @override
   void initState() {
     textCon =
         widget.controller ?? TextEditingController(text: widget.initialValue);
 
-    fnStream = createDebounceFunc(widget.milliseconds, (String name) async {
-      asyncText = (error: 'Checking...', load: true);
+    validateStream = createDebounceFunc(widget.milliseconds, (
+      String name,
+    ) async {
+      asynctype = (error: 'Checking...', load: true);
       setState(() {});
       key.currentState?.validate();
-      asyncText = (error: (await widget.asyncValidator(name)), load: false);
+      asynctype = (error: (await widget.asyncValidator(name)), load: false);
       setState(() {});
       key.currentState?.validate();
     });
@@ -115,7 +117,7 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
 
   @override
   void dispose() {
-    fnStream.close();
+    validateStream.close();
     super.dispose();
   }
 
@@ -160,7 +162,7 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
       style: widget.style,
 
       decoration: widget.decoration
-          ?.call(asyncText, textCon)
+          ?.call(asynctype, textCon)
           .copyWith(
             isDense: true,
             prefixIcon: !widget.showPrefix
@@ -170,9 +172,9 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
                     width: 20,
                     height: 20,
                     margin: const EdgeInsets.all(16),
-                    child: (asyncText.error == null)
+                    child: (asynctype.error == null)
                         ? const Icon(Icons.done)
-                        : (asyncText.load == true
+                        : (asynctype.load == true
                               ? const CircularProgressIndicator()
                               : const Icon(Icons.error_outline)),
                   ),
@@ -196,7 +198,7 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
                           },
                         ),
                       if (widget.showSubmitSuffix)
-                        asyncText.load
+                        asynctype.load
                             ? const SizedBox(
                                 height: 20,
                                 width: 20,
@@ -204,7 +206,7 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
                               )
                             : (widget.initialValue == textCon.text)
                             ? const Icon(Icons.edit)
-                            : (asyncText.error != null)
+                            : (asynctype.error != null)
                             ? const Icon(Icons.error)
                             : (widget.onSubmit == null)
                             ? const SizedBox()
@@ -226,14 +228,14 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
           ),
       onChanged: (value) {
         widget.onChanged?.call(value);
-        fnStream.add(value);
+        validateStream.add(value);
       },
       validator: (value) {
         lava(value);
-        if ((asyncText.load)) {
+        if ((asynctype.load)) {
           return 'Checking';
         }
-        return asyncText.error;
+        return asynctype.error;
       },
       textInputAction: widget.textInputAction ?? TextInputAction.next,
       autofillHints: widget.autofillHints,

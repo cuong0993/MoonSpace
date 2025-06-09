@@ -8,6 +8,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:moonspace/form/async_text_field.dart';
 import 'package:moonspace/helper/extensions/theme_ext.dart';
 import 'package:moonspace/theme.dart';
+import 'package:moonspace/widgets/button_animated_slide.dart';
+import 'package:moonspace/form/sherlock.dart';
 
 class Quiz extends StatelessWidget {
   const Quiz({super.key});
@@ -42,6 +44,57 @@ class Quiz extends StatelessWidget {
 
                 SizedBox(height: 16),
 
+                Sherlock<String>(
+                  hint: "Search Fruit",
+                  fetch: (query) async {
+                    await Future.delayed(1.sec);
+                    return [
+                      "Apple",
+                      "Lemon",
+                      "Orange",
+                    ].where((q) => q.contains(query)).toList();
+                  },
+                  builder: (data, controller) {
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      clipBehavior: Clip.antiAlias,
+                      itemCount: data.length,
+                      itemBuilder: (con, index) => Card(
+                        child: ListTile(title: Text(data[index]), onTap: () {}),
+                      ),
+                    );
+                  },
+                ),
+
+                SizedBox(height: 16),
+
+                SizedBox(
+                  width: 200,
+                  height: 60,
+                  child: AnimatedSlideButton(
+                    dragOnly: false,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(32),
+                      color: context.cs.surfaceContainer,
+                    ),
+                    dragChild: Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: context.cs.secondary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.arrow_forward,
+                        color: context.cs.onSecondary,
+                      ),
+                    ),
+                    child: Text(
+                      "Quiz",
+                      style: GoogleFonts.agbalumo(textStyle: context.h5),
+                    ),
+                  ),
+                ),
+
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
@@ -60,9 +113,15 @@ class Quiz extends StatelessWidget {
                   ),
                 ),
 
+                SizedBox(height: 16),
+
                 _buildCarouselRow("c", 6, height: 280),
 
+                SizedBox(height: 16),
+
                 HexagonButtons(),
+
+                SizedBox(height: 16),
 
                 DefaultTabController(
                   length: 3,
@@ -109,15 +168,17 @@ class Quiz extends StatelessWidget {
                       onPressed: () {},
                       style: ElevatedButton.styleFrom(
                         backgroundColor: index == 0
-                            ? context.cs.tertiary
-                            : context.cs.primary,
+                            ? context.cs.secondary
+                            : context.cs.surface,
                         elevation: 0,
                         shape: 1.bRound.r(32).c(context.cs.outline),
                       ),
                       child: Text(
                         'Button ${index + 1}',
                         style: context.h7.w5.c(
-                          index == 0 ? context.cs.primary : context.cs.tertiary,
+                          index == 0
+                              ? context.cs.onSecondary
+                              : context.cs.secondary,
                         ),
                       ),
                     );
@@ -627,12 +688,14 @@ class FriendCard extends StatelessWidget {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: context.cs.primary,
+              color: context.cs.secondary,
               borderRadius: BorderRadius.circular(32),
             ),
             child: Text(
               "quiz",
-              style: GoogleFonts.agbalumo(textStyle: context.h4),
+              style: GoogleFonts.agbalumo(
+                textStyle: context.h4.c(context.cs.onSecondary),
+              ),
             ),
           ),
         ),
@@ -641,12 +704,14 @@ class FriendCard extends StatelessWidget {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: context.cs.primary,
+              color: context.cs.secondary,
               borderRadius: BorderRadius.circular(32),
             ),
             child: Text(
               "FriendShip",
-              style: GoogleFonts.agbalumo(textStyle: context.h4),
+              style: GoogleFonts.agbalumo(
+                textStyle: context.h4.c(context.cs.onSecondary),
+              ),
             ),
           ),
         ),

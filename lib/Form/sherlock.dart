@@ -1,37 +1,61 @@
 import 'dart:async';
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:moonspace/helper/extensions/color.dart';
 import 'package:moonspace/helper/extensions/theme_ext.dart';
 import 'package:moonspace/helper/stream/cached_stream.dart';
-import 'package:moonspace/helper/stream/functions.dart';
+import 'package:moonspace/helper/stream/debounce.dart';
 
-class Sherlock extends StatefulWidget {
-  const Sherlock({super.key});
+class Sherlock<T> extends StatefulWidget {
+  const Sherlock({
+    super.key,
+    required this.fetch,
+    required this.builder,
+    this.hint,
+    this.isFullScreen = false,
+    this.actions = const [],
+    this.textStyle,
+    this.debounceMilliseconds = 200,
+    this.iconBuilder,
+  });
+
+  final Future<List<T>> Function(String query) fetch;
+  final Widget Function(List<T> data, SearchController controller) builder;
+
+  final String? hint;
+  final bool isFullScreen;
+
+  final Iterable<Widget> actions;
+  final TextStyle? textStyle;
+
+  final int debounceMilliseconds;
+
+  final Widget Function(BuildContext, SearchController)? iconBuilder;
 
   @override
-  State<Sherlock> createState() => _SherlockState();
+  State<Sherlock<T>> createState() => _SherlockState<T>();
 }
 
-class _SherlockState extends State<Sherlock> {
-  late final StreamController<List<String>> data;
-  late final StreamController<String> oldtext;
+class _SherlockState<T> extends State<Sherlock<T>> {
   late final SearchController searchController;
-  late final StreamController<String> debounce;
-  late final CachedStreamable<Set<String>> searchHistory;
 
-  // Add this variable to track the last text value
+  late final CachedStreamable<List<T>> dataStream;
+  late final StreamController<String> lastTextStream;
+  late final StreamController<String> debounceSearchTextStream;
+  late final CachedStreamable<Set<String>> searchHistoryStream;
+
   String _lastText = '';
 
   @override
   void initState() {
     searchController = SearchController();
-    data = StreamController.broadcast();
-    oldtext = StreamController.broadcast();
-    searchHistory = CachedStreamable({});
-    debounce = createDebounceFunc<String>(400, fetch);
 
-    // print('Init');
+    dataStream = CachedStreamable([]);
+    lastTextStream = StreamController.broadcast();
+    debounceSearchTextStream = createDebounceFunc<String>(
+      widget.debounceMilliseconds,
+      fetch,
+    );
+    searchHistoryStream = CachedStreamable({});
 
     super.initState();
   }
@@ -39,174 +63,170 @@ class _SherlockState extends State<Sherlock> {
   @override
   void dispose() {
     searchController.dispose();
-    data.close();
-    oldtext.close();
-    searchHistory.close();
-    debounce.close();
-
-    // print('Dispose');
+    dataStream.close();
+    lastTextStream.close();
+    searchHistoryStream.close();
+    debounceSearchTextStream.close();
 
     super.dispose();
   }
 
   void fetch(String v) async {
     if (searchController.text != _lastText) {
-      oldtext.add('');
-      await 2.sec.delay();
-      data.add(
-        List.generate(100, (index) => math.Random().nextInt(200).toString()),
-      );
+      lastTextStream.add('');
+
       _lastText = searchController.text;
-      oldtext.add(searchController.text);
+
+      final d = await widget.fetch(_lastText);
+      dataStream.value = d;
+
+      lastTextStream.add(searchController.text);
     }
   }
 
+  void submit() {
+    if (searchController.text == "") return;
+    Set<String> history = (searchHistoryStream.value).toSet();
+    history.add(searchController.text);
+    searchHistoryStream.value = history;
+    debounceSearchTextStream.add(searchController.text);
+  }
+
+  void clear() {
+    searchHistoryStream.value = {};
+    searchController.clear();
+  }
+
+  void close() {
+    searchController.text = '';
+    debounceSearchTextStream.add('');
+    searchController.clear();
+    searchController.closeView(null);
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (widget.iconBuilder != null) {
+      return SearchAnchor(
+        searchController: searchController,
+        isFullScreen: widget.isFullScreen,
+        viewHintText: widget.hint,
+        viewConstraints: const BoxConstraints(maxHeight: 400, minWidth: 300),
+        viewTrailing: actions,
+        builder: (BuildContext context, SearchController controller) {
+          return IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              controller.openView();
+            },
+          );
+        },
+        suggestionsBuilder: suggestionsBuilder,
+      );
+    }
+
     return SearchAnchor.bar(
       searchController: searchController,
-      isFullScreen: true,
-      viewHintText: 'Hint',
-      barHintText: 'Hint',
-      viewConstraints: const BoxConstraints(maxHeight: 200),
-      viewTrailing: [
-        IconButton(
-          onPressed: () async {
-            Set<String> s = (searchHistory.value).toSet();
-            s.add(searchController.text);
-            searchHistory.value = s;
-            debounce.add(searchController.text);
-          },
-          icon: const Icon(Icons.search),
-        ),
-        IconButton(
-          onPressed: () async {
-            searchController.text = '';
-            debounce.add('');
-          },
-          icon: const Icon(Icons.cancel),
-        ),
-      ],
-      suggestionsBuilder: (context, controller) {
-        debounce.add(controller.text);
-
-        return [
-          SherlockBox(
-            oldtext: oldtext,
-            controller: searchController,
-            searchHistory: searchHistory,
-            data: data,
-            debounce: debounce,
-          ),
-        ];
+      isFullScreen: widget.isFullScreen,
+      viewHintText: widget.hint,
+      barHintText: widget.hint,
+      barHintStyle: WidgetStateTextStyle.resolveWith((s) {
+        return widget.textStyle ?? context.h7 ?? TextStyle();
+      }),
+      viewHeaderTextStyle: widget.textStyle ?? context.h7,
+      viewConstraints: const BoxConstraints(maxHeight: 400),
+      onSubmitted: (value) {
+        submit();
       },
+      viewTrailing: actions,
+      suggestionsBuilder: suggestionsBuilder,
     );
   }
-}
 
-class SherlockBox extends StatelessWidget {
-  const SherlockBox({
-    super.key,
-    required this.oldtext,
-    required this.searchHistory,
-    required this.controller,
-    required this.data,
-    required this.debounce,
-  });
+  List<Widget> get actions => [
+    ...widget.actions,
+    IconButton(onPressed: submit, icon: const Icon(Icons.add_circle)),
+    IconButton(onPressed: clear, icon: const Icon(Icons.celebration_sharp)),
+    IconButton(onPressed: close, icon: const Icon(Icons.cancel)),
+  ];
 
-  final StreamController<String> oldtext;
-  final CachedStreamable<Set<String>> searchHistory;
-  final TextEditingController controller;
-  final StreamController<List<String>> data;
-  final StreamController<String> debounce;
+  FutureOr<Iterable<Widget>> suggestionsBuilder(
+    BuildContext context,
+    SearchController controller,
+  ) {
+    debounceSearchTextStream.add(controller.text);
 
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: context.mq.w,
-      height: context.mq.h - 100,
-      child: Column(
-        children: [
-          //
-          StreamBuilder(
-            stream: oldtext.stream,
-            builder: (context, snapshot) {
-              // return Text('${controller.text} : ${snapshot.data}');
-              if (controller.text != snapshot.data) {
-                return LinearProgressIndicator(
-                  minHeight: 2,
-                  color: HexColor.random(),
-                );
-              }
-              return const SizedBox(height: 2);
-            },
-          ),
-
-          //
-          Container(
-            width: context.mq.w,
-            padding: const EdgeInsets.all(4),
-            child: StreamBuilder(
-              stream: searchHistory.stream,
-              builder: (context, snapshot) {
-                return Wrap(
-                  runSpacing: 2,
-                  spacing: 2,
-                  children:
-                      snapshot.data
-                          ?.map(
-                            (e) => ChoiceChip(
-                              selected: controller.text == e,
-                              label: Text(e),
-                              onSelected: (value) {
-                                controller.text = e;
-                                controller.selection = TextSelection.collapsed(
-                                  offset: e.length,
-                                );
-                                debounce.add(controller.text);
-                              },
-                            ),
-                          )
-                          .toList() ??
-                      [],
-                );
-              },
-            ),
-          ),
-
-          StreamBuilder(
-            stream: data.stream,
-            builder: (context, snapshot) {
-              return Expanded(
-                // child: ListView.builder(
-                //   clipBehavior: Clip.antiAlias,
-                //   itemCount: snapshot.data?.length,
-                //   itemBuilder: (con, index) => Card(
-                //     child: ListTile(
-                //       tileColor: HexColor.random(),
-                //       title: Text(snapshot.data?[index] ?? ''),
-                //       onTap: () {},
-                //     ),
-                //   ),
-                // ),
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  children: [
-                    Container(color: Colors.blue),
-                    Container(color: Colors.red),
-                    Container(color: Colors.green),
-                    Container(color: Colors.yellow),
-                    Container(color: Colors.blue),
-                    Container(color: Colors.red),
-                    Container(color: Colors.green),
-                    Container(color: Colors.yellow),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
+    return [
+      //
+      StreamBuilder(
+        stream: lastTextStream.stream,
+        builder: (context, snapshot) {
+          // return Text('${controller.text} : ${snapshot.data}');
+          if (searchController.text != snapshot.data) {
+            return LinearProgressIndicator(
+              minHeight: 2,
+              color: HexColor.random(),
+            );
+          }
+          return const SizedBox(height: 2);
+        },
       ),
-    );
+
+      //
+      Container(
+        width: context.mq.w,
+        padding: const EdgeInsets.all(4),
+        child: StreamBuilder(
+          stream: searchHistoryStream.stream,
+          builder: (context, snapshot) {
+            return Wrap(
+              runSpacing: 2,
+              spacing: 2,
+              children:
+                  snapshot.data
+                      ?.map(
+                        (e) => ChoiceChip(
+                          selected: searchController.text == e,
+                          label: Text(e),
+                          onSelected: (value) {
+                            searchController.text = e;
+                            searchController.selection =
+                                TextSelection.collapsed(offset: e.length);
+                            debounceSearchTextStream.add(searchController.text);
+                          },
+                        ),
+                      )
+                      .toList() ??
+                  [],
+            );
+          },
+        ),
+      ),
+
+      StreamBuilder(
+        stream: dataStream.stream,
+        builder: (context, snapshot) {
+          if (snapshot.data == null) {
+            return Placeholder(fallbackHeight: 30, fallbackWidth: 30);
+          }
+          return Expanded(
+            child: widget.builder(snapshot.data!, controller),
+            // child: GridView.count(
+            //   crossAxisCount: 2,
+            //   children: [
+            //     Container(color: Colors.blue),
+            //     Container(color: Colors.red),
+            //     Container(color: Colors.green),
+            //     Container(color: Colors.yellow),
+            //     Container(color: Colors.blue),
+            //     Container(color: Colors.red),
+            //     Container(color: Colors.green),
+            //     Container(color: Colors.yellow),
+            //   ],
+            // ),
+          );
+        },
+      ),
+    ];
   }
 }

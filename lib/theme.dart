@@ -314,13 +314,13 @@ class AppTheme {
       tertiaryFixedDim: Colors.red, // tertiary,
       onTertiaryFixedVariant: Colors.red, //tertiary.getOnColor(),
 
-      surfaceDim: surface.lighten(isDark ? -0.04 : 0.04),
-      surfaceBright: surface.lighten(isDark ? -0.03 : 0.03),
-      surfaceContainerLowest: surface.lighten(isDark ? -0.02 : 0.02),
-      surfaceContainerLow: surface.lighten(isDark ? 0.02 : -0.02),
-      surfaceContainer: surface.lighten(isDark ? 0.03 : -0.03),
-      surfaceContainerHigh: surface.lighten(isDark ? 0.03 : -0.03),
-      surfaceContainerHighest: surface.lighten(isDark ? 0.05 : -0.05),
+      surfaceContainerLowest: surface.lighten(isDark ? 0.01 : -0.01),
+      surfaceBright: surface.lighten(isDark ? 0.025 : -0.025),
+      surfaceContainerLow: surface.lighten(isDark ? 0.04 : -0.04),
+      surfaceContainer: surface.lighten(isDark ? 0.06 : -0.06),
+      surfaceContainerHigh: surface.lighten(isDark ? 0.08 : -0.08),
+      surfaceContainerHighest: surface.lighten(isDark ? 0.1 : -0.1),
+      surfaceDim: surface.lighten(isDark ? 0.12 : -0.12),
     );
   }
 

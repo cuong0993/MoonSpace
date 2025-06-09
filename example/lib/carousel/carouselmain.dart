@@ -2,10 +2,13 @@ import 'package:example/carousel/circularcarousel.dart';
 import 'package:example/carousel/contactListPage.dart';
 import 'package:example/carousel/flutter_custom_carousel/views/card_deck_view.dart';
 import 'package:example/carousel/flutter_custom_carousel/views/card_rotate_view.dart';
+import 'package:example/carousel/flutter_custom_carousel/views/circle_cover.dart';
+import 'package:example/carousel/flutter_custom_carousel/views/circle_single_card.dart';
 import 'package:example/carousel/flutter_custom_carousel/views/circular_menu_view.dart';
 import 'package:example/carousel/flutter_custom_carousel/views/cover_slider_view.dart';
 import 'package:example/carousel/flutter_custom_carousel/views/digital_wallet_view.dart';
 import 'package:example/carousel/flutter_custom_carousel/views/coverflow.dart';
+import 'package:example/carousel/flutter_custom_carousel/views/opacity_stack.dart';
 import 'package:example/carousel/flutter_custom_carousel/views/read_me_example.dart';
 import 'package:example/carousel/flutter_custom_carousel/views/record_box_view.dart';
 import 'package:example/carousel/flutter_custom_carousel/views/rotate.dart';
@@ -95,6 +98,48 @@ class Carouselmain extends StatelessWidget {
                         child: Container(color: c),
                       );
                     }).toList(),
+                  ),
+                ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text("OpacityStack"),
+              ),
+              RepaintBoundary(
+                child: ClipRRect(
+                  child: SizedBox(
+                    height: 400,
+                    width: 400,
+                    child: OpacityStack(),
+                  ),
+                ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text("CircleSingle"),
+              ),
+              RepaintBoundary(
+                child: ClipRRect(
+                  child: SizedBox(
+                    height: 400,
+                    width: 400,
+                    child: CircleSingle(),
+                  ),
+                ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text("CircleCover"),
+              ),
+              RepaintBoundary(
+                child: ClipRRect(
+                  child: SizedBox(
+                    height: 400,
+                    width: 400,
+                    child: CircleCover(),
                   ),
                 ),
               ),

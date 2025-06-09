@@ -11,6 +11,7 @@ import 'package:example/ariana/main.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:intl/intl.dart' as intl;
 
@@ -41,6 +42,9 @@ import 'package:example/vignettes/product_detail_zoom/lib/main.dart';
 import 'package:example/vignettes/sparkle_party/lib/main.dart';
 import 'package:example/vignettes/spending_tracker/lib/main.dart';
 import 'package:example/vignettes/ticket_fold/lib/main.dart';
+
+import 'package:moonspace/widgets/animated/neon_button.dart';
+import 'package:moonspace/widgets/loader.dart';
 
 part 'main.g.dart';
 
@@ -555,6 +559,24 @@ class _HomeState extends ConsumerState<Home> {
           body: Text("Body"),
         ),
       ],
+    ),
+
+    GradientLoader(),
+
+    CircularProgress(
+      size: 50,
+      secondaryColor: Colors.red,
+      primaryColor: Colors.yellow,
+    ),
+
+    NeonButton(
+      color: context.cs.secondary,
+      child: Text(
+        "Hello",
+        style: GoogleFonts.agbalumo(
+          textStyle: context.h6.c(context.cs.onSecondary),
+        ),
+      ),
     ),
 
     DataTable(
@@ -1503,20 +1525,15 @@ class ColorSchemeView extends StatelessWidget {
         divider,
         ColorGroup(
           children: <ColorChip>[
-            ColorChip(
-              'surfaceDim',
-              colorScheme.surfaceDim,
-              colorScheme.onSurface,
-            ),
             ColorChip('surface', colorScheme.surface, colorScheme.onSurface),
-            ColorChip(
-              'surfaceBright',
-              colorScheme.surfaceBright,
-              colorScheme.onSurface,
-            ),
             ColorChip(
               'surfaceContainerLowest',
               colorScheme.surfaceContainerLowest,
+              colorScheme.onSurface,
+            ),
+            ColorChip(
+              'surfaceBright',
+              colorScheme.surfaceBright,
               colorScheme.onSurface,
             ),
             ColorChip(
@@ -1539,6 +1556,12 @@ class ColorSchemeView extends StatelessWidget {
               colorScheme.surfaceContainerHighest,
               colorScheme.onSurface,
             ),
+            ColorChip(
+              'surfaceDim',
+              colorScheme.surfaceDim,
+              colorScheme.onSurface,
+            ),
+
             ColorChip('onSurface', colorScheme.onSurface, colorScheme.surface),
             ColorChip(
               'onSurfaceVariant',

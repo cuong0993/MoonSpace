@@ -1,10 +1,9 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:moonspace/helper/extensions/theme_ext.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:moonspace/helper/stream/debounce.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 const String
@@ -41,30 +40,11 @@ const List<String> color = [
 
 List<Map<String, String>> logs = [];
 
-// Timer? _debounce;
-// StreamController<Map<String, String>> logStream = StreamController<Map<String, String>>()
-//   ..stream.listen(
-//     (event) {
-//       if (_debounce?.isActive ?? false) _debounce?.cancel();
-//       _debounce = Timer(
-//         const Duration(milliseconds: 2000),
-//         () {
-//           log('$bRed${fWhite}_______________________________________________$reset');
-//           _debounce?.cancel();
-//         },
-//       );
-//     },
-//   );
-
 void dividerline() {
   debugLog('$fWhite  ■  ∙  ÷  =  ≡  ─  ×  ☼  ■  ∙  ÷  =  ≡  ─  ×  ☼  $reset');
 }
 
-StreamController<Map<String, String>> logStream =
-    StreamController<Map<String, String>>()
-      ..stream.debounceTime(const Duration(seconds: 2)).listen((event) {
-        dividerline();
-      });
+final logStream = createDebounceFunc(2000, (e) => dividerline());
 
 final JsonEncoder _encoder = JsonEncoder.withIndent('  ', (object) {
   return object.toString();
