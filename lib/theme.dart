@@ -122,7 +122,7 @@ class AppTheme {
       padding: (14, 16),
 
       primary: const Color(0xff8a73cf),
-      secondary: const Color(0xffbed18c),
+      secondary: const Color(0xffb2d2a4),
       tertiary: const Color(0xffffffff),
 
       baseunit: 1.0,
@@ -186,6 +186,31 @@ class AppTheme {
         seedColor: Colors.green,
         brightness: Brightness.light,
         dynamicSchemeVariant: DynamicSchemeVariant.monochrome,
+      ),
+
+      baseunit: 1.0,
+    ),
+    AppTheme(
+      name: "TonalSpot",
+      icon: Icons.icecream_outlined,
+
+      dark: false,
+
+      size: const Size(360, 780),
+      maxSize: const Size(1366, 1024),
+      designSize: const Size(360, 780),
+
+      borderRadius: (8, 10),
+      padding: (14, 16),
+
+      primary: const Color.fromARGB(255, 105, 187, 255),
+      secondary: const Color.fromARGB(255, 255, 109, 157),
+      tertiary: Colors.yellow,
+
+      themedata: ColorScheme.fromSeed(
+        seedColor: Colors.purple,
+        brightness: Brightness.light,
+        dynamicSchemeVariant: DynamicSchemeVariant.tonalSpot,
       ),
 
       baseunit: 1.0,
@@ -314,13 +339,13 @@ class AppTheme {
       tertiaryFixedDim: Colors.red, // tertiary,
       onTertiaryFixedVariant: Colors.red, //tertiary.getOnColor(),
 
-      surfaceContainerLowest: surface.lighten(isDark ? 0.01 : -0.01),
-      surfaceBright: surface.lighten(isDark ? 0.025 : -0.025),
-      surfaceContainerLow: surface.lighten(isDark ? 0.04 : -0.04),
-      surfaceContainer: surface.lighten(isDark ? 0.06 : -0.06),
-      surfaceContainerHigh: surface.lighten(isDark ? 0.08 : -0.08),
-      surfaceContainerHighest: surface.lighten(isDark ? 0.1 : -0.1),
-      surfaceDim: surface.lighten(isDark ? 0.12 : -0.12),
+      surfaceBright: surface.lighten(isDark ? 0.02 : -0.02),
+      surfaceContainerLowest: surface.lighten(isDark ? 0.04 : -0.04),
+      surfaceContainerLow: surface.lighten(isDark ? 0.06 : -0.06),
+      surfaceContainer: surface.lighten(isDark ? 0.08 : -0.08),
+      surfaceContainerHigh: surface.lighten(isDark ? 0.12 : -0.12),
+      surfaceContainerHighest: surface.lighten(isDark ? 0.18 : -0.18),
+      surfaceDim: surface.lighten(isDark ? 0.24 : -0.24),
     );
   }
 
@@ -333,11 +358,11 @@ class AppTheme {
     displaySmall: TextStyle(letterSpacing: .5.c, fontSize: (32, 36).c),
 
     //h3
-    headlineLarge: TextStyle(letterSpacing: .5.c, fontSize: (28, 32).c),
+    headlineLarge: TextStyle(letterSpacing: .5.c, fontSize: (26, 32).c),
     //h4
-    headlineMedium: TextStyle(letterSpacing: .5.c, fontSize: (24, 28).c),
+    headlineMedium: TextStyle(letterSpacing: .5.c, fontSize: (22, 26).c),
     //h5
-    headlineSmall: TextStyle(fontSize: (19, 24).c),
+    headlineSmall: TextStyle(fontSize: (19, 22).c),
 
     //h6, Appbar
     titleLarge: TextStyle(letterSpacing: 0.c, fontSize: (17, 19).c),
@@ -398,13 +423,22 @@ class AppTheme {
 
       //
       listTileTheme: ListTileThemeData(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadius.c),
-        ),
+        iconColor: colorScheme.onSurface,
+        selectedTileColor: colorScheme.surfaceContainerLow,
+        // shape: RoundedRectangleBorder(
+        //   borderRadius: BorderRadius.circular(borderRadius.c),
+        // ),
       ),
 
       //
-      iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom()),
+      // iconTheme: IconThemeData(color: Colors.red),
+      iconButtonTheme: IconButtonThemeData(
+        // style: IconButton.styleFrom(foregroundColor: colorScheme.onSurface),
+      ),
+
+      //
+
+      //
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: colorScheme.tertiary,
         foregroundColor: colorScheme.onTertiary,

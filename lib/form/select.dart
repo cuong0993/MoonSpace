@@ -59,6 +59,7 @@ class OptionDialog<T> extends StatelessWidget {
 class Option<T> {
   final Widget? title;
   final Widget? subtitle;
+  final Widget? secondary;
   final T value;
   final Object? compareBy;
   final bool selected;
@@ -66,6 +67,7 @@ class Option<T> {
   const Option({
     this.title,
     this.subtitle,
+    this.secondary,
     required this.value,
     this.compareBy,
     this.selected = false,
@@ -79,6 +81,7 @@ class OptionBox<T> extends StatefulWidget {
     super.key,
     required this.options,
     this.multi = false,
+    this.divider = false,
     this.semanticLabel,
     this.onChange,
     this.init,
@@ -87,6 +90,7 @@ class OptionBox<T> extends StatefulWidget {
 
   final List<Option<T>> options;
   final bool multi;
+  final bool divider;
   final String? semanticLabel;
   final void Function(Set<T> selected)? onChange;
   final void Function(Set<T> selected)? init;
@@ -166,7 +170,16 @@ class _OptionBoxState<T> extends State<OptionBox<T>> {
           final isSelected = _isSelected(option);
 
           return FilterChip(
-            label: option.title ?? Text(option.value.toString()),
+            label: option.secondary == null
+                ? option.title ?? Text(option.value.toString())
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      option.secondary!,
+                      SizedBox(width: 4),
+                      option.title ?? Text(option.value.toString()),
+                    ],
+                  ),
             selected: isSelected,
             onSelected: (value) => _onSelect(option, value),
           );
@@ -175,9 +188,12 @@ class _OptionBoxState<T> extends State<OptionBox<T>> {
     }
 
     // Default: List mode
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(optionList.length, (index) {
+    return ListView.separated(
+      shrinkWrap: true,
+      itemCount: optionList.length,
+      separatorBuilder: (context, index) =>
+          widget.divider ? const Divider(height: 1) : const SizedBox(),
+      itemBuilder: (context, index) {
         final option = optionList[index];
         final isSelected = _isSelected(option);
         final groupValue = selectedKeys.length == 1
@@ -188,7 +204,9 @@ class _OptionBoxState<T> extends State<OptionBox<T>> {
           return SwitchListTile(
             title: option.title ?? Text(option.value.toString()),
             subtitle: option.subtitle,
+            secondary: option.secondary,
             value: isSelected,
+            selected: isSelected,
             onChanged: (value) => _onSelect(option, value),
           );
         }
@@ -197,19 +215,24 @@ class _OptionBoxState<T> extends State<OptionBox<T>> {
             ? CheckboxListTile(
                 title: option.title ?? Text(option.value.toString()),
                 subtitle: option.subtitle,
+                secondary: option.secondary,
                 value: isSelected,
+                selected: isSelected,
                 onChanged: (value) => _onSelect(option, value ?? false),
               )
             : RadioListTile<T>(
                 title: option.title ?? Text(option.value.toString()),
                 subtitle: option.subtitle,
+                controlAffinity: ListTileControlAffinity.trailing,
                 value: option.value,
+                selected: isSelected,
+                secondary: option.secondary,
                 groupValue: groupValue,
                 onChanged: (value) {
                   if (value != null) _onSelect(option, true);
                 },
               );
-      }),
+      },
     );
   }
 }

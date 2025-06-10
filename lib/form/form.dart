@@ -96,7 +96,6 @@ class PopupMenu extends StatelessWidget {
     return PopupMenuButton<int>(
       icon: child == null ? const Icon(Icons.more_vert) : null,
       iconSize: 20,
-      color: context.theme.canvas,
       tooltip: 'tooltip',
       surfaceTintColor: Colors.white,
       splashRadius: 24,

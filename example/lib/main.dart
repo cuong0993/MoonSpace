@@ -1,32 +1,22 @@
-import 'dart:math';
-import 'dart:ui';
-
 import 'package:example/carousel/carouselmain.dart';
-import 'package:example/carousel/contactListPage.dart';
-import 'package:example/carousel/circularcarousel.dart';
+import 'package:example/manager.dart';
 import 'package:example/quiz.dart';
+import 'package:example/hotel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:example/ariana/main.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-import 'package:intl/intl.dart' as intl;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:moonspace/electrify.dart';
 import 'package:moonspace/form/async_text_field.dart';
-import 'package:moonspace/form/form.dart';
-import 'package:moonspace/form/color.dart';
 import 'package:moonspace/form/select.dart';
 import 'package:moonspace/helper/extensions/theme_ext.dart';
 import 'package:moonspace/provider/global_theme.dart';
 import 'package:moonspace/theme.dart';
 import 'package:moonspace/widgets/functions.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:example/carousel/flutter_custom_carousel/views/coverflow.dart';
 import 'package:example/recipes/main.dart';
 import 'package:example/renderobject/main.dart';
 import 'package:example/vignettes/basketball_ptr/lib/main.dart';
@@ -94,6 +84,25 @@ void main() {
 
         baseunit: 1.0,
       ),
+      AppTheme(
+        name: "manager",
+        icon: CupertinoIcons.sun_min,
+
+        dark: false,
+
+        size: const Size(360, 780),
+        maxSize: const Size(1366, 1024),
+        designSize: const Size(360, 780),
+
+        borderRadius: (0, 0),
+        padding: (20, 25),
+
+        primary: const Color.fromARGB(255, 34, 34, 34),
+        secondary: const Color.fromARGB(255, 247, 51, 51),
+        tertiary: Color(0xFFEFD24F),
+
+        baseunit: 1.0,
+      ),
     ],
     router: () => GoRouter(
       routes: [
@@ -131,6 +140,18 @@ void main() {
           path: "/quiz",
           builder: (context, state) {
             return Quiz();
+          },
+        ),
+        GoRoute(
+          path: "/hotel",
+          builder: (context, state) {
+            return HotelApp();
+          },
+        ),
+        GoRoute(
+          path: "/manager",
+          builder: (context, state) {
+            return ManagerApp();
           },
         ),
       ],
@@ -771,6 +792,12 @@ class ThemeSettings extends StatelessWidget {
             ),
             ListTile(
               onTap: () {
+                context.push("/colors");
+              },
+              title: Text("Colors"),
+            ),
+            ListTile(
+              onTap: () {
                 context.push("/render");
               },
               title: Text("Render"),
@@ -789,9 +816,15 @@ class ThemeSettings extends StatelessWidget {
             ),
             ListTile(
               onTap: () {
-                context.push("/colors");
+                context.push("/hotel");
               },
-              title: Text("Colors"),
+              title: Text("Hotel"),
+            ),
+            ListTile(
+              onTap: () {
+                context.push("/manager");
+              },
+              title: Text("Manager"),
             ),
           ],
         ),
@@ -1527,13 +1560,13 @@ class ColorSchemeView extends StatelessWidget {
           children: <ColorChip>[
             ColorChip('surface', colorScheme.surface, colorScheme.onSurface),
             ColorChip(
-              'surfaceContainerLowest',
-              colorScheme.surfaceContainerLowest,
+              'surfaceBright',
+              colorScheme.surfaceBright,
               colorScheme.onSurface,
             ),
             ColorChip(
-              'surfaceBright',
-              colorScheme.surfaceBright,
+              'surfaceContainerLowest',
+              colorScheme.surfaceContainerLowest,
               colorScheme.onSurface,
             ),
             ColorChip(

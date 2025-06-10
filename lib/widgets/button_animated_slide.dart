@@ -28,8 +28,8 @@ class ShimmerBox extends StatelessWidget {
   }
 }
 
-class AnimatedSlideButton extends StatefulWidget {
-  const AnimatedSlideButton({
+class SwipeButton extends StatefulWidget {
+  const SwipeButton({
     super.key,
     required this.child,
     required this.dragChild,
@@ -47,10 +47,10 @@ class AnimatedSlideButton extends StatefulWidget {
   final bool dragOnly;
 
   @override
-  State<AnimatedSlideButton> createState() => _AnimatedSlideButtonState();
+  State<SwipeButton> createState() => _SwipeButtonState();
 }
 
-class _AnimatedSlideButtonState extends State<AnimatedSlideButton>
+class _SwipeButtonState extends State<SwipeButton>
     with SingleTickerProviderStateMixin {
   double position = 0;
   bool dragging = false;

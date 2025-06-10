@@ -10,6 +10,7 @@ import 'package:moonspace/helper/extensions/theme_ext.dart';
 import 'package:moonspace/theme.dart';
 import 'package:moonspace/widgets/button_animated_slide.dart';
 import 'package:moonspace/form/sherlock.dart';
+import 'package:moonspace/widgets/ratings.dart';
 
 class Quiz extends StatelessWidget {
   const Quiz({super.key});
@@ -25,6 +26,7 @@ class Quiz extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 QuizHeader(),
+
                 FriendHeader(),
 
                 SizedBox(height: 8),
@@ -71,11 +73,11 @@ class Quiz extends StatelessWidget {
                 SizedBox(
                   width: 200,
                   height: 60,
-                  child: AnimatedSlideButton(
+                  child: SwipeButton(
                     dragOnly: false,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(32),
-                      color: context.cs.surfaceContainer,
+                      color: context.cSur4,
                     ),
                     dragChild: Container(
                       padding: EdgeInsets.all(8),
@@ -94,6 +96,42 @@ class Quiz extends StatelessWidget {
                     ),
                   ),
                 ),
+
+                SizedBox(height: 16),
+
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: context.cs.primary),
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  child: IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        IconButton(
+                          onPressed: () {},
+                          icon: const Icon(Icons.arrow_back),
+                        ),
+                        VerticalDivider(width: 8, color: context.cs.primary),
+                        Spacer(),
+                        Text(
+                          'Quiz',
+                          style: GoogleFonts.agbalumo(textStyle: context.h4),
+                        ),
+                        Spacer(),
+                        VerticalDivider(width: 8, color: context.cs.primary),
+                        IconButton(
+                          onPressed: () {},
+                          icon: const Icon(Icons.workspaces_outline),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                MaskedRatingBar(rating: 3.6),
+
+                SizedBox(height: 16),
 
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
@@ -433,7 +471,7 @@ class QuizTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: context.cs.surfaceContainerHighest,
+      color: context.cSur6,
 
       child: Padding(
         padding: const EdgeInsets.all(4.0),

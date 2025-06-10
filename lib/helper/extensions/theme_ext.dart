@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:moonspace/helper/extensions/color.dart';
 
 extension SuperMediaQueryData on MediaQueryData {
   double get w => size.width;
@@ -16,59 +17,6 @@ extension SuperMediaQueryData on MediaQueryData {
   EdgeInsets get pad => padding;
   EdgeInsets get vi => viewInsets;
   EdgeInsets get vp => viewPadding;
-}
-
-extension SuperThemeData on ThemeData {
-  //
-  ColorScheme get cs => colorScheme;
-  Brightness get brightness => colorScheme.brightness;
-  //
-  Color get csErr => colorScheme.error;
-  Color get csErrCon => colorScheme.errorContainer;
-  Color get csOnErrCon => colorScheme.onErrorContainer;
-  //
-  Color get csOut => colorScheme.outline;
-  Color get csOutVar => colorScheme.outlineVariant;
-  //
-  Color get csShadow => colorScheme.shadow;
-  Color get csScrim => colorScheme.scrim;
-  //
-  Color get csSur => colorScheme.surface;
-  Color get csOnSur => colorScheme.onSurface;
-  Color get csInvSur => colorScheme.inverseSurface;
-  Color get csOnInvSur => colorScheme.onInverseSurface;
-  Color get csSurTint => colorScheme.surfaceTint;
-  Color get csSurVar => colorScheme.surfaceContainerHighest;
-  //
-  Color get csSec => colorScheme.secondary;
-  Color get csSecCon => colorScheme.secondaryContainer;
-  Color get csOnSec => colorScheme.onSecondary;
-  Color get csOnSecCon => colorScheme.onSecondaryContainer;
-  //
-  Color get csPri => colorScheme.primary;
-  Color get csOnPri => colorScheme.onPrimary;
-  Color get csPriCon => colorScheme.primaryContainer;
-  Color get csOnPriCon => colorScheme.onPrimaryContainer;
-  Color get csInvPri => colorScheme.inversePrimary;
-  //
-  Color get csBg => colorScheme.surface;
-  Color get csOnBg => colorScheme.onSurface;
-  //
-  Color get csTer => colorScheme.tertiary;
-  Color get csTerCon => colorScheme.tertiaryContainer;
-  Color get csOnTerCon => colorScheme.onTertiaryContainer;
-  //
-  Color get pri => primaryColor;
-  Color get priColDark => primaryColorDark;
-  Color get primColLight => primaryColorLight;
-  Color get canvas => canvasColor;
-  Color get card => cardColor;
-  Color get hint => hintColor;
-  Color get splash => splashColor;
-  Color get shadow => shadowColor;
-  Color get disabled => disabledColor;
-  Color get scafBg => scaffoldBackgroundColor;
-  Color get highlight => highlightColor;
 }
 
 class Device {
@@ -84,14 +32,11 @@ class Device {
 extension SuperContext on BuildContext {
   //
   Brightness get brightness => theme.brightness;
+  bool get isDark => theme.brightness == Brightness.dark;
 
   //
   ThemeData get theme => Theme.of(this);
   ColorScheme get cs => Theme.of(this).colorScheme;
-  CupertinoThemeData get cupertinoTheme => CupertinoThemeData(
-    brightness: theme.brightness,
-    textTheme: CupertinoTextThemeData(primaryColor: theme.pri),
-  );
 
   TextStyle? get dl => theme.textTheme.displayLarge;
   TextStyle? get dm => theme.textTheme.displayMedium;
@@ -124,6 +69,51 @@ extension SuperContext on BuildContext {
   TextStyle? get h8 => theme.textTheme.bodyLarge;
   TextStyle? get h9 => theme.textTheme.bodyMedium;
   TextStyle? get p => theme.textTheme.bodySmall;
+
+  //
+  Color get cErr => cs.error;
+  Color get cOnErr => cs.onError;
+  Color get cErrCon => cs.errorContainer;
+  Color get cOnErrCon => cs.onErrorContainer;
+  //
+  Color get cOut => cs.outline;
+  Color get cOutVar => cs.outlineVariant;
+  //
+  Color get cShadow => cs.shadow;
+  Color get cScrim => cs.scrim;
+  //
+  Color get cInvSur => cs.inverseSurface;
+  Color get cOnInvSur => cs.onInverseSurface;
+  Color get cSurTint => cs.surfaceTint;
+  Color get cOnSur => cs.onSurface;
+  Color get cSur => cs.surface;
+  Color get cSur1 => cs.surfaceBright;
+  Color get cSur2 => cs.surfaceContainerLowest;
+  Color get cSur3 => cs.surfaceContainerLow;
+  Color get cSur4 => cs.surfaceContainer;
+  Color get cSur5 => cs.surfaceContainerHigh;
+  Color get cSur6 => cs.surfaceContainerHighest;
+  Color get cSur7 => cs.surfaceDim;
+  Color get cSur8 => cs.surface.lighten(isDark ? 0.3 : -0.3);
+  Color get cSur9 => cs.surface.lighten(isDark ? 0.4 : -0.4);
+  Color get cSur10 => cs.surface.lighten(isDark ? 0.44 : -0.44);
+
+  //
+  Color get cSec => cs.secondary;
+  Color get cOnSec => cs.onSecondary;
+  Color get cSecCon => cs.secondaryContainer;
+  Color get cOnSecCon => cs.onSecondaryContainer;
+  //
+  Color get cPri => cs.primary;
+  Color get cOnPri => cs.onPrimary;
+  Color get cPriCon => cs.primaryContainer;
+  Color get cOnPriCon => cs.onPrimaryContainer;
+  Color get cInvPri => cs.inversePrimary;
+  //
+  Color get cTer => cs.tertiary;
+  Color get cOnTer => cs.onTertiary;
+  Color get cTerCon => cs.tertiaryContainer;
+  Color get cOnTerCon => cs.onTertiaryContainer;
 
   //
   TargetPlatform get platform => theme.platform;

@@ -88,7 +88,7 @@ class AnimatedSnackbar extends StatelessWidget {
               decoration:
                   decoration ??
                   BoxDecoration(
-                    color: context.theme.csOnSur,
+                    color: context.cOnSur,
                     border: const Border(
                       left: BorderSide(width: 10, color: Colors.green),
                     ),
@@ -109,25 +109,16 @@ class AnimatedSnackbar extends StatelessWidget {
                           padding: const EdgeInsets.all(8),
                           child:
                               icon ??
-                              Icon(
-                                Icons.star_border,
-                                color: context.theme.csSur,
-                              ),
+                              Icon(Icons.star_border, color: context.cSur),
                         ),
                         // const SizedBox(height: 30, child: VerticalDivider()),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                title,
-                                style: context.tl.c(context.theme.csSur),
-                              ),
+                              Text(title, style: context.tl.c(context.cSur)),
                               // const Divider(),
-                              Text(
-                                content,
-                                style: context.ts.c(context.theme.csSur),
-                              ),
+                              Text(content, style: context.ts.c(context.cSur)),
                             ],
                           ),
                         ),
@@ -135,7 +126,7 @@ class AnimatedSnackbar extends StatelessWidget {
                         //
                         ...action,
                         IconButton(
-                          color: context.theme.csSur,
+                          color: context.cSur,
                           onPressed: () {
                             AnimatedOverlay.hide();
                           },
