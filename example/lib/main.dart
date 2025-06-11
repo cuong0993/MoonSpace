@@ -95,11 +95,11 @@ void main() {
         designSize: const Size(360, 780),
 
         borderRadius: (0, 0),
-        padding: (20, 25),
+        padding: (16, 18),
 
-        primary: const Color.fromARGB(255, 34, 34, 34),
-        secondary: const Color.fromARGB(255, 247, 51, 51),
-        tertiary: Color(0xFFEFD24F),
+        primary: const Color.fromARGB(255, 39, 39, 39),
+        secondary: const Color.fromARGB(255, 107, 107, 107),
+        tertiary: Color.fromARGB(255, 90, 239, 79),
 
         baseunit: 1.0,
       ),
@@ -240,6 +240,8 @@ class _HomeState extends ConsumerState<Home> {
 
   List<Widget> first(BuildContext context) => [
     AsyncTextFormField(
+      valueParser: (value) => value,
+      valueFormatter: (value) => value,
       key: ValueKey('Nick'),
       initialValue: "Witch",
       autocorrect: false,
@@ -331,9 +333,28 @@ class _HomeState extends ConsumerState<Home> {
         Buttons(isDisabled: true, hasIcon: false),
       ],
     ),
-
     Wrap(
       children: [
+        IconButton.filled(
+          icon: const Icon(Icons.settings_outlined),
+          selectedIcon: const Icon(Icons.settings),
+          onPressed: () {},
+        ),
+        IconButton.filledTonal(
+          icon: const Icon(Icons.settings_outlined),
+          selectedIcon: const Icon(Icons.settings),
+          onPressed: () {},
+        ),
+        IconButton.outlined(
+          icon: const Icon(Icons.settings_outlined),
+          selectedIcon: const Icon(Icons.settings),
+          onPressed: () {},
+        ),
+        IconButton(
+          icon: const Icon(Icons.settings_outlined),
+          selectedIcon: const Icon(Icons.settings),
+          onPressed: () {},
+        ),
         IconButton.filled(
           isSelected: true,
           icon: const Icon(Icons.settings_outlined),

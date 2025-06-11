@@ -157,12 +157,12 @@ class HotelApp extends StatelessWidget {
                                 Icon(
                                   Icons.yard_outlined,
                                   size: 50,
-                                  color: context.cSur10,
+                                  color: context.cSur9,
                                 ),
                                 SizedBox(height: 4),
                                 Text(
                                   'Item ${index + 1}',
-                                  style: context.h8.c(context.cSur10),
+                                  style: context.h8.c(context.cSur9),
                                 ),
                               ],
                             ),

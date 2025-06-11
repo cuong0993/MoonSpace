@@ -1,17 +1,24 @@
 import 'dart:async';
 
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:moonspace/helper/stream/debounce.dart';
 import 'package:moonspace/helper/validator/debug_functions.dart';
 import 'package:moonspace/widgets/async_lock.dart';
 
 typedef AsyncTextType = ({String? error, bool load});
+typedef ValueParser<T> = T? Function(String? value);
+typedef ValueFormatter<T> = String Function(T value);
 
-class AsyncTextFormField extends StatefulWidget {
+class AsyncTextFormField<T> extends StatefulWidget {
   const AsyncTextFormField({
     super.key,
     this.controller,
-    required this.asyncValidator,
+    this.asyncValidator,
+    this.validator,
+    required this.valueParser,
+    required this.valueFormatter,
     this.style,
     this.initialValue,
     this.decoration,
@@ -29,8 +36,10 @@ class AsyncTextFormField extends StatefulWidget {
     this.minLines,
     this.maxLines,
     this.maxLength,
+    this.password = false,
     this.autofillHints,
     this.keyboardType,
+    this.inputFormatters = const [],
     this.textInputAction,
     this.onChanged,
     this.onSubmit,
@@ -42,13 +51,16 @@ class AsyncTextFormField extends StatefulWidget {
   });
 
   final TextEditingController? controller;
-  final Future<String?> Function(String value) asyncValidator;
+  final Future<void> Function(T value)? asyncValidator;
+  final String? Function(T value)? validator;
+  final ValueParser<T> valueParser;
+  final ValueFormatter<T> valueFormatter;
   final InputDecoration Function(
     AsyncTextType asyncText,
     TextEditingController textCon,
   )?
   decoration;
-  final String? initialValue;
+  final T? initialValue;
   final bool autofocus;
   final bool showPrefix;
   final bool enabled;
@@ -64,13 +76,19 @@ class AsyncTextFormField extends StatefulWidget {
   final int? minLines;
   final int? maxLines;
   final int? maxLength;
+  final bool password;
   final Iterable<String>? autofillHints;
   final TextInputType? keyboardType;
+  final List<TextInputFormatter> inputFormatters;
 
   final TextInputAction? textInputAction;
-  final void Function(String)? onChanged;
+  final void Function(String? value)? onChanged;
   final Future<void> Function(TextEditingController controller)? onSubmit;
-  final Future<void> Function(TextEditingController controller)? onTap;
+  final Future<void> Function(
+    TextEditingController controller,
+    Function(String value) onChanged,
+  )?
+  onTap;
   final Future<void> Function(TextEditingController controller)?
   onEditingComplete;
   final Widget? Function(
@@ -84,30 +102,62 @@ class AsyncTextFormField extends StatefulWidget {
   final ScrollPhysics? scrollPhysics;
 
   @override
-  State<AsyncTextFormField> createState() => _AsyncTextFormFieldState();
+  State<AsyncTextFormField<T>> createState() => _AsyncTextFormFieldState<T>();
 }
 
-class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
+class _AsyncTextFormFieldState<T> extends State<AsyncTextFormField<T>> {
   AsyncTextType asynctype = (error: null, load: false);
   final focusNode = FocusNode(debugLabel: 'AsyncTextFormField');
   final key = GlobalKey<FormFieldState>();
 
   late TextEditingController textCon;
 
-  late final StreamController<String> validateStream;
+  late final StreamController<String?> validateStream;
+
+  T? _originalValue;
+  T? get currentValue => _originalValue;
 
   @override
   void initState() {
+    _originalValue = widget.initialValue;
     textCon =
-        widget.controller ?? TextEditingController(text: widget.initialValue);
+        widget.controller ??
+        TextEditingController(
+          text: widget.initialValue != null
+              ? widget.valueFormatter(widget.initialValue as T)
+              : '',
+        );
 
     validateStream = createDebounceFunc(widget.milliseconds, (
-      String name,
+      String? value,
     ) async {
       asynctype = (error: 'Checking...', load: true);
       setState(() {});
       key.currentState?.validate();
-      asynctype = (error: (await widget.asyncValidator(name)), load: false);
+
+      // Parse the string value to type T
+      final T? parsedValue = widget.valueParser(value);
+      if (parsedValue == null) {
+        asynctype = (error: 'Invalid format', load: false);
+      } else {
+        _originalValue = parsedValue;
+
+        // First run sync validator
+        final String? validationError = widget.validator?.call(parsedValue);
+        if (validationError != null) {
+          asynctype = (error: validationError, load: false);
+        } else {
+          // If sync validation passes, run async validation
+          asynctype = (error: null, load: true);
+          try {
+            await widget.asyncValidator?.call(parsedValue);
+            asynctype = (error: null, load: false);
+          } catch (e) {
+            asynctype = (error: e.toString(), load: false);
+          }
+        }
+      }
+
       setState(() {});
       key.currentState?.validate();
     });
@@ -121,6 +171,32 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
     super.dispose();
   }
 
+  void onChanged(String? value) {
+    widget.onChanged?.call(value);
+    validateStream.add(value);
+  }
+
+  void onFieldSubmitted(String value) async {
+    final T? parsedValue = widget.valueParser(value);
+    if (parsedValue == null) {
+      asynctype = (error: 'Invalid format', load: false);
+      setState(() {});
+      return;
+    }
+
+    _originalValue = parsedValue;
+    try {
+      await widget.asyncValidator?.call(parsedValue);
+      // If we reach here, validation succeeded
+      if (widget.initialValue != parsedValue) {
+        widget.onSubmit?.call(textCon);
+      }
+    } catch (e) {
+      asynctype = (error: e.toString(), load: false);
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return TextFormField(
@@ -129,29 +205,31 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
       textAlign: widget.textAlign,
       textAlignVertical: widget.textAlignVertical,
 
+      inputFormatters: widget.inputFormatters,
+
       autofocus: widget.autofocus,
 
       //
-      autocorrect: widget.autocorrect,
-      enableSuggestions: widget.enableSuggestions,
+      autocorrect:
+          widget.inputFormatters.isEmpty &&
+          !widget.password &&
+          widget.autocorrect,
+      enableSuggestions: !widget.password && widget.enableSuggestions,
 
       //
       onTapOutside: (event) => focusNode.unfocus(),
       onEditingComplete: () => widget.onEditingComplete?.call(textCon),
-      onFieldSubmitted: (value) async {
-        final res = await widget.asyncValidator(value);
-        if (res == null && widget.initialValue != textCon.text) {
-          widget.onSubmit?.call(textCon);
-        }
-      },
+      onFieldSubmitted: onFieldSubmitted,
       onSaved: (v) => owl(v),
-      onTap: () => widget.onTap?.call(textCon),
+      onTap: () => widget.onTap?.call(textCon, onChanged),
       //
       focusNode: focusNode,
 
+      obscureText: widget.password,
       minLines: widget.minLines,
-      maxLines: widget.maxLines,
+      maxLines: widget.password ? 1 : widget.maxLines,
       maxLength: widget.maxLength,
+
       enabled: widget.enabled,
       scrollPhysics: widget.scrollPhysics,
 
@@ -161,85 +239,168 @@ class _AsyncTextFormFieldState extends State<AsyncTextFormField> {
       //
       style: widget.style,
 
-      decoration: widget.decoration
-          ?.call(asynctype, textCon)
-          .copyWith(
-            isDense: true,
-            prefixIcon: !widget.showPrefix
-                ? null
-                : Container(
-                    alignment: Alignment.center,
-                    width: 20,
-                    height: 20,
-                    margin: const EdgeInsets.all(16),
-                    child: (asynctype.error == null)
-                        ? const Icon(Icons.done)
-                        : (asynctype.load == true
-                              ? const CircularProgressIndicator()
-                              : const Icon(Icons.error_outline)),
-                  ),
-            suffixIcon:
-                (!widget.enabled ||
-                    (widget.suffix.isEmpty &&
-                        !widget.showSubmitSuffix &&
-                        !widget.showClear))
-                ? null
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ...widget.suffix,
-                      if (widget.showClear && textCon.text.isNotEmpty)
-                        IconButton.filledTonal(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () async {
-                            textCon.clear();
-                            widget.clearFunc?.call();
-                          },
-                        ),
-                      if (widget.showSubmitSuffix)
-                        asynctype.load
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(),
-                              )
-                            : (widget.initialValue == textCon.text)
-                            ? const Icon(Icons.edit)
-                            : (asynctype.error != null)
-                            ? const Icon(Icons.error)
-                            : (widget.onSubmit == null)
-                            ? const SizedBox()
-                            : AsyncLock(
-                                builder:
-                                    (isLoading, status, lock, open, setStatus) {
-                                      return IconButton.filledTonal(
-                                        icon: const Icon(Icons.done),
-                                        onPressed: () async {
-                                          lock();
-                                          await widget.onSubmit?.call(textCon);
-                                          open();
+      decoration:
+          ((widget.decoration)?.call(asynctype, textCon) ??
+                  const InputDecoration())
+              .copyWith(
+                isDense: true,
+                prefixIcon: !widget.showPrefix
+                    ? null
+                    : Container(
+                        alignment: Alignment.center,
+                        width: 20,
+                        height: 20,
+                        margin: const EdgeInsets.all(16),
+                        child: (asynctype.error == null)
+                            ? const Icon(Icons.done)
+                            : (asynctype.load == true
+                                  ? const CircularProgressIndicator()
+                                  : const Icon(Icons.error_outline)),
+                      ),
+                suffixIcon:
+                    (!widget.enabled ||
+                        (widget.suffix.isEmpty &&
+                            !widget.showSubmitSuffix &&
+                            !widget.showClear))
+                    ? null
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ...widget.suffix,
+                          if (widget.showClear && textCon.text.isNotEmpty)
+                            IconButton.filledTonal(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () async {
+                                textCon.clear();
+                                widget.clearFunc?.call();
+                              },
+                            ),
+                          if (widget.showSubmitSuffix)
+                            asynctype.load
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(),
+                                  )
+                                : (widget.initialValue ==
+                                      widget.valueParser(textCon.text))
+                                ? const Icon(Icons.edit)
+                                : (asynctype.error != null)
+                                ? const Icon(Icons.error)
+                                : (widget.onSubmit == null)
+                                ? const SizedBox()
+                                : AsyncLock(
+                                    builder:
+                                        (
+                                          isLoading,
+                                          status,
+                                          lock,
+                                          open,
+                                          setStatus,
+                                        ) {
+                                          return IconButton.filledTonal(
+                                            icon: const Icon(Icons.done),
+                                            onPressed: () async {
+                                              lock();
+                                              await widget.onSubmit?.call(
+                                                textCon,
+                                              );
+                                              open();
+                                            },
+                                          );
                                         },
-                                      );
-                                    },
-                              ),
-                    ],
-                  ),
-          ),
-      onChanged: (value) {
-        widget.onChanged?.call(value);
-        validateStream.add(value);
-      },
+                                  ),
+                        ],
+                      ),
+              ),
+      onChanged: onChanged,
+      autovalidateMode: AutovalidateMode.always,
       validator: (value) {
         lava(value);
-        if ((asynctype.load)) {
+        if (asynctype.load) {
           return 'Checking';
         }
+
+        // Run sync validator first
+        final T? parsedValue = widget.valueParser(value);
+        if (parsedValue == null) {
+          return 'Invalid format';
+        }
+
+        // Run the widget's sync validator if provided
+        final String? syncError = widget.validator?.call(parsedValue);
+        if (syncError != null) {
+          return syncError;
+        }
+
+        // Return any async validation errors
         return asynctype.error;
       },
       textInputAction: widget.textInputAction ?? TextInputAction.next,
       autofillHints: widget.autofillHints,
       keyboardType: widget.keyboardType,
+    );
+  }
+}
+
+class AsyncText {
+  static final positiveInt = const TextInputType.numberWithOptions(
+    signed: false,
+    decimal: false,
+  );
+  static final negativeInt = const TextInputType.numberWithOptions(
+    signed: true,
+    decimal: false,
+  );
+  static final positiveDouble = const TextInputType.numberWithOptions(
+    signed: false,
+    decimal: true,
+  );
+  static final negativeDouble = const TextInputType.numberWithOptions(
+    signed: true,
+    decimal: true,
+  );
+
+  static final positiveIntFormatter = [FilteringTextInputFormatter.digitsOnly];
+  static final negativeIntFormatter = [
+    FilteringTextInputFormatter.allow(RegExp(r'^-?\d*')),
+  ];
+  static final positiveDoubleIntFormatter = [
+    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+  ];
+  static final negativeDoubleFormatter = [
+    FilteringTextInputFormatter.allow(RegExp(r'^-?\d*\.?\d*')),
+  ];
+
+  static Future<void> datetimeSelect(
+    TextEditingController controller,
+    BuildContext context,
+  ) async {
+    FocusScope.of(context).requestFocus(FocusNode());
+    final date = await showDatePicker(
+      context: context,
+      firstDate: DateTime(2024),
+      lastDate: DateTime(2025),
+    );
+    if (date != null) {
+      controller.text = date
+          .toString(); //DateFormat('MMM yyyy').format(date).toString();
+    }
+  }
+}
+
+class UpperCaseTextFormatter implements TextInputFormatter {
+  const UpperCaseTextFormatter();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    return TextEditingValue(
+      text: newValue.text.toUpperCase(),
+      selection: newValue.selection,
     );
   }
 }

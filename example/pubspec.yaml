@@ -61,6 +61,7 @@ dependencies:
   flutter_animate: ^4.5.2
   smooth_sheets: ^0.12.0
   faker: ^2.2.0
+  mask_text_input_formatter: ^2.9.0
 
   moonspace:
     path: ../

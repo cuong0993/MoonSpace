@@ -339,13 +339,13 @@ class AppTheme {
       tertiaryFixedDim: Colors.red, // tertiary,
       onTertiaryFixedVariant: Colors.red, //tertiary.getOnColor(),
 
-      surfaceBright: surface.lighten(isDark ? 0.02 : -0.02),
-      surfaceContainerLowest: surface.lighten(isDark ? 0.04 : -0.04),
+      surfaceContainerHighest: surface.lighten(isDark ? 0.02 : -0.02),
       surfaceContainerLow: surface.lighten(isDark ? 0.06 : -0.06),
       surfaceContainer: surface.lighten(isDark ? 0.08 : -0.08),
-      surfaceContainerHigh: surface.lighten(isDark ? 0.12 : -0.12),
-      surfaceContainerHighest: surface.lighten(isDark ? 0.18 : -0.18),
-      surfaceDim: surface.lighten(isDark ? 0.24 : -0.24),
+      surfaceContainerHigh: surface.lighten(isDark ? 0.04 : -0.04),
+      surfaceBright: surface.lighten(isDark ? 0.02 : -0.02),
+      surfaceContainerLowest: surface.lighten(isDark ? 0.04 : -0.04),
+      surfaceDim: surface.lighten(isDark ? 0.08 : -0.08),
     );
   }
 
@@ -415,7 +415,8 @@ class AppTheme {
         //   borderRadius: BorderRadius.circular(borderRadius.c),
         // ),
         // filled: true,
-        contentPadding: EdgeInsets.all(padding.c),
+        contentPadding: EdgeInsets.symmetric(vertical: 12),
+        // contentPadding: EdgeInsets.symmetric(vertical: padding.c),
       ),
 
       // splashColor: ,
@@ -423,8 +424,7 @@ class AppTheme {
 
       //
       listTileTheme: ListTileThemeData(
-        iconColor: colorScheme.onSurface,
-        selectedTileColor: colorScheme.surfaceContainerLow,
+        selectedTileColor: colorScheme.surfaceContainerHigh,
         // shape: RoundedRectangleBorder(
         //   borderRadius: BorderRadius.circular(borderRadius.c),
         // ),

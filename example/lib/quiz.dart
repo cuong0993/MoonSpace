@@ -415,6 +415,8 @@ class AnswerTextFormField extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 0, 40),
             child: AsyncTextFormField(
+              valueParser: (value) => value,
+              valueFormatter: (value) => value,
               asyncValidator: (value) async {
                 return null;
               },
