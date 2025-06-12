@@ -4,11 +4,10 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:moonspace/helper/stream/debounce.dart';
-import 'package:moonspace/helper/validator/debug_functions.dart';
 import 'package:moonspace/widgets/async_lock.dart';
 
 typedef AsyncTextType = ({String? error, bool load});
-typedef ValueParser<T> = T? Function(String? value);
+typedef ValueParser<T> = T? Function(String value);
 typedef ValueFormatter<T> = String Function(T value);
 
 class AsyncTextFormField<T> extends StatefulWidget {
@@ -82,7 +81,7 @@ class AsyncTextFormField<T> extends StatefulWidget {
   final List<TextInputFormatter> inputFormatters;
 
   final TextInputAction? textInputAction;
-  final void Function(String? value)? onChanged;
+  final void Function(T? value)? onChanged;
   final Future<void> Function(TextEditingController controller)? onSubmit;
   final Future<void> Function(
     TextEditingController controller,
@@ -114,12 +113,8 @@ class _AsyncTextFormFieldState<T> extends State<AsyncTextFormField<T>> {
 
   late final StreamController<String?> validateStream;
 
-  T? _originalValue;
-  T? get currentValue => _originalValue;
-
   @override
   void initState() {
-    _originalValue = widget.initialValue;
     textCon =
         widget.controller ??
         TextEditingController(
@@ -136,12 +131,10 @@ class _AsyncTextFormFieldState<T> extends State<AsyncTextFormField<T>> {
       key.currentState?.validate();
 
       // Parse the string value to type T
-      final T? parsedValue = widget.valueParser(value);
+      final T? parsedValue = value == null ? null : widget.valueParser(value);
       if (parsedValue == null) {
         asynctype = (error: 'Invalid format', load: false);
       } else {
-        _originalValue = parsedValue;
-
         // First run sync validator
         final String? validationError = widget.validator?.call(parsedValue);
         if (validationError != null) {
@@ -162,17 +155,22 @@ class _AsyncTextFormFieldState<T> extends State<AsyncTextFormField<T>> {
       key.currentState?.validate();
     });
 
+    focusNode.addListener(_onFocusChange);
+
     super.initState();
   }
 
   @override
   void dispose() {
     validateStream.close();
+    focusNode.removeListener(_onFocusChange);
+    focusNode.dispose();
     super.dispose();
   }
 
   void onChanged(String? value) {
-    widget.onChanged?.call(value);
+    final T? parsedValue = value == null ? null : widget.valueParser(value);
+    widget.onChanged?.call(parsedValue);
     validateStream.add(value);
   }
 
@@ -184,7 +182,6 @@ class _AsyncTextFormFieldState<T> extends State<AsyncTextFormField<T>> {
       return;
     }
 
-    _originalValue = parsedValue;
     try {
       await widget.asyncValidator?.call(parsedValue);
       // If we reach here, validation succeeded
@@ -194,6 +191,12 @@ class _AsyncTextFormFieldState<T> extends State<AsyncTextFormField<T>> {
     } catch (e) {
       asynctype = (error: e.toString(), load: false);
       setState(() {});
+    }
+  }
+
+  void _onFocusChange() {
+    if (focusNode.hasFocus) {
+      widget.onTap?.call(textCon, onChanged);
     }
   }
 
@@ -220,8 +223,9 @@ class _AsyncTextFormFieldState<T> extends State<AsyncTextFormField<T>> {
       onTapOutside: (event) => focusNode.unfocus(),
       onEditingComplete: () => widget.onEditingComplete?.call(textCon),
       onFieldSubmitted: onFieldSubmitted,
-      onSaved: (v) => owl(v),
+      // onSaved: (v) => owl(v),
       onTap: () => widget.onTap?.call(textCon, onChanged),
+
       //
       focusNode: focusNode,
 
@@ -315,17 +319,16 @@ class _AsyncTextFormFieldState<T> extends State<AsyncTextFormField<T>> {
                       ),
               ),
       onChanged: onChanged,
-      autovalidateMode: AutovalidateMode.always,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       validator: (value) {
-        lava(value);
         if (asynctype.load) {
           return 'Checking';
         }
 
         // Run sync validator first
-        final T? parsedValue = widget.valueParser(value);
+        final T? parsedValue = value == null ? null : widget.valueParser(value);
         if (parsedValue == null) {
-          return 'Invalid format';
+          return null;
         }
 
         // Run the widget's sync validator if provided
@@ -374,18 +377,23 @@ class AsyncText {
   ];
 
   static Future<void> datetimeSelect(
-    TextEditingController controller,
     BuildContext context,
+    TextEditingController controller,
+    Function(String value) onChanged,
+    DateFormat format,
+    DateTime firstDate,
+    DateTime lastDate,
   ) async {
     FocusScope.of(context).requestFocus(FocusNode());
     final date = await showDatePicker(
       context: context,
-      firstDate: DateTime(2024),
-      lastDate: DateTime(2025),
+      firstDate: firstDate,
+      lastDate: lastDate,
     );
     if (date != null) {
-      controller.text = date
-          .toString(); //DateFormat('MMM yyyy').format(date).toString();
+      final formattedDate = format.format(date);
+      controller.text = formattedDate;
+      onChanged(formattedDate);
     }
   }
 }

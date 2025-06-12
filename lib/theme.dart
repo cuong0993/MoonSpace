@@ -42,6 +42,8 @@ class AppTheme {
 
   final (int, int) borderRadius;
   final (int, int) padding;
+  final bool inputfilled;
+  final bool inputOutlined;
 
   final double baseunit;
 
@@ -83,6 +85,9 @@ class AppTheme {
 
     required this.borderRadius,
     required this.padding,
+
+    this.inputOutlined = false,
+    this.inputfilled = false,
 
     required this.baseunit,
   });
@@ -407,16 +412,14 @@ class AppTheme {
 
       //
       inputDecorationTheme: InputDecorationTheme(
-        // focusedBorder: OutlineInputBorder(
-        //   borderRadius: BorderRadius.circular(8),
-        //   borderSide: BorderSide(color: seedColor),
-        // ),
-        // border: OutlineInputBorder(
-        //   borderRadius: BorderRadius.circular(borderRadius.c),
-        // ),
-        // filled: true,
-        contentPadding: EdgeInsets.symmetric(vertical: 12),
-        // contentPadding: EdgeInsets.symmetric(vertical: padding.c),
+        border: !inputOutlined
+            ? null
+            : OutlineInputBorder(
+                borderRadius: BorderRadius.circular(borderRadius.c),
+              ),
+        filled: inputfilled,
+
+        contentPadding: EdgeInsets.all(padding.c),
       ),
 
       // splashColor: ,

@@ -239,23 +239,24 @@ class _HomeState extends ConsumerState<Home> {
   }
 
   List<Widget> first(BuildContext context) => [
-    AsyncTextFormField(
-      valueParser: (value) => value,
-      valueFormatter: (value) => value,
-      key: ValueKey('Nick'),
-      initialValue: "Witch",
-      autocorrect: false,
-      enableSuggestions: false,
-      enabled: true,
-      maxLines: 1,
-      asyncValidator: (value) async {
-        return null;
-      },
-      textInputAction: TextInputAction.done,
-      decoration: (asyncText, textCon) =>
-          InputDecoration(errorText: 'error text', helperText: 'helper'),
-    ),
+    Text("AsyncTextFormField"),
 
+    // AsyncTextFormField(
+    //   valueParser: (value) => value,
+    //   valueFormatter: (value) => value,
+    //   key: ValueKey('Nick'),
+    //   initialValue: "Witch",
+    //   autocorrect: false,
+    //   enableSuggestions: false,
+    //   enabled: true,
+    //   maxLines: 1,
+    //   asyncValidator: (value) async {
+    //     return null;
+    //   },
+    //   textInputAction: TextInputAction.done,
+    //   decoration: (asyncText, textCon) =>
+    //       InputDecoration(errorText: 'error text', helperText: 'helper'),
+    // ),
     Wrap(
       children: [
         Card(
@@ -559,7 +560,7 @@ class _HomeState extends ConsumerState<Home> {
 
     Wrap(
       children: [
-        SizedBox(height: 320, child: NavigationDrawerSection()),
+        SizedBox(height: 360, child: NavigationDrawerSection()),
 
         SizedBox(
           height: 320,
@@ -603,20 +604,19 @@ class _HomeState extends ConsumerState<Home> {
       ],
     ),
 
-    GradientLoader(),
+    // SizedBox(width: 40, height: 40, child: GradientLoader()),
 
-    CircularProgress(
-      size: 50,
-      secondaryColor: Colors.red,
-      primaryColor: Colors.yellow,
-    ),
-
+    // CircularProgress(
+    //   size: 50,
+    //   secondaryColor: Colors.red,
+    //   primaryColor: Colors.yellow,
+    // ),
     NeonButton(
-      color: context.cs.secondary,
+      color: context.cs.tertiary,
       child: Text(
         "Hello",
         style: GoogleFonts.agbalumo(
-          textStyle: context.h6.c(context.cs.onSecondary),
+          textStyle: context.h6.c(context.cs.onTertiary),
         ),
       ),
     ),
@@ -948,9 +948,66 @@ class _NavigationDrawerSectionState extends State<NavigationDrawerSection> {
       selectedIndex: navDrawerIndex,
       children: <Widget>[
         DrawerHeader(child: Text("Header")),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(28, 16, 16, 10),
-          child: Text('Mail', style: Theme.of(context).textTheme.titleSmall),
+
+        ExpansionPanelList(
+          materialGapSize: 0,
+          expandedHeaderPadding: EdgeInsets.all(0),
+          children: [
+            ExpansionPanel(
+              canTapOnHeader: true,
+              isExpanded: true,
+              headerBuilder: (context, isExpanded) =>
+                  ListTile(title: Text('Home', style: context.h6.w5)),
+              body: Column(
+                children: [
+                  ...destinations.asMap().entries.map((destination) {
+                    return ListTile(
+                      leading: destination.value.icon,
+                      title: Text(destination.value.label),
+                      selected: destination.key == navDrawerIndex,
+                      selectedTileColor: context.cSec,
+                      selectedColor: context.cOnSec,
+                      style: ListTileStyle.drawer,
+                      shape: destination.key != navDrawerIndex
+                          ? null
+                          : RoundedRectangleBorder(
+                              borderRadius: BorderRadiusGeometry.all(
+                                Radius.circular(32),
+                              ),
+                            ),
+                      onTap: () {
+                        setState(() {
+                          navDrawerIndex = destination.key;
+                        });
+                      },
+                    );
+                  }),
+                  SizedBox(height: 20),
+                ],
+              ),
+            ),
+
+            ExpansionPanel(
+              canTapOnHeader: true,
+              isExpanded: true,
+              headerBuilder: (context, isExpanded) =>
+                  ListTile(title: Text('Home', style: context.h6.w5)),
+              body: Column(
+                children: destinations.asMap().entries.map((destination) {
+                  return ListTile(
+                    leading: destination.value.icon,
+                    title: Text(destination.value.label),
+                    selected: destination.key == navDrawerIndex,
+                    onTap: () {
+                      setState(() {
+                        navDrawerIndex = destination.key;
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
         ),
         ...destinations.map((destination) {
           return NavigationDrawerDestination(
@@ -985,14 +1042,27 @@ class ExampleDestination {
 }
 
 const List<ExampleDestination> destinations = <ExampleDestination>[
-  ExampleDestination('Inbox', Icon(Icons.inbox_outlined), Icon(Icons.inbox)),
-  ExampleDestination('Outbox', Icon(Icons.send_outlined), Icon(Icons.send)),
   ExampleDestination(
-    'Favorites',
+    'Dashboard',
+    Icon(Icons.inbox_outlined),
+    Icon(Icons.inbox),
+  ),
+  ExampleDestination(
+    'Report Overview',
+    Icon(Icons.send_outlined),
+    Icon(Icons.send),
+  ),
+  ExampleDestination(
+    'Insights',
     Icon(Icons.favorite_outline),
     Icon(Icons.favorite),
   ),
-  ExampleDestination('Trash', Icon(Icons.delete_outline), Icon(Icons.delete)),
+  ExampleDestination(
+    'Manage Task',
+    Icon(Icons.legend_toggle_sharp),
+    Icon(Icons.legend_toggle_sharp),
+  ),
+  ExampleDestination('Settings', Icon(Icons.settings), Icon(Icons.settings)),
 ];
 
 class NavigationRailSection extends StatefulWidget {
