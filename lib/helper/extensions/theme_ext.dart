@@ -88,14 +88,14 @@ extension SuperContext on BuildContext {
   Color get cOnSur => cs.onSurface;
   Color get cSur => cs.surface;
   Color get cSur1 => cs.surface.lighten(isDark ? 0.02 : -0.02);
-  Color get cSur2 => cs.surface.lighten(isDark ? 0.06 : -0.06);
-  Color get cSur3 => cs.surface.lighten(isDark ? 0.1 : -0.1);
-  Color get cSur4 => cs.surface.lighten(isDark ? 0.14 : -0.14);
-  Color get cSur5 => cs.surface.lighten(isDark ? 0.18 : -0.18);
-  Color get cSur6 => cs.surface.lighten(isDark ? 0.24 : -0.24);
+  Color get cSur2 => cs.surface.lighten(isDark ? 0.04 : -0.04);
+  Color get cSur3 => cs.surface.lighten(isDark ? 0.6 : -0.6);
+  Color get cSur4 => cs.surface.lighten(isDark ? 0.1 : -0.1);
+  Color get cSur5 => cs.surface.lighten(isDark ? 0.16 : -0.16);
+  Color get cSur6 => cs.surface.lighten(isDark ? 0.22 : -0.22);
   Color get cSur7 => cs.surface.lighten(isDark ? 0.28 : -0.28);
-  Color get cSur8 => cs.surface.lighten(isDark ? 0.32 : -0.32);
-  Color get cSur9 => cs.surface.lighten(isDark ? 0.4 : -0.4);
+  Color get cSur8 => cs.surface.lighten(isDark ? 0.38 : -0.38);
+  Color get cSur9 => cs.surface.lighten(isDark ? 0.5 : -0.5);
 
   //
   Color get cSec => cs.secondary;

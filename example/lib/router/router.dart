@@ -1,361 +1,202 @@
 import 'package:flutter/material.dart';
-import 'data.dart';
 import 'package:go_router/go_router.dart';
+import 'package:moonspace/router/router.dart';
+import './data.dart';
 
 part 'router.g.dart';
 
-void otherDoc(BuildContext context) {
-  // #docregion GoRoute
-  GoRoute(
-    path: ':familyId',
-    builder: (BuildContext context, GoRouterState state) {
-      // Require the familyId to be present and be an integer.
-      final int familyId = int.parse(state.pathParameters['familyId']!);
-      return FamilyScreen(familyId);
-    },
-  );
-  // #enddocregion GoRoute
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> shellNavigatorKey = GlobalKey<NavigatorState>();
 
-  // #docregion GoWrong
-  void tap() =>
-      context.go('/familyId/a42'); // This is an error: `a42` is not an `int`.
-  // #enddocregion GoWrong
+void main() => runApp(const App());
 
-  // #docregion GoRouter
-  final GoRouter router = GoRouter(routes: $appRoutes);
-  // #enddocregion GoRouter
+final GoRouter _router = GoRouter(
+  routes: $appRoutes,
+  initialLocation: '/',
+  navigatorKey: rootNavigatorKey,
+);
 
-  // #docregion routerWithErrorBuilder
-  final GoRouter routerWithErrorBuilder = GoRouter(
-    routes: $appRoutes,
-    errorBuilder: (BuildContext context, GoRouterState state) {
-      return ErrorRoute(error: state.error!).build(context, state);
-    },
-  );
-  // #enddocregion routerWithErrorBuilder
+class App extends StatelessWidget {
+  const App({super.key});
 
-  // #docregion go
-  void onTap() => const FamilyRoute(fid: 'f2').go(context);
-  // #enddocregion go
-
-  // #docregion goError
-  // This is an error: missing required parameter 'fid'.
-  void errorTap() => const FamilyRoute().go(context);
-  // #enddocregion goError
-
-  // #docregion tapWithExtra
-  void tapWithExtra() {
-    PersonRouteWithExtra(Person(id: 1, name: 'Marvin', age: 42)).go(context);
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp.router(routerConfig: _router);
   }
-  // #enddocregion tapWithExtra
-
-  final LoginInfo loginInfo = LoginInfo();
-
-  final GoRouter routerWithRedirect = GoRouter(
-    routes: $appRoutes,
-    // #docregion redirect
-    redirect: (BuildContext context, GoRouterState state) {
-      final bool loggedIn = loginInfo.loggedIn;
-      final bool loggingIn = state.matchedLocation == LoginRoute().location;
-      if (!loggedIn && !loggingIn) {
-        return LoginRoute(from: state.matchedLocation).location;
-      }
-      if (loggedIn && loggingIn) {
-        return const HomeRoute().location;
-      }
-      return null;
-    },
-    // #enddocregion redirect
-  );
 }
 
-// #docregion TypedGoRouteHomeRoute
-@TypedGoRoute<HomeRoute>(
+@TypedGoRoute<RootRoute>(
   path: '/',
-  routes: <TypedGoRoute<GoRouteData>>[
-    TypedGoRoute<FamilyRoute>(path: 'family/:fid'),
+  routes: [
+    TypedGoRoute<ExtraRoute>(path: 'extra'),
+    TypedGoRoute<EnumRoute>(path: 'enum/:requiredEnumField'),
+
+    TypedShellRoute<MyShellRouteData>(
+      routes: <TypedRoute<RouteData>>[
+        TypedGoRoute<FooRouteData>(path: 'foo'),
+        TypedGoRoute<UsersRouteData>(
+          path: 'users',
+          routes: <TypedGoRoute<UserRouteData>>[
+            TypedGoRoute<UserRouteData>(path: ':id'),
+          ],
+        ),
+      ],
+    ),
+
+    TypedStatefulShellRoute<MyStatefulShellRouteData>(
+      branches: <TypedStatefulShellBranch<StatefulShellBranchData>>[
+        TypedStatefulShellBranch<BranchAData>(
+          routes: <TypedRoute<RouteData>>[
+            TypedGoRoute<DetailsARouteData>(path: 'detailsA'),
+          ],
+        ),
+        TypedStatefulShellBranch<BranchBData>(
+          routes: <TypedRoute<RouteData>>[
+            TypedGoRoute<DetailsBRouteData>(path: 'detailsB'),
+          ],
+        ),
+      ],
+    ),
+
+    TypedStatefulShellRoute<MainShellRouteData>(
+      branches: [
+        TypedStatefulShellBranch<NotificationsShellBranchData>(
+          routes: [
+            TypedGoRoute<NotificationsRouteData>(
+              path: '/notifications/:section',
+            ),
+          ],
+        ),
+        TypedStatefulShellBranch<OrdersShellBranchData>(
+          routes: [TypedGoRoute<OrdersRouteData>(path: '/orders')],
+        ),
+      ],
+    ),
   ],
 )
-// #docregion HomeRoute
-class HomeRoute extends GoRouteData with _$HomeRoute {
-  const HomeRoute();
+class RootRoute extends GoRouteData with _$RootRoute {
+  const RootRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => const HomeScreen();
+  Widget build(BuildContext context, GoRouterState state) => Scaffold(
+    appBar: AppBar(title: Text(GoRouterState.of(context).uri.path)),
+    body: ListView(
+      children: <Widget>[
+        ListTile(
+          onTap: () => const ExtraRoute($extra: Extra(2)).go(context),
+          title: const Text('Optional Extra'),
+        ),
+        ListTile(
+          onTap: () => const FooRouteData().go(context),
+          title: const Text('FooRouteData'),
+        ),
+        ListTile(
+          onTap: () => const UsersRouteData().go(context),
+          title: const Text('UsersRouteData'),
+        ),
+        ListTile(
+          onTap: () => const DetailsARouteData().go(context),
+          title: const Text('DetailsARouteData'),
+        ),
+        ListTile(
+          onTap: () => const OrdersRouteData().go(context),
+          title: const Text('OrdersRouteData'),
+        ),
+        EnumRoute(
+          requiredEnumField: SportDetails.football,
+          enumField: SportDetails.volleyball,
+          enumFieldWithDefaultValue: SportDetails.hockey,
+        ).drawerTile(context),
+      ],
+    ),
+  );
 }
-// #enddocregion HomeRoute
 
-// #docregion RedirectRoute
-class RedirectRoute extends GoRouteData {
-  // There is no need to implement [build] when this [redirect] is unconditional.
-  @override
-  String? redirect(BuildContext context, GoRouterState state) {
-    return const HomeRoute().location;
-  }
+class Extra {
+  const Extra(this.value);
+
+  final int value;
 }
-// #enddocregion RedirectRoute
 
-// #docregion login
-@TypedGoRoute<LoginRoute>(path: '/login')
-class LoginRoute extends GoRouteData with _$LoginRoute {
-  LoginRoute({this.from});
-  final String? from;
+class ExtraRoute extends GoRouteData with _$ExtraRoute {
+  const ExtraRoute({this.$extra});
+
+  final Extra? $extra;
 
   @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return LoginScreen(from: from);
-  }
-}
-// #enddocregion login
-// #enddocregion TypedGoRouteHomeRoute
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('home')),
-      body: TextButton(
-        onPressed: () async {
-          // #docregion awaitPush
-          final bool? result = await const FamilyRoute(
-            fid: 'John',
-          ).push<bool>(context);
-          // #enddocregion awaitPush
-          print('result is $result');
-        },
-        child: const Text('push'),
+  Future<bool> onExit(BuildContext context, GoRouterState state) async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        content: const Text('Are you sure to leave this page?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Confirm'),
+          ),
+        ],
       ),
     );
+    return confirmed ?? false;
   }
-}
-
-class FamilyRoute extends GoRouteData with _$FamilyRoute {
-  const FamilyRoute({this.fid});
-
-  final String? fid;
 
   @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return FamilyScreen(int.parse(fid!));
-  }
+  Widget build(BuildContext context, GoRouterState state) => Scaffold(
+    appBar: AppBar(
+      leading: BackButton(),
+      title: Text(GoRouterState.of(context).uri.path),
+    ),
+    body: Center(child: Text('Extra: ${$extra?.value}')),
+  );
 }
 
-class FamilyScreen extends StatelessWidget {
-  const FamilyScreen(this.fid, {super.key});
+class EnumRoute extends GoRouteData with _$EnumRoute {
+  EnumRoute({
+    required this.requiredEnumField,
+    this.enumField,
+    this.enumFieldWithDefaultValue = SportDetails.football,
+  });
 
-  final int fid;
+  final SportDetails requiredEnumField;
+  final SportDetails? enumField;
+  final SportDetails enumFieldWithDefaultValue;
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('family')),
-      body: TextButton(
-        onPressed: () {
-          context.pop(true);
-        },
-        child: const Text('pop with true'),
+  Widget build(BuildContext context, GoRouterState state) => Scaffold(
+    appBar: AppBar(title: Text(GoRouterState.of(context).uri.path)),
+    body: Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Text('Param: $requiredEnumField'),
+          Text('Query param: $enumField'),
+          Text('Query param with default value: $enumFieldWithDefaultValue'),
+          SelectableText(GoRouterState.of(context).uri.path),
+          SelectableText(
+            GoRouterState.of(context).uri.queryParameters.toString(),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+
+  Widget drawerTile(BuildContext context) => ListTile(
+    title: const Text('EnhancedEnumRoute'),
+    onTap: () => go(context),
+    selected: GoRouterState.of(context).uri.path == location,
+  );
 }
 
-// #docregion ErrorRoute
-class ErrorRoute extends GoRouteData {
-  ErrorRoute({required this.error});
-  final Exception error;
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return ErrorScreen(error: error);
-  }
-}
-// #enddocregion ErrorRoute
-
-class ErrorScreen extends StatelessWidget {
-  const ErrorScreen({required this.error, super.key});
-
-  final Exception error;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Error')),
-      body: Text(error.toString()),
-    );
-  }
-}
-
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({required this.from, super.key});
-  final String? from;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(appBar: AppBar(title: const Text('Login')));
-  }
-}
-
-// #docregion MyRoute
-@TypedGoRoute<MyRoute>(path: '/my-route')
-class MyRoute extends GoRouteData with _$MyRoute {
-  MyRoute({this.queryParameter = 'defaultValue'});
-  final String queryParameter;
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return MyScreen(queryParameter: queryParameter);
-  }
-}
-// #enddocregion MyRoute
-
-class MyScreen extends StatelessWidget {
-  const MyScreen({required this.queryParameter, super.key});
-  final String queryParameter;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(appBar: AppBar(title: const Text('MyScreen')));
-  }
-}
-
-@TypedGoRoute<PersonRouteWithExtra>(path: '/person')
-// #docregion PersonRouteWithExtra
-class PersonRouteWithExtra extends GoRouteData with _$PersonRouteWithExtra {
-  PersonRouteWithExtra(this.$extra);
-  final Person? $extra;
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return PersonScreen($extra);
-  }
-}
-// #enddocregion PersonRouteWithExtra
-
-class PersonScreen extends StatelessWidget {
-  const PersonScreen(this.person, {super.key});
-  final Person? person;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(appBar: AppBar(title: const Text('PersonScreen')));
-  }
-}
-
-// #docregion HotdogRouteWithEverything
-@TypedGoRoute<HotdogRouteWithEverything>(path: '/:ketchup')
-class HotdogRouteWithEverything extends GoRouteData
-    with _$HotdogRouteWithEverything {
-  HotdogRouteWithEverything(this.ketchup, this.mustard, this.$extra);
-  final bool ketchup; // A required path parameter.
-  final String? mustard; // An optional query parameter.
-  final Sauce $extra; // A special $extra parameter.
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return HotdogScreen(ketchup, mustard, $extra);
-  }
-}
-// #enddocregion HotdogRouteWithEverything
-
-class Sauce {}
-
-class HotdogScreen extends StatelessWidget {
-  const HotdogScreen(this.ketchup, this.mustard, this.extra, {super.key});
-  final bool ketchup;
-  final String? mustard;
-  final Sauce extra;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(appBar: AppBar(title: const Text('Hotdog')));
-  }
-}
-
-// #docregion BookKind
-enum BookKind { all, popular, recent }
-
-class BooksRoute extends GoRouteData {
-  BooksRoute({this.kind = BookKind.popular});
-  final BookKind kind;
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return BooksScreen(kind: kind);
-  }
-}
-// #enddocregion BookKind
-
-class BooksScreen extends StatelessWidget {
-  const BooksScreen({required this.kind, super.key});
-  final BookKind kind;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(appBar: AppBar(title: const Text('BooksScreen')));
-  }
-}
-
-// #docregion MyMaterialRouteWithKey
-class MyMaterialRouteWithKey extends GoRouteData {
-  static const LocalKey _key = ValueKey<String>('my-route-with-key');
-  @override
-  MaterialPage<void> buildPage(BuildContext context, GoRouterState state) {
-    return const MaterialPage<void>(key: _key, child: MyPage());
-  }
-}
-// #enddocregion MyMaterialRouteWithKey
-
-class MyPage extends StatelessWidget {
-  const MyPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(appBar: AppBar(title: const Text('MyPage')));
-  }
-}
-
-class MyShellRoutePage extends StatelessWidget {
-  const MyShellRoutePage(this.child, {super.key});
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('MyShellRoutePage')),
-      body: child,
-    );
-  }
-}
-
-// #docregion FancyRoute
-class FancyRoute extends GoRouteData {
-  @override
-  CustomTransitionPage<void> buildPage(
-    BuildContext context,
-    GoRouterState state,
-  ) {
-    return CustomTransitionPage<void>(
-      key: state.pageKey,
-      child: const MyPage(),
-      transitionsBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-            Widget child,
-          ) {
-            return RotationTransition(turns: animation, child: child);
-          },
-    );
-  }
-}
-// #enddocregion FancyRoute
-
-// #docregion MyShellRouteData
-final GlobalKey<NavigatorState> shellNavigatorKey = GlobalKey<NavigatorState>();
-final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
+////
+////
+////
+////
+////
+////
 
 class MyShellRouteData extends ShellRouteData {
   const MyShellRouteData();
@@ -364,17 +205,473 @@ class MyShellRouteData extends ShellRouteData {
 
   @override
   Widget builder(BuildContext context, GoRouterState state, Widget navigator) {
-    return MyShellRoutePage(navigator);
+    return MyShellRouteScreen(child: navigator);
   }
 }
 
-// For GoRoutes:
-class MyGoRouteData extends GoRouteData {
-  const MyGoRouteData();
-
-  static final GlobalKey<NavigatorState> $parentNavigatorKey = rootNavigatorKey;
+class FooRouteData extends GoRouteData with _$FooRouteData {
+  const FooRouteData();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => const MyPage();
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return fadePage(context, state, Text("Foo"));
+  }
 }
-// #enddocregion MyShellRouteData
+
+class MyShellRouteScreen extends StatelessWidget {
+  const MyShellRouteScreen({required this.child, super.key});
+
+  final Widget child;
+
+  int getCurrentIndex(BuildContext context) {
+    final String location = GoRouterState.of(context).uri.path;
+    if (location == '/bar') {
+      return 1;
+    }
+    return 0;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final int currentIndex = getCurrentIndex(context);
+    return Scaffold(
+      appBar: AppBar(title: Text(GoRouterState.of(context).uri.path)),
+      body: child,
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: currentIndex,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Foo'),
+          BottomNavigationBarItem(icon: Icon(Icons.business), label: 'Users'),
+        ],
+        onTap: (int index) {
+          switch (index) {
+            case 0:
+              const FooRouteData().go(context);
+            case 1:
+              const UsersRouteData().go(context);
+          }
+        },
+      ),
+    );
+  }
+}
+
+class UsersRouteData extends GoRouteData with _$UsersRouteData {
+  const UsersRouteData();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return Scaffold(
+      body: ListView(
+        children: <Widget>[
+          for (int userID = 1; userID <= 3; userID++)
+            ListTile(
+              title: Text('User $userID'),
+              onTap: () async {
+                final u = await UserRouteData(id: userID).push<String>(context);
+                print(u);
+              },
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class DialogPage extends Page<String> {
+  /// A page to display a dialog.
+  const DialogPage({required this.child, super.key});
+
+  /// The widget to be displayed which is usually a [Dialog] widget.
+  final Widget child;
+
+  @override
+  Route<String> createRoute(BuildContext context) {
+    return DialogRoute<String>(
+      context: context,
+      settings: this,
+      builder: (BuildContext context) => child,
+    );
+  }
+}
+
+class UserRouteData extends GoRouteData with _$UserRouteData {
+  const UserRouteData({required this.id});
+
+  // Without this static key, the dialog will not cover the navigation rail.
+  static final GlobalKey<NavigatorState> $parentNavigatorKey = rootNavigatorKey;
+
+  final int id;
+
+  @override
+  Page<String> buildPage(BuildContext context, GoRouterState state) {
+    return DialogPage(
+      key: state.pageKey,
+      child: Center(
+        child: SizedBox(
+          width: 300,
+          height: 300,
+          child: Card(
+            child: Center(
+              child: TextButton(
+                onPressed: () {
+                  context.pop("Hello");
+                },
+                child: Text('User $id'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+///
+///
+///
+///
+///
+///
+
+final GlobalKey<NavigatorState> _sectionANavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'sectionANav');
+
+class MyStatefulShellRouteData extends StatefulShellRouteData {
+  const MyStatefulShellRouteData();
+
+  @override
+  Widget builder(
+    BuildContext context,
+    GoRouterState state,
+    StatefulNavigationShell navigationShell,
+  ) {
+    return navigationShell;
+  }
+
+  static const String $restorationScopeId = 'restorationScopeId';
+
+  static Widget $navigatorContainerBuilder(
+    BuildContext context,
+    StatefulNavigationShell navigationShell,
+    List<Widget> children,
+  ) {
+    return ScaffoldWithNavBar(
+      navigationShell: navigationShell,
+      children: children,
+    );
+  }
+}
+
+class BranchAData extends StatefulShellBranchData {
+  const BranchAData();
+}
+
+class BranchBData extends StatefulShellBranchData {
+  const BranchBData();
+
+  static final GlobalKey<NavigatorState> $navigatorKey = _sectionANavigatorKey;
+  static const String $restorationScopeId = 'restorationScopeId';
+}
+
+class DetailsARouteData extends GoRouteData with _$DetailsARouteData {
+  const DetailsARouteData();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const DetailsScreen(label: 'A');
+  }
+}
+
+class DetailsBRouteData extends GoRouteData with _$DetailsBRouteData {
+  const DetailsBRouteData();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const DetailsScreen(label: 'B');
+  }
+}
+
+/// Builds the "shell" for the app by building a Scaffold with a
+/// BottomNavigationBar, where [child] is placed in the body of the Scaffold.
+class ScaffoldWithNavBar extends StatelessWidget {
+  /// Constructs an [ScaffoldWithNavBar].
+  const ScaffoldWithNavBar({
+    required this.navigationShell,
+    required this.children,
+    Key? key,
+  }) : super(key: key ?? const ValueKey<String>('ScaffoldWithNavBar'));
+
+  /// The navigation shell and container for the branch Navigators.
+  final StatefulNavigationShell navigationShell;
+
+  /// The children (branch Navigators) to display in a custom container
+  /// ([AnimatedBranchContainer]).
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: AnimatedBranchContainer(
+        currentIndex: navigationShell.currentIndex,
+        children: children,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        // Here, the items of BottomNavigationBar are hard coded. In a real
+        // world scenario, the items would most likely be generated from the
+        // branches of the shell route, which can be fetched using
+        // `navigationShell.route.branches`.
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Section A'),
+          BottomNavigationBarItem(icon: Icon(Icons.work), label: 'Section B'),
+        ],
+        currentIndex: navigationShell.currentIndex,
+        onTap: (int index) => _onTap(context, index),
+      ),
+    );
+  }
+
+  /// Navigate to the current location of the branch at the provided index when
+  /// tapping an item in the BottomNavigationBar.
+  void _onTap(BuildContext context, int index) {
+    // When navigating to a new branch, it's recommended to use the goBranch
+    // method, as doing so makes sure the last navigation state of the
+    // Navigator for the branch is restored.
+    navigationShell.goBranch(
+      index,
+      // A common pattern when using bottom navigation bars is to support
+      // navigating to the initial location when tapping the item that is
+      // already active. This example demonstrates how to support this behavior,
+      // using the initialLocation parameter of goBranch.
+      initialLocation: index == navigationShell.currentIndex,
+    );
+  }
+}
+
+/// Custom branch Navigator container that provides animated transitions
+/// when switching branches.
+class AnimatedBranchContainer extends StatelessWidget {
+  /// Creates a AnimatedBranchContainer
+  const AnimatedBranchContainer({
+    super.key,
+    required this.currentIndex,
+    required this.children,
+  });
+
+  /// The index (in [children]) of the branch Navigator to display.
+  final int currentIndex;
+
+  /// The children (branch Navigators) to display in this container.
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: children.asMap().entries.map((o) {
+        return AnimatedScale(
+          scale: o.key == currentIndex ? 1 : 1.5,
+          duration: const Duration(milliseconds: 400),
+          child: AnimatedOpacity(
+            opacity: o.key == currentIndex ? 1 : 0,
+            duration: const Duration(milliseconds: 400),
+            child: _branchNavigatorWrapper(o.key, o.value),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _branchNavigatorWrapper(int index, Widget navigator) => IgnorePointer(
+    ignoring: index != currentIndex,
+    child: TickerMode(enabled: index == currentIndex, child: navigator),
+  );
+}
+
+/// The details screen for either the A or B screen.
+class DetailsScreen extends StatefulWidget {
+  /// Constructs a [DetailsScreen].
+  const DetailsScreen({required this.label, this.param, this.extra, super.key});
+
+  /// The label to display in the center of the screen.
+  final String label;
+
+  /// Optional param
+  final String? param;
+
+  /// Optional extra object
+  final Object? extra;
+  @override
+  State<StatefulWidget> createState() => DetailsScreenState();
+}
+
+/// The state for DetailsScreen
+class DetailsScreenState extends State<DetailsScreen> {
+  int _counter = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Details Screen - ${widget.label}')),
+      body: _build(context),
+    );
+  }
+
+  Widget _build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Text(
+            'Details for ${widget.label} - Counter: $_counter',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const Padding(padding: EdgeInsets.all(4)),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _counter++;
+              });
+            },
+            child: const Text('Increment counter'),
+          ),
+          const Padding(padding: EdgeInsets.all(8)),
+          if (widget.param != null)
+            Text(
+              'Parameter: ${widget.param!}',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          const Padding(padding: EdgeInsets.all(8)),
+          if (widget.extra != null)
+            Text(
+              'Extra: ${widget.extra!}',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+////
+////
+////
+////
+////
+////
+
+class MainShellRouteData extends StatefulShellRouteData {
+  const MainShellRouteData();
+
+  @override
+  Widget builder(
+    BuildContext context,
+    GoRouterState state,
+    StatefulNavigationShell navigationShell,
+  ) {
+    return MainPageView(navigationShell: navigationShell);
+  }
+}
+
+class NotificationsShellBranchData extends StatefulShellBranchData {
+  const NotificationsShellBranchData();
+
+  static String $initialLocation = '/notifications/old';
+}
+
+class OrdersShellBranchData extends StatefulShellBranchData {
+  const OrdersShellBranchData();
+}
+
+enum NotificationsPageSection { latest, old, archive }
+
+class NotificationsRouteData extends GoRouteData with _$NotificationsRouteData {
+  const NotificationsRouteData({required this.section});
+
+  final NotificationsPageSection section;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return NotificationsPageView(section: section);
+  }
+}
+
+class OrdersRouteData extends GoRouteData with _$OrdersRouteData {
+  const OrdersRouteData();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const Text('Orders page');
+  }
+}
+
+class MainPageView extends StatelessWidget {
+  const MainPageView({required this.navigationShell, super.key});
+
+  final StatefulNavigationShell navigationShell;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: navigationShell,
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
+            label: 'Notifications',
+          ),
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Orders'),
+        ],
+        currentIndex: navigationShell.currentIndex,
+        onTap: (int index) => _onTap(context, index),
+      ),
+    );
+  }
+
+  void _onTap(BuildContext context, int index) {
+    navigationShell.goBranch(
+      index,
+      initialLocation: index == navigationShell.currentIndex,
+    );
+  }
+}
+
+class NotificationsPageView extends StatelessWidget {
+  const NotificationsPageView({super.key, required this.section});
+
+  final NotificationsPageSection section;
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 3,
+      initialIndex: NotificationsPageSection.values.indexOf(section),
+      child: const Column(
+        children: <Widget>[
+          TabBar(
+            tabs: <Tab>[
+              Tab(
+                child: Text('Latest', style: TextStyle(color: Colors.black87)),
+              ),
+              Tab(
+                child: Text('Old', style: TextStyle(color: Colors.black87)),
+              ),
+              Tab(
+                child: Text('Archive', style: TextStyle(color: Colors.black87)),
+              ),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
+              children: <Widget>[
+                Text('Latest notifications'),
+                Text('Old notifications'),
+                Text('Archived notifications'),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

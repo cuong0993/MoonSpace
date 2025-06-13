@@ -2,9 +2,9 @@ import 'package:example/animated/animated_list_scale.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_custom_carousel/flutter_custom_carousel.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:moonspace/carousel/curved_carousel.dart';
 import 'package:moonspace/form/async_text_field.dart';
 import 'package:moonspace/helper/extensions/theme_ext.dart';
 import 'package:moonspace/theme.dart';
@@ -43,30 +43,6 @@ class Quiz extends StatelessWidget {
                 SizedBox(height: 16),
 
                 Text("Let's continue a quiz!", style: context.h2.bold),
-
-                SizedBox(height: 16),
-
-                Sherlock<String>(
-                  hint: "Search Fruit",
-                  fetch: (query) async {
-                    await Future.delayed(1.sec);
-                    return [
-                      "Apple",
-                      "Lemon",
-                      "Orange",
-                    ].where((q) => q.contains(query)).toList();
-                  },
-                  builder: (data, controller) {
-                    return ListView.builder(
-                      shrinkWrap: true,
-                      clipBehavior: Clip.antiAlias,
-                      itemCount: data.length,
-                      itemBuilder: (con, index) => Card(
-                        child: ListTile(title: Text(data[index]), onTap: () {}),
-                      ),
-                    );
-                  },
-                ),
 
                 SizedBox(height: 16),
 
@@ -153,7 +129,13 @@ class Quiz extends StatelessWidget {
 
                 SizedBox(height: 16),
 
-                _buildCarouselRow("c", 6, height: 280),
+                CurvedCarousel(
+                  count: 6,
+                  height: 280,
+                  builder: (index) {
+                    return FriendCard("c", index + 1);
+                  },
+                ),
 
                 SizedBox(height: 16),
 
@@ -225,7 +207,19 @@ class Quiz extends StatelessWidget {
 
                 SizedBox(height: 8),
 
-                CarouselCards(),
+                ConstrainedBox(
+                  constraints: BoxConstraints.tightFor(height: (160, 175).c),
+                  child: CarouselView(
+                    itemSnapping: true,
+                    onTap: (value) {},
+                    padding: EdgeInsets.zero,
+                    shrinkExtent: (300, 320).c,
+                    itemExtent: (300, 320).c,
+                    children: List<Widget>.generate(20, (index) {
+                      return NameCard(index: index);
+                    }),
+                  ),
+                ),
 
                 SizedBox(height: 8),
 
@@ -417,9 +411,6 @@ class AnswerTextFormField extends StatelessWidget {
             child: AsyncTextFormField(
               valueParser: (value) => value,
               valueFormatter: (value) => value,
-              asyncValidator: (value) async {
-                return null;
-              },
               minLines: 9,
               maxLines: 9,
               textAlign: TextAlign.start,
@@ -473,7 +464,7 @@ class QuizTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: context.cSur6,
+      color: context.cSur2,
 
       child: Padding(
         padding: const EdgeInsets.all(4.0),
@@ -549,27 +540,6 @@ class CatTile extends StatelessWidget {
             SizedBox(width: 16),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class CarouselCards extends StatelessWidget {
-  const CarouselCards({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: BoxConstraints.tightFor(height: (160, 175).c),
-      child: CarouselView(
-        itemSnapping: true,
-        onTap: (value) {},
-        padding: EdgeInsets.zero,
-        shrinkExtent: (300, 320).c,
-        itemExtent: (300, 320).c,
-        children: List<Widget>.generate(20, (index) {
-          return NameCard(index: index);
-        }),
       ),
     );
   }
@@ -766,11 +736,11 @@ class FriendCard extends StatelessWidget {
 
   void _showDetails(BuildContext context, String category, int index) {
     PageRouteBuilder route = PageRouteBuilder(
-      pageBuilder: (_, __, ___) {
+      pageBuilder: (_, _, _) {
         return DetailsView(category: category, index: index);
       },
       transitionDuration: 600.ms,
-      transitionsBuilder: (_, a, __, c) => FadeTransition(opacity: a, child: c),
+      transitionsBuilder: (_, a, _, c) => FadeTransition(opacity: a, child: c),
     );
     Navigator.push(context, route);
   }
@@ -871,48 +841,4 @@ class _DetailsViewState extends State<DetailsView> {
       ),
     );
   }
-}
-
-Widget _buildCarouselRow(String category, int count, {double? height = 100}) {
-  // Build a list of widgets for the carousel items:
-  List<Widget> items = List.generate(count, (i) => FriendCard(category, i + 1));
-
-  double rotationMultiplier = 0.2; // radians
-  double scaleMin = 0.9; // minimum scale
-  double opacityMin = 0.5; // minimum opacity
-
-  Widget carousel = CustomCarousel(
-    itemCountBefore: 2,
-    itemCountAfter: 2,
-    alignment: Alignment.center,
-    scrollDirection: Axis.horizontal,
-    loop: true,
-    depthOrder: DepthOrder.selectedInFront,
-    tapToSelect: false,
-    effectsBuilder: (_, ratio, child) {
-      double angle = ratio * rotationMultiplier;
-      double distance = ratio.abs();
-
-      double scale = (1 - distance).clamp(scaleMin, 1.0);
-      double opacity = (1 - distance).clamp(opacityMin, 1.0);
-
-      // Vertical offset increases with distance
-      double yOffset = distance * 50; // Adjust 20 for how low it goes
-
-      return Opacity(
-        opacity: opacity,
-        child: Transform.translate(
-          offset: Offset(ratio * 170 * 3, yOffset),
-          child: Transform.rotate(
-            angle: angle,
-            child: Transform.scale(scale: scale, child: child),
-          ),
-        ),
-      );
-    },
-    // Pass in the list of widgets we created above:
-    children: items,
-  );
-
-  return SizedBox(height: height, child: carousel);
 }

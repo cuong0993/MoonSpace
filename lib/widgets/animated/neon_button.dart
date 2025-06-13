@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class NeonButton extends StatefulWidget {
   final Color color;
-  final Widget child;
+  final Widget Function(bool completed) builder;
   final Duration? duration;
   final VoidCallback? onTap;
   final bool animateAfterChanges;
@@ -15,7 +15,7 @@ class NeonButton extends StatefulWidget {
     this.onTap,
     this.animateAfterChanges = true,
     required this.color,
-    required this.child,
+    required this.builder,
   });
 
   @override
@@ -93,7 +93,7 @@ class _NeonButtonState extends State<NeonButton>
                   // ),
                   child: Padding(
                     padding: const EdgeInsets.all(padding),
-                    child: FittedBox(child: widget.child),
+                    child: FittedBox(child: widget.builder(completed)),
                   ),
                 ),
               ),

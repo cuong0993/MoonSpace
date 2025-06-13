@@ -2,6 +2,7 @@ import 'package:example/carousel/carouselmain.dart';
 import 'package:example/manager.dart';
 import 'package:example/quiz.dart';
 import 'package:example/hotel.dart';
+import 'package:example/travel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:example/ariana/main.dart';
@@ -152,6 +153,12 @@ void main() {
           path: "/manager",
           builder: (context, state) {
             return ManagerApp();
+          },
+        ),
+        GoRoute(
+          path: "/travel",
+          builder: (context, state) {
+            return TravelApp();
           },
         ),
       ],
@@ -613,10 +620,12 @@ class _HomeState extends ConsumerState<Home> {
     // ),
     NeonButton(
       color: context.cs.tertiary,
-      child: Text(
+      builder: (completed) => Text(
         "Hello",
         style: GoogleFonts.agbalumo(
-          textStyle: context.h6.c(context.cs.onTertiary),
+          textStyle: context.h6.c(
+            completed ? context.cs.onTertiary : context.cs.tertiary,
+          ),
         ),
       ),
     ),
@@ -846,6 +855,12 @@ class ThemeSettings extends StatelessWidget {
                 context.push("/manager");
               },
               title: Text("Manager"),
+            ),
+            ListTile(
+              onTap: () {
+                context.push("/travel");
+              },
+              title: Text("Travel"),
             ),
           ],
         ),

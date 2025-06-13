@@ -85,9 +85,9 @@ class HotelApp extends StatelessWidget {
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
                               colors: [
-                                Colors.black.withAlpha(100),
+                                context.cSur.withAlpha(100),
                                 Colors.transparent,
-                                Colors.black.withAlpha(100),
+                                context.cSur.withAlpha(100),
                               ],
                               stops: [0.0, 0.5, 1.0],
                             ),

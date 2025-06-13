@@ -434,7 +434,7 @@ class AppTheme {
       ),
 
       //
-      // iconTheme: IconThemeData(color: Colors.red),
+      iconTheme: IconThemeData(color: colorScheme.onSurface, size: 20),
       iconButtonTheme: IconButtonThemeData(
         // style: IconButton.styleFrom(foregroundColor: colorScheme.onSurface),
       ),
@@ -480,12 +480,21 @@ class AppTheme {
       ),
 
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        // selectedLabelStyle: AppTheme.tx.labelMedium,
-        // unselectedLabelStyle: AppTheme.tx.labelMedium,
-        // selectedIconTheme: IconThemeData(size: (24, 28).c),
-        // unselectedIconTheme: IconThemeData(size: (24, 28).c),
+        unselectedItemColor: colorScheme.onSurface,
+        selectedItemColor: colorScheme.secondary,
+        selectedLabelStyle: textTheme.bodySmall,
+        unselectedLabelStyle: textTheme.bodySmall,
+        selectedIconTheme: IconThemeData(size: 20),
+        unselectedIconTheme: IconThemeData(size: 20),
+        type: BottomNavigationBarType.fixed,
+        landscapeLayout: BottomNavigationBarLandscapeLayout.linear,
       ),
-      tabBarTheme: const TabBarThemeData(),
+
+      tabBarTheme: TabBarThemeData(
+        indicatorSize: TabBarIndicatorSize.label,
+        labelStyle: textTheme.bodySmall,
+        unselectedLabelStyle: textTheme.bodySmall,
+      ),
 
       //
       dialogTheme: DialogThemeData(

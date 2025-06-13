@@ -15,7 +15,11 @@ class Sherlock<T> extends StatefulWidget {
     this.actions = const [],
     this.textStyle,
     this.debounceMilliseconds = 200,
-    this.iconBuilder,
+    this.icon,
+    this.elevation = 0,
+    required this.bar,
+    this.border,
+    this.barColor,
   });
 
   final Future<List<T>> Function(String query) fetch;
@@ -29,7 +33,13 @@ class Sherlock<T> extends StatefulWidget {
 
   final int debounceMilliseconds;
 
-  final Widget Function(BuildContext, SearchController)? iconBuilder;
+  final Widget? icon;
+
+  final double elevation;
+  final RoundedRectangleBorder? border;
+  final Color? barColor;
+
+  final bool bar;
 
   @override
   State<Sherlock<T>> createState() => _SherlockState<T>();
@@ -106,16 +116,17 @@ class _SherlockState<T> extends State<Sherlock<T>> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.iconBuilder != null) {
+    if (!widget.bar) {
       return SearchAnchor(
         searchController: searchController,
         isFullScreen: widget.isFullScreen,
         viewHintText: widget.hint,
         viewConstraints: const BoxConstraints(maxHeight: 400, minWidth: 300),
         viewTrailing: actions,
+        viewElevation: widget.elevation,
         builder: (BuildContext context, SearchController controller) {
           return IconButton(
-            icon: const Icon(Icons.search),
+            icon: widget.icon ?? const Icon(Icons.search),
             onPressed: () {
               controller.openView();
             },
@@ -130,14 +141,24 @@ class _SherlockState<T> extends State<Sherlock<T>> {
       isFullScreen: widget.isFullScreen,
       viewHintText: widget.hint,
       barHintText: widget.hint,
+      barElevation: WidgetStateProperty.resolveWith((s) {
+        return widget.elevation;
+      }),
       barHintStyle: WidgetStateTextStyle.resolveWith((s) {
-        return widget.textStyle ?? context.h7 ?? TextStyle();
+        return widget.textStyle ?? context.h8 ?? TextStyle();
+      }),
+      barBackgroundColor: WidgetStateProperty.resolveWith((s) {
+        return widget.barColor;
+      }),
+      barShape: WidgetStateProperty.resolveWith((s) {
+        return widget.border;
       }),
       viewHeaderTextStyle: widget.textStyle ?? context.h7,
       viewConstraints: const BoxConstraints(maxHeight: 400),
       onSubmitted: (value) {
         submit();
       },
+      barLeading: widget.icon,
       viewTrailing: actions,
       suggestionsBuilder: suggestionsBuilder,
     );
