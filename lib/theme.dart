@@ -21,11 +21,6 @@ extension AppThemeRange on (num, num) {
       ($1 + ($2 - $1) * AppTheme.rc).toDouble();
 }
 
-extension AppThemeRange3 on (num, num, num) {
-  double get r =>
-      (AppTheme.isMobile ? $1 : (AppTheme.isTab ? $2 : $3)).toDouble();
-}
-
 class AppTheme {
   final String name;
   final IconData icon;
@@ -250,11 +245,6 @@ class AppTheme {
   static int currentThemeIndex = 0;
   static AppTheme currentTheme = themes[currentThemeIndex];
 
-  static bool get isMobile => currentTheme.size.width < 600;
-  static bool get isTab =>
-      currentTheme.size.width > 600 && currentTheme.size.width < 1200;
-  static bool get isDesktop => currentTheme.size.width > 1200;
-
   static bool get isDark => currentTheme.dark;
 
   static double get w => currentTheme.size.width;
@@ -434,7 +424,7 @@ class AppTheme {
       ),
 
       //
-      iconTheme: IconThemeData(color: colorScheme.onSurface, size: 20),
+      // iconTheme: IconThemeData(), //Dont change
       iconButtonTheme: IconButtonThemeData(
         // style: IconButton.styleFrom(foregroundColor: colorScheme.onSurface),
       ),

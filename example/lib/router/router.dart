@@ -8,16 +8,14 @@ part 'router.g.dart';
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> shellNavigatorKey = GlobalKey<NavigatorState>();
 
-void main() => runApp(const App());
-
 final GoRouter _router = GoRouter(
   routes: $appRoutes,
   initialLocation: '/',
   navigatorKey: rootNavigatorKey,
 );
 
-class App extends StatelessWidget {
-  const App({super.key});
+class GoRouterApp extends StatelessWidget {
+  const GoRouterApp({super.key});
 
   @override
   Widget build(BuildContext context) {

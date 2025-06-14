@@ -1,33 +1,33 @@
 import 'package:example/carousel/carouselmain.dart';
-import 'package:example/manager.dart';
-import 'package:example/quiz.dart';
-import 'package:example/hotel.dart';
-import 'package:example/travel.dart';
+import 'package:example/pages/manager.dart';
+import 'package:example/pages/music.dart';
+import 'package:example/pages/quiz.dart';
+import 'package:example/pages/hotel.dart';
+import 'package:example/pages/recipe.dart';
+import 'package:example/router/router.dart';
+import 'package:example/smooth_sheets/main.dart';
+import 'package:example/pages/travel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:example/ariana/main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:moonspace/electrify.dart';
-import 'package:moonspace/form/async_text_field.dart';
 import 'package:moonspace/form/select.dart';
 import 'package:moonspace/helper/extensions/theme_ext.dart';
 import 'package:moonspace/provider/global_theme.dart';
 import 'package:moonspace/theme.dart';
 import 'package:moonspace/widgets/functions.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:example/recipes/main.dart';
 import 'package:example/renderobject/main.dart';
 import 'package:example/vignettes/basketball_ptr/lib/main.dart';
-import 'package:example/vignettes/bubble_tab_bar/main.dart';
 import 'package:example/vignettes/constellations_list/lib/main.dart';
 import 'package:example/vignettes/dark_ink_transition/main.dart';
 import 'package:example/vignettes/drink_rewards_list/main.dart';
 import 'package:example/vignettes/gooey_edge/lib/main.dart';
 import 'package:example/vignettes/parallax_travel_cards_hero/lib/main.dart';
-import 'package:example/vignettes/parallax_travel_cards_list/lib/main.dart';
+import 'package:example/vignettes/parallax_travel_cards_list/main.dart';
 import 'package:example/vignettes/particle_swipe/lib/main.dart';
 import 'package:example/vignettes/product_detail_zoom/lib/main.dart';
 import 'package:example/vignettes/sparkle_party/lib/main.dart';
@@ -37,13 +37,10 @@ import 'package:example/vignettes/ticket_fold/lib/main.dart';
 import 'package:moonspace/widgets/animated/neon_button.dart';
 import 'package:moonspace/widgets/loader.dart';
 
-part 'main.g.dart';
-
 void main() {
-  // runApp(BubbleTabBar());
   // runApp(DarkInkTransition());
   // runApp(DrinkRewardList());
-  // runApp(ParallaxTravelCardsList());
+  runApp(ParallaxTravelCardsList());
 
   // runApp(BasketballPtr());
   // runApp(ConstellationsList());
@@ -56,10 +53,14 @@ void main() {
   // runApp(TicketFoldApp());
 
   // Compassmain();
-  // CoolCardSwipermain();
-  // runApp(const ProviderScope(child: RecipesApp()));
-  // runApp(Ariana());
+
   // runApp(RenderHome());
+
+  // runApp(const GoRouterApp());
+
+  // runApp(const SmoothSheetApp());
+
+  return;
 
   electrify(
     title: "Home",
@@ -156,6 +157,18 @@ void main() {
           },
         ),
         GoRoute(
+          path: "/recipe",
+          builder: (context, state) {
+            return RecipeApp();
+          },
+        ),
+        GoRoute(
+          path: "/music",
+          builder: (context, state) {
+            return MusicApp();
+          },
+        ),
+        GoRoute(
           path: "/travel",
           builder: (context, state) {
             return TravelApp();
@@ -169,16 +182,6 @@ void main() {
     recordError: (error, stack) {},
     debugUi: false,
   );
-}
-
-@riverpod
-class Counter extends _$Counter {
-  @override
-  int build() {
-    return 0;
-  }
-
-  void increment() => state++;
 }
 
 class Home extends ConsumerStatefulWidget {
@@ -196,12 +199,10 @@ class _HomeState extends ConsumerState<Home> {
     return Scaffold(
       key: scaffoldKey,
       appBar: AppBar(
-        title: Text(
-          '${AppTheme.currentTheme.size.width} Counter example ${ref.watch(counterProvider)}',
-        ),
+        title: Text('${AppTheme.currentTheme.size.width}'),
         actions: [
           ThemeBrightnessButton(),
-          if (!AppTheme.isDesktop)
+          if (!context.width6)
             IconButton(
               onPressed: () {
                 context.showFormDialog(
@@ -220,7 +221,7 @@ class _HomeState extends ConsumerState<Home> {
       ),
 
       // endDrawer: SizedBox(height: 520, child: NavigationDrawerSection()),
-      body: AppTheme.isDesktop
+      body: context.width6
           ? Row(
               children: [
                 ThemeSettings(),
@@ -238,32 +239,13 @@ class _HomeState extends ConsumerState<Home> {
             ),
 
       floatingActionButton: FloatingActionButton(
-        // The read method is a utility to read a provider without listening to it
-        onPressed: () => ref.read(counterProvider.notifier).increment(),
+        onPressed: () {},
         child: const Icon(Icons.add),
       ),
     );
   }
 
   List<Widget> first(BuildContext context) => [
-    Text("AsyncTextFormField"),
-
-    // AsyncTextFormField(
-    //   valueParser: (value) => value,
-    //   valueFormatter: (value) => value,
-    //   key: ValueKey('Nick'),
-    //   initialValue: "Witch",
-    //   autocorrect: false,
-    //   enableSuggestions: false,
-    //   enabled: true,
-    //   maxLines: 1,
-    //   asyncValidator: (value) async {
-    //     return null;
-    //   },
-    //   textInputAction: TextInputAction.done,
-    //   decoration: (asyncText, textCon) =>
-    //       InputDecoration(errorText: 'error text', helperText: 'helper'),
-    // ),
     Wrap(
       children: [
         Card(
@@ -855,6 +837,18 @@ class ThemeSettings extends StatelessWidget {
                 context.push("/manager");
               },
               title: Text("Manager"),
+            ),
+            ListTile(
+              onTap: () {
+                context.push("/recipe");
+              },
+              title: Text("Recipe"),
+            ),
+            ListTile(
+              onTap: () {
+                context.push("/music");
+              },
+              title: Text("Music"),
             ),
             ListTile(
               onTap: () {

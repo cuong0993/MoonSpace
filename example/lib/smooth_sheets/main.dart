@@ -6,12 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:smooth_sheets/smooth_sheets.dart';
 import 'package:moonspace/form/select.dart';
 
-void main() {
-  runApp(const _App());
-}
-
-class _App extends StatelessWidget {
-  const _App();
+class SmoothSheetApp extends StatelessWidget {
+  const SmoothSheetApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -612,6 +608,17 @@ class ExampleSheet extends StatelessWidget {
                   ],
                 ),
                 Align(child: _RotatedFlutterLogo(controller: controller)),
+                AnimatedBuilder(
+                  animation: controller,
+                  builder: (context, child) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        '${SheetOffsetDrivenAnimation(controller: controller, initialValue: 1).value}',
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
           ),
@@ -687,24 +694,23 @@ class _ExampleBottomBar extends StatelessWidget {
       ),
     );
 
-    // final bottomAppBar = BottomAppBar(
-    //   child: Row(
-    //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //     children: [
-    //       IconButton(onPressed: () {}, icon: const Icon(Icons.menu)),
-    //       IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
-    //     ],
-    //   ),
-    // );
+    final bottomAppBar = BottomAppBar(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(onPressed: () {}, icon: const Icon(Icons.menu)),
+          IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
+        ],
+      ),
+    );
 
     // Hide the bottom app bar when the sheet is dragged down.
-    // return SlideTransition(
-    //   position: animation.drive(
-    //     Tween(begin: const Offset(0, 1), end: Offset.zero),
-    //   ),
-    //   child: bottomAppBar,
-    // );
-    // }
+    return SlideTransition(
+      position: animation.drive(
+        Tween(begin: const Offset(0, 1), end: Offset.zero),
+      ),
+      child: bottomAppBar,
+    );
   }
 }
 
@@ -872,59 +878,6 @@ class _ModalSheet extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-}
-
-class KeyboardDismissSheet extends StatelessWidget {
-  const KeyboardDismissSheet({
-    super.key,
-    required this.isFullScreen,
-    required this.keyboardDismissBehavior,
-  });
-
-  final bool isFullScreen;
-  final SheetKeyboardDismissBehavior? keyboardDismissBehavior;
-
-  @override
-  Widget build(BuildContext context) {
-    Widget body = const SingleChildScrollView(
-      child: TextField(
-        maxLines: null,
-        decoration: InputDecoration(hintText: 'Enter some text...'),
-      ),
-    );
-    if (isFullScreen) {
-      body = SizedBox.expand(child: body);
-    }
-
-    final bottomBar = ColoredBox(
-      color: Theme.of(context).colorScheme.secondaryContainer,
-      child: SafeArea(
-        child: Row(
-          children: [
-            IconButton(onPressed: () {}, icon: const Icon(Icons.menu)),
-            const Spacer(),
-            IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert)),
-          ],
-        ),
-      ),
-    );
-
-    return SheetKeyboardDismissible(
-      dismissBehavior: keyboardDismissBehavior,
-      child: Sheet(
-        scrollConfiguration: const SheetScrollConfiguration(),
-        decoration: MaterialSheetDecoration(
-          size: SheetSize.stretch,
-          color: Theme.of(context).colorScheme.secondaryContainer,
-        ),
-        child: SheetContentScaffold(
-          topBar: AppBar(),
-          body: body,
-          bottomBar: bottomBar,
-        ),
-      ),
     );
   }
 }

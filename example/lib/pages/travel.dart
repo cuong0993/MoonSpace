@@ -56,6 +56,7 @@ class _TravelAppState extends State<TravelApp> {
                   bottom: false,
                   child: SizedBox.expand(child: TravelCard(index: 0)),
                 ),
+
                 _ContentSheet(systemUiInsets: systemUiInsets),
               ],
             ),
@@ -334,6 +335,17 @@ class _ContentSheet extends StatelessWidget {
               height: sheetHeight,
               child: Column(
                 children: [
+                  AnimatedBuilder(
+                    animation: DefaultSheetController.of(context),
+                    builder: (context, child) {
+                      return Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          '${SheetOffsetDrivenAnimation(controller: DefaultSheetController.of(context), initialValue: 1).value}',
+                        ),
+                      );
+                    },
+                  ),
                   _ContentSheetHandle(),
                   Expanded(child: _HouseList()),
                 ],

@@ -1,5 +1,446 @@
-import '../styles/app_colors.dart';
-import 'recipe.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:moonspace/helper/extensions/color.dart';
+import 'package:moonspace/helper/extensions/theme_ext.dart';
+
+class RecipeApp extends StatelessWidget {
+  const RecipeApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    Theme.of(context);
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.chevron_left),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text('Dessert Recipes'),
+      ),
+      body: SafeArea(bottom: false, child: RecipeListView()),
+    );
+  }
+}
+
+class RecipeListView extends StatefulWidget {
+  const RecipeListView({super.key});
+
+  @override
+  State<RecipeListView> createState() => _RecipeListViewState();
+}
+
+class _RecipeListViewState extends State<RecipeListView> {
+  bool downScroll = true; // Default flip value
+
+  @override
+  Widget build(BuildContext context) {
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification is ScrollUpdateNotification) {
+          setState(() {
+            if (notification.scrollDelta! > 0) {
+              downScroll = true;
+            } else {
+              downScroll = false;
+            }
+          });
+        }
+        return true;
+      },
+      child: GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: context.r(1, 1, 2, 2, 3, 4).toInt(),
+          mainAxisSpacing: 24,
+          crossAxisSpacing: 24,
+          childAspectRatio: context.r(1.4, 1.8, 1.8, 1.8, 1.8, 1.8).toDouble(),
+        ),
+        cacheExtent: 0,
+        padding: const EdgeInsets.all(20),
+        itemCount: RecipesData.dessertMenu.length * 10,
+        itemBuilder: (context, index) {
+          // return Placeholder(
+          //   child: Text("${index % RecipesData.dessertMenu.length}"),
+          // );
+          return RecipeCard(
+            index: index % RecipesData.dessertMenu.length,
+            delayMs: 0,
+            downScroll: downScroll,
+          );
+        },
+      ),
+    );
+  }
+}
+
+class RecipeCard extends StatelessWidget {
+  const RecipeCard({
+    super.key,
+    required this.index,
+    required this.delayMs,
+    required this.downScroll,
+  });
+
+  final int index;
+  final double delayMs;
+  final bool downScroll;
+
+  @override
+  Widget build(BuildContext context) {
+    final recipe = RecipesData.dessertMenu[index];
+    final delay = (delayMs * index).ms;
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => RecipePage(index: index)),
+        );
+      },
+      child:
+          Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: recipe.bgColor,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RecipeTitle(index: index, sliver: false),
+                          RecipeSubtitle(index: index, sliver: false),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child:
+                          RecipeImage(delay: delay, index: index, sliver: false)
+                              .animate()
+                              .scale(end: Offset(1.2, 1.2))
+                              .rotate(
+                                delay: delay,
+                                alignment: Alignment.center,
+                                duration: 400.ms,
+                                begin: 0.2,
+                                end: 0,
+                              )
+                              .move(end: Offset(20, 20)),
+                    ),
+                  ],
+                ),
+              )
+              .animate()
+              .fadeIn(delay: delay, duration: 300.ms)
+              .flipV(begin: downScroll ? .5 : -.5, end: 0),
+    );
+  }
+}
+
+class RecipeTitle extends StatelessWidget {
+  const RecipeTitle({super.key, required this.index, required this.sliver});
+  final int index;
+  final bool sliver;
+
+  @override
+  Widget build(BuildContext context) {
+    final recipe = RecipesData.dessertMenu[index];
+
+    return Hero(
+      tag: "RecipeTitle-$index",
+      child: Text(
+        recipe.title,
+        style: context.h5.w5.c(
+          sliver ? context.cOnSur : recipe.bgColor.getOnColor(),
+        ),
+        maxLines: 2,
+      ),
+    );
+  }
+}
+
+class RecipeSubtitle extends StatelessWidget {
+  const RecipeSubtitle({super.key, required this.index, required this.sliver});
+  final int index;
+  final bool sliver;
+
+  @override
+  Widget build(BuildContext context) {
+    final recipe = RecipesData.dessertMenu[index];
+
+    return Hero(
+      tag: "RecipeSubtitle-$index",
+      child: Text(
+        recipe.description,
+        style: context.h8.c(
+          sliver ? context.cOnSur : recipe.bgColor.getOnColor(),
+        ),
+        maxLines: 3,
+      ),
+    );
+  }
+}
+
+class RecipeImage extends StatelessWidget {
+  const RecipeImage({
+    super.key,
+    required this.delay,
+    required this.index,
+    required this.sliver,
+  });
+
+  final Duration delay;
+  final int index;
+  final bool sliver;
+
+  // static double size(bool sliver) => sliver ? 270 : 200;
+
+  @override
+  Widget build(BuildContext context) {
+    final recipe = RecipesData.dessertMenu[index];
+    return Container(
+      padding: sliver ? EdgeInsets.all(10) : null,
+      child: Hero(tag: "RecipeImage-$index", child: Image.asset(recipe.image)),
+    );
+  }
+}
+
+class RecipePage extends StatefulWidget {
+  const RecipePage({super.key, required this.index});
+
+  final int index;
+
+  @override
+  State<RecipePage> createState() => _RecipePageState();
+}
+
+class _RecipePageState extends State<RecipePage> {
+  final controller = ScrollController();
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    controller.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final recipe = RecipesData.dessertMenu[widget.index];
+
+    return Scaffold(
+      body: context.widthM2
+          ? _scroll(recipe, context)
+          : Row(
+              children: [
+                Expanded(
+                  child: Stack(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: recipe.bgColor,
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(32),
+                            bottomRight: Radius.circular(32),
+                          ),
+                        ),
+                        child: _img(),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: FilledButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.black,
+                            padding: EdgeInsets.all(24),
+                            textStyle: context.h7,
+                            shape: 0.bRound.r(32).c(Colors.transparent),
+                          ),
+                          label: Text("Back to Recipes"),
+                          icon: Icon(CupertinoIcons.arrow_left),
+                        ),
+                      ).animate().scale(),
+                    ],
+                  ),
+                ),
+                Expanded(child: _scroll(recipe, context)),
+              ],
+            ),
+    );
+  }
+
+  Widget _scroll(Recipe recipe, BuildContext context) {
+    return CustomScrollView(
+      controller: controller,
+      slivers: [
+        if (context.widthM2)
+          SliverAppBar(
+            leading: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: IconButton.filled(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                style: IconButton.styleFrom(backgroundColor: context.cSur),
+                icon: Icon(CupertinoIcons.arrow_left),
+              ).animate().scale(),
+            ),
+            pinned: true,
+            collapsedHeight: 150,
+            expandedHeight: 300,
+            backgroundColor: recipe.bgColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadiusGeometry.vertical(
+                bottom: Radius.circular(32),
+              ),
+            ),
+            flexibleSpace: _img(),
+          ),
+
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 16),
+
+                RecipeTitle(index: widget.index, sliver: true),
+
+                const SizedBox(height: 8),
+
+                RecipeSubtitle(index: widget.index, sliver: true),
+
+                const SizedBox(height: 16),
+
+                Text('INGREDIENTS', style: context.h6.w5),
+
+                // const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        ),
+
+        SliverRecipeList(recipe: recipe, ingredients: true),
+
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Text('STEPS', style: context.h6.w5),
+          ),
+        ),
+
+        SliverRecipeList(recipe: recipe, ingredients: false),
+      ],
+    );
+  }
+
+  Center _img() {
+    return Center(
+      child: RecipeImage(
+        delay: 1.ms,
+        index: widget.index,
+        sliver: true,
+      ).animate(adapter: ScrollAdapter(controller)).rotate(),
+    );
+  }
+}
+
+class SliverRecipeList extends StatelessWidget {
+  const SliverRecipeList({
+    super.key,
+    required this.recipe,
+    required this.ingredients,
+  });
+
+  final Recipe recipe;
+  final bool ingredients;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverList.builder(
+      itemCount: ingredients
+          ? recipe.ingredients.length
+          : recipe.instructions.length,
+      itemBuilder: (context, index) {
+        return Container(
+          // height: 50,
+          padding: EdgeInsets.all(8),
+          margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            border: Border.all(width: 2, color: recipe.bgColor),
+            borderRadius: BorderRadius.circular(32),
+          ),
+          child: Stack(
+            children: [
+              CircleAvatar(
+                    backgroundColor: recipe.bgColor,
+                    child: IconButton(
+                      onPressed: () {},
+                      icon: Image.asset('assets/images/chef.png'),
+                    ),
+                  )
+                  .animate()
+                  .rotate(duration: 400.ms, begin: .2, end: -.05)
+                  .move(end: Offset(-20, -20)),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(40.0, 8, 8, 8),
+                child: Text(
+                  ingredients
+                      ? recipe.ingredients[index]
+                      : recipe.instructions[index],
+                  style: context.h7.w3,
+                ),
+              ),
+            ],
+          ),
+        ).animate().fadeIn(duration: 400.ms).moveY(begin: 100, end: 0);
+      },
+    );
+  }
+}
+
+///
+///
+
+class Recipe {
+  final int id;
+  final String title;
+  final String description;
+  final List<String> ingredients;
+  final List<String> instructions;
+  final String image;
+  final String bgImageName;
+  final Color bgColor;
+
+  const Recipe({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.ingredients,
+    required this.instructions,
+    required this.image,
+    required this.bgImageName,
+    required this.bgColor,
+  });
+
+  String get bgImage =>
+      bgImageName.isEmpty ? '' : 'assets/images/desserts/$bgImageName.png';
+
+  String get bgImageLg =>
+      bgImageName.isEmpty ? '' : 'assets/images/desserts/$bgImageName-lg.png';
+}
 
 class RecipesData {
   static const List<Recipe> dessertMenu = [
@@ -308,4 +749,21 @@ class RecipesData {
       bgColor: AppColors.sugar,
     ),
   ];
+}
+
+class AppColors {
+  static const Color primary = Color(0xff7AC5C1);
+  static const Color primaryLighter = Color(0xffE6F9FF);
+  static const Color white = Color(0xffffffff);
+  static const Color realBlack = Color(0xff000000);
+  static const Color text = Color(0xff0F1E31);
+  static const Color black = Color(0xff0F1E31);
+  static const Color blackLight = Color(0xff1B2C41);
+  static const Color orangeDark = Color(0xffCE5A01);
+  static const Color yellow = Color(0xffFFEF7D);
+  static const Color sugar = Color(0xffFBF5E9);
+  static const Color honey = Color(0xffDA7C16);
+  static const Color pinkLight = Color(0xffF9B7B6);
+  static const Color green = Color(0xffADBE56);
+  static const Color red = Color(0xffCF252F);
 }

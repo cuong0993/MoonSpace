@@ -1,4 +1,3 @@
-import 'package:example/animated/animated_list_scale.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -9,7 +8,6 @@ import 'package:moonspace/form/async_text_field.dart';
 import 'package:moonspace/helper/extensions/theme_ext.dart';
 import 'package:moonspace/theme.dart';
 import 'package:moonspace/widgets/button_animated_slide.dart';
-import 'package:moonspace/form/sherlock.dart';
 import 'package:moonspace/widgets/ratings.dart';
 
 class Quiz extends StatelessWidget {
@@ -177,8 +175,17 @@ class Quiz extends StatelessWidget {
                 SizedBox(height: 12),
 
                 GridView.count(
-                  crossAxisCount: AppTheme.isMobile ? 2 : 4,
-                  childAspectRatio: ((3.5, 5).c, (1, 5).c, (1, 6).c).r,
+                  crossAxisCount: context.width1 ? 2 : 4,
+                  childAspectRatio: context
+                      .r(
+                        (3.5, 5).c,
+                        (1, 5).c,
+                        (1, 6).c,
+                        (1, 6).c,
+                        (1, 6).c,
+                        (1, 6).c,
+                      )
+                      .toDouble(),
                   mainAxisSpacing: 16,
                   crossAxisSpacing: 16,
                   shrinkWrap: true,
@@ -816,25 +823,6 @@ class _DetailsViewState extends State<DetailsView> {
                 "Details about $category go here.",
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
-            ),
-          ),
-
-          // Sliver List with animated tiles
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              // (context, i) => _buildAnimatedTile(context, i),
-              (context, i) => AnimatedScrollViewItem(
-                index: i,
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 15),
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade100,
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-              ),
-              childCount: 100,
             ),
           ),
         ],

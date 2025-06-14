@@ -120,6 +120,36 @@ extension SuperContext on BuildContext {
   TargetPlatform get android => TargetPlatform.android;
 
   //
+  double get width => mq.size.width;
+  bool get width1 => width <= 450;
+  bool get width2 => width > 450 && width <= 700;
+  bool get width3 => width > 700 && width <= 950;
+  bool get width4 => width > 950 && width <= 1200;
+  bool get width5 => width > 1200 && width <= 1500;
+  bool get width6 => width > 1500;
+
+  bool get widthM2 => width <= 700;
+  bool get widthM3 => width <= 950;
+  bool get widthM4 => width <= 1200;
+  bool get widthM5 => width <= 1500;
+
+  num r(num w1, num w2, num w3, num w4, num w5, num w6) {
+    if (width1) {
+      return w1;
+    } else if (width2) {
+      return w2;
+    } else if (width3) {
+      return w3;
+    } else if (width4) {
+      return w4;
+    } else if (width5) {
+      return w5;
+    } else {
+      return w6;
+    }
+  }
+
+  //
   MediaQueryData get mq => MediaQuery.of(this);
   double get pixelsPerInch => Platform.isAndroid || Platform.isIOS ? 150 : 96;
 

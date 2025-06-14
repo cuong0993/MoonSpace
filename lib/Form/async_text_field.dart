@@ -115,13 +115,10 @@ class _AsyncTextFormFieldState<T> extends State<AsyncTextFormField<T>> {
 
   @override
   void initState() {
-    textCon =
-        widget.controller ??
-        TextEditingController(
-          text: widget.initialValue != null
-              ? widget.valueFormatter(widget.initialValue as T)
-              : '',
-        );
+    textCon = (widget.controller ?? TextEditingController())
+      ..text = widget.initialValue != null
+          ? widget.valueFormatter(widget.initialValue as T)
+          : '';
 
     validateStream = createDebounceFunc(widget.milliseconds, (
       String? value,
