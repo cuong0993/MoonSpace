@@ -9,11 +9,13 @@ class CurvedCarousel extends StatelessWidget {
     this.width = 170,
     this.controller,
     this.rotationMultiplier = 0.2,
+    this.xMultiplier = 3,
     this.yMultiplier = 50,
     this.scaleMin = 0.9,
     this.opacityMin = 0.5,
     this.alignment = Alignment.center,
-    required this.builder,
+    this.staticBuilder,
+    this.animatedBuilder,
   });
 
   final int count;
@@ -23,14 +25,20 @@ class CurvedCarousel extends StatelessWidget {
   final double rotationMultiplier;
   final double scaleMin;
   final double opacityMin;
+  final double xMultiplier;
   final double yMultiplier;
   final Alignment? alignment;
-  final Widget Function(int index) builder;
+  final Widget Function(int index)? staticBuilder;
+  final Widget Function(int index, double ratio)? animatedBuilder;
 
   @override
   Widget build(BuildContext context) {
-    // Build a list of widgets for the carousel items:
-    List<Widget> items = List.generate(count, (i) => builder(i));
+    assert(!(staticBuilder == null && animatedBuilder == null));
+
+    List<Widget> items = List.generate(
+      count,
+      (i) => staticBuilder?.call(i) ?? const SizedBox(),
+    );
 
     Widget carousel = CustomCarousel(
       itemCountBefore: 2,
@@ -41,27 +49,27 @@ class CurvedCarousel extends StatelessWidget {
       loop: true,
       depthOrder: DepthOrder.selectedInFront,
       tapToSelect: false,
-      effectsBuilder: (_, ratio, child) {
+      effectsBuilder: (index, ratio, child) {
         double angle = ratio * rotationMultiplier;
         double distance = ratio.abs();
 
         double scale = (1 - distance).clamp(scaleMin, 1.0);
         double opacity = (1 - distance).clamp(opacityMin, 1.0);
 
-        double yOffset = distance * yMultiplier;
-
         return Opacity(
           opacity: opacity,
           child: Transform.translate(
-            offset: Offset(ratio * width * 3, yOffset),
+            offset: Offset(ratio * width * xMultiplier, distance * yMultiplier),
             child: Transform.rotate(
               angle: angle,
-              child: Transform.scale(scale: scale, child: child),
+              child: Transform.scale(
+                scale: scale,
+                child: animatedBuilder?.call(index, ratio) ?? child,
+              ),
             ),
           ),
         );
       },
-      // Pass in the list of widgets we created above:
       children: items,
     );
 

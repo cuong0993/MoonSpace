@@ -12,6 +12,7 @@ import 'package:example/carousel/flutter_custom_carousel/views/opacity_stack.dar
 import 'package:example/carousel/flutter_custom_carousel/views/read_me_example.dart';
 import 'package:example/carousel/flutter_custom_carousel/views/record_box_view.dart';
 import 'package:example/carousel/flutter_custom_carousel/views/rotate.dart';
+import 'package:example/carousel/parallax.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_custom_carousel/flutter_custom_carousel.dart';
@@ -29,6 +30,8 @@ class Carouselmain extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 64.0),
           child: Column(
             children: [
+              Parallax(),
+
               CarouselExample(),
 
               Padding(

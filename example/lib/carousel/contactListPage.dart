@@ -188,11 +188,11 @@ class _PerspectiveListViewState extends State<PerspectiveListView> {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      widget.backItemsShadowColor.withOpacity(0.8),
-                      widget.backItemsShadowColor.withOpacity(0),
-                      widget.backItemsShadowColor.withOpacity(0),
-                      widget.backItemsShadowColor.withOpacity(0),
-                      widget.backItemsShadowColor.withOpacity(0),
+                      widget.backItemsShadowColor.withAlpha(200),
+                      widget.backItemsShadowColor.withAlpha(0),
+                      widget.backItemsShadowColor.withAlpha(0),
+                      widget.backItemsShadowColor.withAlpha(0),
+                      widget.backItemsShadowColor.withAlpha(0),
                     ],
                   ),
                 ),
@@ -261,7 +261,6 @@ class _PerspectiveItems extends StatelessWidget {
                   final endPositionPercent = index / generateItems;
                   return (currentIndex > invertedIndex)
                       ? _TransformedItem(
-                          child: children[currentIndex - (invertedIndex + 1)],
                           heightItem: heightItem,
                           factorChange: pagePercent,
                           scale: lerpDouble(0.5, 1.0, positionPercent)!,
@@ -269,17 +268,18 @@ class _PerspectiveItems extends StatelessWidget {
                           translateY: (height - heightItem) * positionPercent,
                           endTranslateY:
                               (height - heightItem) * endPositionPercent,
+                          child: children[currentIndex - (invertedIndex + 1)],
                         )
                       : const SizedBox();
                 })
                 ..add(
                   (currentIndex < children.length + 1)
                       ? _TransformedItem(
-                          child: children[currentIndex + 1],
                           heightItem: heightItem,
                           factorChange: pagePercent,
                           translateY: height + 20,
                           endTranslateY: height - heightItem,
+                          child: children[currentIndex + 1],
                         )
                       : const SizedBox(),
                 )
@@ -287,10 +287,10 @@ class _PerspectiveItems extends StatelessWidget {
                   0,
                   currentIndex > generateItems - 1
                       ? _TransformedItem(
-                          child: children[currentIndex - generateItems],
                           heightItem: heightItem,
                           factorChange: 1.0,
                           endScale: 0.5,
+                          child: children[currentIndex - generateItems],
                         )
                       : const SizedBox(),
                 ),

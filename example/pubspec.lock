@@ -9,22 +9,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "82.0.0"
-  adaptive_breakpoints:
-    dependency: transitive
-    description:
-      name: adaptive_breakpoints
-      sha256: "56dd5f1016f4d5732b80628d1b63a29d8c9cabe4d66a8a5fe63fdbec7b3af5cd"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.7"
-  adaptive_navigation:
-    dependency: "direct main"
-    description:
-      name: adaptive_navigation
-      sha256: "87c08c5c8b954f2266518c1efb98a1d0ae09cd8cbef69c4d4fd7ea28d4b9fd51"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.10"
   analyzer:
     dependency: transitive
     description:
@@ -313,14 +297,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.3"
-  faker:
-    dependency: "direct main"
-    description:
-      name: faker
-      sha256: "544c34e9e1d322824156d5a8d451bc1bb778263b892aded24ec7ba77b0706624"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.0"
   feedback:
     dependency: transitive
     description:
@@ -437,16 +413,8 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  freezed:
-    dependency: "direct dev"
-    description:
-      name: freezed
-      sha256: "6022db4c7bfa626841b2a10f34dd1e1b68e8f8f9650db6112dcdeeca45ca793c"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.6"
   freezed_annotation:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: freezed_annotation
       sha256: c87ff004c8aa6af2d531668b46a4ea379f7191dc6dfa066acd53d506da6e044b
@@ -582,21 +550,13 @@ packages:
     source: hosted
     version: "0.7.2"
   json_annotation:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: json_annotation
       sha256: "1ce844379ca14835a50d2f019a3099f419082cfdd231cd86a142af94dd5c6bb1"
       url: "https://pub.dev"
     source: hosted
     version: "4.9.0"
-  json_serializable:
-    dependency: "direct dev"
-    description:
-      name: json_serializable
-      sha256: c50ef5fc083d5b5e12eef489503ba3bf5ccc899e487d691584699b4bdefeea8c
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.9.5"
   leak_tracker:
     dependency: transitive
     description:

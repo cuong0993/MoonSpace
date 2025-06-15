@@ -102,7 +102,7 @@ class CoverSliderView extends StatelessWidget {
 }
 
 class _Card extends StatelessWidget {
-  const _Card(this.category, this.index, {Key? key}) : super(key: key);
+  const _Card(this.category, this.index);
 
   final String category;
   final int index;

@@ -1,4 +1,3 @@
-import 'package:faker/faker.dart' hide Image, Color;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:smooth_sheets/smooth_sheets.dart';
@@ -253,11 +252,11 @@ class _House {
 
   factory _House.random() {
     return _House(
-      title: '${faker.address.city()}, ${faker.address.country()}',
-      rating: faker.randomGenerator.decimal(scale: 1.5, min: 3.5),
-      distance: faker.randomGenerator.integer(300, min: 50),
-      charge: faker.randomGenerator.integer(2000, min: 500),
-      image: faker.image.loremPicsum(width: 300, height: 300),
+      title: 'address country',
+      rating: 2,
+      distance: 200,
+      charge: 800,
+      image: "",
     );
   }
 

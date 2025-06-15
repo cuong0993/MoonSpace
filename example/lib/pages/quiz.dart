@@ -130,7 +130,7 @@ class Quiz extends StatelessWidget {
                 CurvedCarousel(
                   count: 6,
                   height: 280,
-                  builder: (index) {
+                  staticBuilder: (index) {
                     return FriendCard("c", index + 1);
                   },
                 ),
@@ -159,8 +159,6 @@ class Quiz extends StatelessWidget {
                   ),
                 ),
 
-                Container(height: 100),
-
                 SizedBox(height: 16),
 
                 Text(
@@ -179,15 +177,15 @@ class Quiz extends StatelessWidget {
                   childAspectRatio: context
                       .r(
                         (3.5, 5).c,
-                        (1, 5).c,
-                        (1, 6).c,
-                        (1, 6).c,
-                        (1, 6).c,
-                        (1, 6).c,
+                        (2.5, 4).c,
+                        (3, 6).c,
+                        (3, 6).c,
+                        (3, 6).c,
+                        (3, 6).c,
                       )
                       .toDouble(),
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 8,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   children: List.generate(4, (index) {
@@ -198,7 +196,7 @@ class Quiz extends StatelessWidget {
                             ? context.cs.secondary
                             : context.cs.surface,
                         elevation: 0,
-                        shape: 1.bRound.r(32).c(context.cs.outline),
+                        shape: 1.bRound.r(16).c(context.cs.outline),
                       ),
                       child: Text(
                         'Button ${index + 1}',

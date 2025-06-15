@@ -1,15 +1,8 @@
-import 'dart:math';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:moonspace/carousel/curved_carousel.dart';
-import 'package:moonspace/form/sherlock.dart';
 import 'package:moonspace/helper/extensions/theme_ext.dart';
 
-import 'package:faker/faker.dart' hide Image, Color;
 import 'package:flutter/services.dart';
 import 'package:smooth_sheets/smooth_sheets.dart';
 

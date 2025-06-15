@@ -1,4 +1,6 @@
 import 'package:example/carousel/carouselmain.dart';
+import 'package:example/l10n/app_localizations.dart';
+import 'package:example/pages/compass.dart';
 import 'package:example/pages/manager.dart';
 import 'package:example/pages/music.dart';
 import 'package:example/pages/quiz.dart';
@@ -19,53 +21,19 @@ import 'package:moonspace/helper/extensions/theme_ext.dart';
 import 'package:moonspace/provider/global_theme.dart';
 import 'package:moonspace/theme.dart';
 import 'package:moonspace/widgets/functions.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:example/renderobject/main.dart';
-import 'package:example/vignettes/basketball_ptr/lib/main.dart';
-import 'package:example/vignettes/constellations_list/lib/main.dart';
-import 'package:example/vignettes/dark_ink_transition/main.dart';
-import 'package:example/vignettes/drink_rewards_list/main.dart';
-import 'package:example/vignettes/gooey_edge/lib/main.dart';
-import 'package:example/vignettes/parallax_travel_cards_hero/lib/main.dart';
-import 'package:example/vignettes/parallax_travel_cards_list/main.dart';
-import 'package:example/vignettes/particle_swipe/lib/main.dart';
-import 'package:example/vignettes/product_detail_zoom/lib/main.dart';
-import 'package:example/vignettes/sparkle_party/lib/main.dart';
-import 'package:example/vignettes/spending_tracker/lib/main.dart';
-import 'package:example/vignettes/ticket_fold/lib/main.dart';
 
 import 'package:moonspace/widgets/animated/neon_button.dart';
-import 'package:moonspace/widgets/loader.dart';
 
 void main() {
-  // runApp(DarkInkTransition());
-  // runApp(DrinkRewardList());
-  runApp(ParallaxTravelCardsList());
-
-  // runApp(BasketballPtr());
-  // runApp(ConstellationsList());
-  // runApp(GooeyEdgeApp());
-  // runApp(ParallaxTravelcardsHero());
-  // runApp(ParticleSwipe());
-  // runApp(ProductDetailZoom());
-  // runApp(SparklePartyApp());
-  // runApp(SpendingTracker());
-  // runApp(TicketFoldApp());
-
-  // Compassmain();
-
-  // runApp(RenderHome());
-
   // runApp(const GoRouterApp());
-
   // runApp(const SmoothSheetApp());
-
-  return;
 
   electrify(
     title: "Home",
     before: (widgetsBinding) {},
     after: () {},
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
     themes: [
       AppTheme(
         name: "quiz",
@@ -127,12 +95,6 @@ void main() {
           },
         ),
         GoRoute(
-          path: "/render",
-          builder: (context, state) {
-            return RenderHome();
-          },
-        ),
-        GoRoute(
           path: "/carousel",
           builder: (context, state) {
             return Carouselmain();
@@ -162,6 +124,7 @@ void main() {
             return RecipeApp();
           },
         ),
+        ...compassRoutes,
         GoRoute(
           path: "/music",
           builder: (context, state) {
@@ -810,12 +773,6 @@ class ThemeSettings extends StatelessWidget {
             ),
             ListTile(
               onTap: () {
-                context.push("/render");
-              },
-              title: Text("Render"),
-            ),
-            ListTile(
-              onTap: () {
                 context.push("/carousel");
               },
               title: Text("Carousel"),
@@ -837,6 +794,12 @@ class ThemeSettings extends StatelessWidget {
                 context.push("/manager");
               },
               title: Text("Manager"),
+            ),
+            ListTile(
+              onTap: () {
+                context.push("/compass");
+              },
+              title: Text("Compass"),
             ),
             ListTile(
               onTap: () {

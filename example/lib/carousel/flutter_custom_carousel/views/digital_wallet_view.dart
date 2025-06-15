@@ -162,9 +162,9 @@ class _Card extends StatelessWidget {
           children: [
             Image.asset(
               'assets/images/digital_wallet/${account.logo}',
-              width: 32,
+              width: 16,
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 6),
             Text(
               account.name,
               style: const TextStyle(fontWeight: FontWeight.w300),

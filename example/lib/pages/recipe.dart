@@ -388,7 +388,7 @@ class SliverRecipeList extends StatelessWidget {
                     backgroundColor: recipe.bgColor,
                     child: IconButton(
                       onPressed: () {},
-                      icon: Image.asset('assets/images/chef.png'),
+                      icon: Image.asset('assets/desserts/chef.png'),
                     ),
                   )
                   .animate()
@@ -436,10 +436,10 @@ class Recipe {
   });
 
   String get bgImage =>
-      bgImageName.isEmpty ? '' : 'assets/images/desserts/$bgImageName.png';
+      bgImageName.isEmpty ? '' : 'assets/desserts/$bgImageName.png';
 
   String get bgImageLg =>
-      bgImageName.isEmpty ? '' : 'assets/images/desserts/$bgImageName-lg.png';
+      bgImageName.isEmpty ? '' : 'assets/desserts/$bgImageName-lg.png';
 }
 
 class RecipesData {
@@ -463,7 +463,7 @@ class RecipesData {
         'Line the base of a 20cm loose bottomed cake tin with baking parchment. Press the biscuit into the bottom of the tin and chill in the fridge while making the topping.'
             'Beat together the mascarpone, caster sugar, lemon zest and juice, until smooth and creamy. Spread over the base and chill for a couple of hours.',
       ],
-      image: 'assets/images/desserts/01-lemon-cheesecake.png',
+      image: 'assets/desserts/01-lemon-cheesecake.png',
       bgImageName: '01-lemon-cheesecake-bg',
       bgColor: AppColors.yellow,
     ),
@@ -499,7 +499,7 @@ class RecipesData {
         'Add a dollop of buttercream to one macaron shell. Top it with another macaron shell to create a sandwich. Repeat with remaining macaron shells and buttercream.',
         'Place in an airtight container for 24 hours to “bloom”.',
       ],
-      image: 'assets/images/desserts/05-macaroons.png',
+      image: 'assets/desserts/05-macaroons.png',
       bgImageName: '',
       bgColor: AppColors.primary,
     ),
@@ -510,7 +510,7 @@ class RecipesData {
           "Bake these easy vanilla cupcakes in just 35 minutes. Perfect for birthdays, picnics or whenever you fancy a sweet treat, they're sure to be a crowd-pleaser",
       ingredients: [''],
       instructions: [''],
-      image: 'assets/images/desserts/08-cream-cupcakes.png',
+      image: 'assets/desserts/08-cream-cupcakes.png',
       bgImageName: '',
       bgColor: AppColors.pinkLight,
     ),
@@ -534,7 +534,7 @@ class RecipesData {
         'To make the cheesecake, melt the chocolate in short bursts in the microwave, then leave to cool slightly. Whip the cream in a large bowl using an electric whisk until soft peaks form, then fold in the cocoa powder. Beat the cream cheese and sugar together, then fold in the cream mixture and the cooled chocolate.',
         'Spoon the cheesecake mixture over the biscuit base, levelling it out with the back of a spoon. Transfer to the freezer and freeze for 2 hrs, or until set. Remove from the tin and leave at room temperature to soften for about 20 mins before serving.',
       ],
-      image: 'assets/images/desserts/02-chocolate-cake-1.png',
+      image: 'assets/desserts/02-chocolate-cake-1.png',
       bgImageName: '',
       bgColor: AppColors.orangeDark,
     ),
@@ -545,7 +545,7 @@ class RecipesData {
           "Melons - they're firmer so make a great base for the softer berries and fruits. Tropical fruit - the top of a pineapple can be included for height, while dragonfruit looks vibrant.",
       ingredients: [''],
       instructions: [''],
-      image: 'assets/images/desserts/09-fruit-plate.png',
+      image: 'assets/desserts/09-fruit-plate.png',
       bgImageName: '',
       bgColor: AppColors.green,
     ),
@@ -576,7 +576,7 @@ class RecipesData {
         'Make the chocolate glaze: Melt the chocolate, heavy cream, and butter gently in the microwave (in 30-second intervals, stirring in between) or a double boiler until smooth. Dip the tops of the donuts into the chocolate glaze, and place on a cooling rack to set.',
         'Donuts are best eaten the same day or keep them for up to 3 days in the refrigerator.',
       ],
-      image: 'assets/images/desserts/03-chocolate-donuts.png',
+      image: 'assets/desserts/03-chocolate-donuts.png',
       bgImageName: '',
       bgColor: AppColors.sugar,
     ),
@@ -587,7 +587,7 @@ class RecipesData {
           'Jam-packed with fresh strawberries, this strawberry cake is one of the simplest, most delicious cakes you’ll ever make.',
       ingredients: [''],
       instructions: [''],
-      image: 'assets/images/desserts/13-strawberry-powdered-cake.png',
+      image: 'assets/desserts/13-strawberry-powdered-cake.png',
       bgImageName: '',
       bgColor: AppColors.red,
     ),
@@ -618,7 +618,7 @@ class RecipesData {
         'Cool the cakes in their pans on a wire rack for 10 minutes, then loosen the edges by running a knife along the sides of the pan. Turn the cakes out onto the racks and cool for at least 1 hour before frosting.',
         'Frost with your choice of frosting and enjoy.',
       ],
-      image: 'assets/images/desserts/04-fluffy-cake.png',
+      image: 'assets/desserts/04-fluffy-cake.png',
       bgImageName: '',
       bgColor: AppColors.orangeDark,
     ),
@@ -653,7 +653,7 @@ class RecipesData {
         'To make Frosting: In a medium bowl, combine 6 ounces white chocolate, 2 1/2 tablespoons flour and 1 cup milk. Cook over medium heat, stirring constantly, until mixture is very thick. Cool completely.',
         'In large bowl, cream 1 cup butter, 1 cup sugar and 1 teaspoon vanilla; beat until light and fluffy. Gradually add cooled white chocolate mixture. Beat at high speed until it is the consistency of whipped cream. Spread between layers, on top and sides of cake.',
       ],
-      image: 'assets/images/desserts/06-white-cream-cake.png',
+      image: 'assets/desserts/06-white-cream-cake.png',
       bgImageName: '',
       bgColor: AppColors.sugar,
     ),
@@ -664,7 +664,7 @@ class RecipesData {
           'Bake a hearty fruit pie for dessert. Our collection of year-round pastry classics includes apple & blackberry, summer berries, lemon meringue and mince pies.',
       ingredients: [''],
       instructions: [''],
-      image: 'assets/images/desserts/14-fruit-pie.png',
+      image: 'assets/desserts/14-fruit-pie.png',
       bgImageName: '',
       bgColor: AppColors.yellow,
     ),
@@ -700,7 +700,7 @@ class RecipesData {
         'Place a cake layer on a parchment paper round on a pizza pan or serving plate. Spread a cup of frosting evenly on top, almost to the edge. Repeat with cake layers and frosting, pressing layers in smooth-side down. Place last cake layer smooth-side up. Frost top and sides of cake. Cover with crumbs; clean any excess crumbs around base.',
         'Cover with plastic wrap and refrigerate for at least 8 hours to overnight. Transfer to a cake stand using 2 spatulas. Cut and serve.',
       ],
-      image: 'assets/images/desserts/07-honey-cake.png',
+      image: 'assets/desserts/07-honey-cake.png',
       bgImageName: '',
       bgColor: AppColors.honey,
     ),
@@ -711,7 +711,7 @@ class RecipesData {
           'Heavy on the butter and nutmeg, this cake has all the flavors of your favorite cake donut in a convenient square shape.',
       ingredients: [''],
       instructions: [''],
-      image: 'assets/images/desserts/11-powdered-cake.png',
+      image: 'assets/desserts/11-powdered-cake.png',
       bgImageName: '',
       bgColor: AppColors.sugar,
     ),
@@ -722,7 +722,7 @@ class RecipesData {
           "We'll admit it: we go a little crazy during strawberry season. Though easy to grow, these sweet berries just taste better when you get them in season, as opposed to buying them at other times of the year.",
       ingredients: [''],
       instructions: [''],
-      image: 'assets/images/desserts/10-strawberries.png',
+      image: 'assets/desserts/10-strawberries.png',
       bgImageName: '',
       bgColor: AppColors.red,
     ),
@@ -733,7 +733,7 @@ class RecipesData {
           'The Best Chocolate Cake Recipe – A one bowl chocolate cake recipe that is quick, easy, and delicious! Updated with gluten-free, dairy-free, and egg-free options!',
       ingredients: [''],
       instructions: [''],
-      image: 'assets/images/desserts/12-chocolate-cake-2.png',
+      image: 'assets/desserts/12-chocolate-cake-2.png',
       bgImageName: '',
       bgColor: AppColors.orangeDark,
     ),
@@ -744,7 +744,7 @@ class RecipesData {
           "This was my grandmother's apple pie recipe. I have never seen another one quite like it. It will always be my favorite and has won me several first place prizes in local competitions.",
       ingredients: [''],
       instructions: [''],
-      image: 'assets/images/desserts/15-apple-pie.png',
+      image: 'assets/desserts/15-apple-pie.png',
       bgImageName: '',
       bgColor: AppColors.sugar,
     ),

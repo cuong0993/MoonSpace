@@ -1,0 +1,506 @@
+[
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9xjb.jpg",
+        "name": "Resident Evil: Requiem",
+        "date": "27 Feb, 2026",
+        "platform": "gamepad\nSeries X|S, PC, PS5"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9gam.jpg",
+        "name": "Clair Obscur: Expedition 33",
+        "date": "24 Apr, 2025",
+        "platform": "gamepad\nSeries X|S, PC, PS5"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9wy4.jpg",
+        "name": "Silent Hill f",
+        "date": "25 Sep, 2025",
+        "platform": "gamepad\nSeries X|S, PC, PS5"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co6lxr.jpg",
+        "name": "Lies of P",
+        "date": "18 Sep, 2023",
+        "platform": "gamepad\nSeries X|S, PS4, PC, PS5, Mac, XONE"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co95gk.jpg",
+        "name": "Elden Ring: Nightreign",
+        "date": "30 May, 2025",
+        "platform": "gamepad\nSeries X|S, PS4, PC, PS5, XONE"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co4jni.jpg",
+        "name": "Elden Ring",
+        "date": "25 Feb, 2022",
+        "platform": "gamepad\nSeries X|S, PS4, Switch 2, PC, PS5, XONE"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co7497.jpg",
+        "name": "Cyberpunk 2077",
+        "date": "10 Dec, 2020",
+        "platform": "gamepad\nStadia, Series X|S, PS4, PC, PS5, Mac, XONE"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1q1f.jpg",
+        "name": "Red Dead Redemption 2",
+        "date": "26 Oct, 2018",
+        "platform": "gamepad\nStadia, PS4, PC, XONE"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co5s5v.jpg",
+        "name": "God of War Ragnarök",
+        "date": "9 Nov, 2022",
+        "platform": "gamepad\nPS4, PC, PS5"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co2zpu.jpg",
+        "name": "Resident Evil Village",
+        "date": "6 May, 2021",
+        "platform": "gamepad\nStadia, Series X|S, PS4, PC, iOS, PS5, Mac, XONE, Switch"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9xio.jpg",
+        "name": "Ill",
+        "date": "gamepad",
+        "platform": "Series X|S, PC, PS5"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co2a23.jpg",
+        "name": "Sekiro: Shadows Die Twice",
+        "date": "22 Mar, 2019",
+        "platform": "gamepad\nStadia, PS4, PC, XONE"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9xjb.jpg",
+        "name": "Resident Evil: Requiem",
+        "date": "27 Feb, 2026",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9wy4.jpg",
+        "name": "Silent Hill f",
+        "date": "25 Sep, 2025",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9gam.jpg",
+        "name": "Clair Obscur: Expedition 33",
+        "date": "24 Apr, 2025",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9s0t.jpg",
+        "name": "Stellar Blade",
+        "date": "26 Apr, 2024",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1q1f.jpg",
+        "name": "Red Dead Redemption 2",
+        "date": "26 Oct, 2018",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co95gk.jpg",
+        "name": "Elden Ring: Nightreign",
+        "date": "30 May, 2025",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1vcf.jpg",
+        "name": "Dark Souls III",
+        "date": "24 Mar, 2016",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co2zpu.jpg",
+        "name": "Resident Evil Village",
+        "date": "6 May, 2021",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co5xex.jpg",
+        "name": "The Last of Us Part I",
+        "date": "1 Sep, 2022",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co2a23.jpg",
+        "name": "Sekiro: Shadows Die Twice",
+        "date": "22 Mar, 2019",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co4jni.jpg",
+        "name": "Elden Ring",
+        "date": "25 Feb, 2022",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9xio.jpg",
+        "name": "Ill",
+        "date": "No Date",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co5vmg.jpg",
+        "name": "The Legend of Zelda: Tears of the Kingdom",
+        "date": "12 May, 2023",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co8zsb.jpg",
+        "name": "Xenoblade Chronicles X: Definitive Edition",
+        "date": "20 Mar, 2025",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1zjz.jpg",
+        "name": "Pokémon: Let's Go, Eevee!",
+        "date": "16 Nov, 2018",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co22a9.jpg",
+        "name": "Luigi's Mansion 3",
+        "date": "31 Oct, 2019",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co27kt.jpg",
+        "name": "Xenoblade Chronicles: Definitive Edition",
+        "date": "29 May, 2020",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co2oil.jpg",
+        "name": "New Pokémon Snap",
+        "date": "29 Apr, 2021",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co7q7n.jpg",
+        "name": "Captain Toad: Treasure Tracker + Special Episode",
+        "date": "13 Feb, 2019",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co3p4a.jpg",
+        "name": "Hyrule Warriors: Age of Calamity",
+        "date": "19 Nov, 2020",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co3vlw.jpg",
+        "name": "Kirby and the Forgotten Land",
+        "date": "25 Mar, 2022",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co88er.jpg",
+        "name": "Luigi's Mansion 2 HD",
+        "date": "27 Jun, 2024",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co8d9b.jpg",
+        "name": "The Legend of Zelda: Echoes of Wisdom",
+        "date": "26 Sep, 2024",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co8ak5.jpg",
+        "name": "Thomas Was Alone",
+        "date": "24 Jul, 2012",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9coo.jpg",
+        "name": "Ghost of Yotei",
+        "date": "2 Oct, 2025",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9ipx.jpg",
+        "name": "Death Stranding 2: On The Beach",
+        "date": "26 Jun, 2025",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9wy4.jpg",
+        "name": "Silent Hill f",
+        "date": "25 Sep, 2025",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9xjb.jpg",
+        "name": "Resident Evil: Requiem",
+        "date": "27 Feb, 2026",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co8hl0.jpg",
+        "name": "Astro Bot",
+        "date": "6 Sep, 2024",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9rwo.jpg",
+        "name": "Grand Theft Auto VI",
+        "date": "26 May, 2026",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9xuo.jpg",
+        "name": "Resonance: A Plague Tale Legacy",
+        "date": "31 Dec, 2026",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9xio.jpg",
+        "name": "Ill",
+        "date": "No Date",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co6lxr.jpg",
+        "name": "Lies of P",
+        "date": "18 Sep, 2023",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9xoc.jpg",
+        "name": "Echoes of the End",
+        "date": "30 Sep, 2025",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9vum.jpg",
+        "name": "Hell is Us",
+        "date": "4 Sep, 2025",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co8ps1.jpg",
+        "name": "Hela",
+        "date": "No Date",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co2crj.jpg",
+        "name": "Ghost of Tsushima",
+        "date": "17 Jul, 2020",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1rba.jpg",
+        "name": "Bloodborne",
+        "date": "24 Mar, 2015",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1nc7.jpg",
+        "name": "Doom",
+        "date": "12 May, 2016",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1sh7.jpg",
+        "name": "Nioh 2",
+        "date": "13 Mar, 2020",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1rqa.jpg",
+        "name": "Rise of the Tomb Raider",
+        "date": "10 Nov, 2015",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1r7h.jpg",
+        "name": "Uncharted 4: A Thief's End",
+        "date": "10 May, 2016",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1tps.jpg",
+        "name": "Uncharted: The Nathan Drake Collection",
+        "date": "7 Oct, 2015",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1q1f.jpg",
+        "name": "Red Dead Redemption 2",
+        "date": "26 Oct, 2018",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1r69.jpg",
+        "name": "Code Vein",
+        "date": "26 Sep, 2019",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co2a23.jpg",
+        "name": "Sekiro: Shadows Die Twice",
+        "date": "22 Mar, 2019",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1rqt.jpg",
+        "name": "Judgment",
+        "date": "13 Dec, 2018",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co2oy0.jpg",
+        "name": "Stubbs the Zombie in Rebel Without a Pulse",
+        "date": "18 Oct, 2005",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9xwq.jpg",
+        "name": "Clockwork Revolution",
+        "date": "No Date",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9rwo.jpg",
+        "name": "Grand Theft Auto VI",
+        "date": "26 May, 2026",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co8ype.jpg",
+        "name": "The Alters",
+        "date": "13 Jun, 2025",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co6lf7.jpg",
+        "name": "Crypt Custodian",
+        "date": "27 Aug, 2024",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co8eda.jpg",
+        "name": "Beyond Good & Evil: 20th Anniversary Edition",
+        "date": "25 Jun, 2024",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co99rj.jpg",
+        "name": "The Blood of Dawnwalker",
+        "date": "31 Dec, 2026",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co8bp2.jpg",
+        "name": "Mixtape",
+        "date": "31 Dec, 2025",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9qak.jpg",
+        "name": "Revenge of the Savage Planet",
+        "date": "8 May, 2025",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co8pg0.jpg",
+        "name": "Herdling",
+        "date": "30 Sep, 2025",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9b3p.jpg",
+        "name": "Ninja Gaiden 4",
+        "date": "21 Oct, 2025",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9xyv.jpg",
+        "name": "High on Life 2",
+        "date": "31 Mar, 2026",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9xwo.jpg",
+        "name": "Grounded 2",
+        "date": "No Date",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co4qfn.jpg",
+        "name": "Assassin's Creed IV Black Flag",
+        "date": "29 Oct, 2013",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1qqh.jpg",
+        "name": "Contrast",
+        "date": "15 Nov, 2013",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1vzu.jpg",
+        "name": "Alien: Isolation",
+        "date": "6 Oct, 2014",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co5qgf.jpg",
+        "name": "Bloodstained: Ritual of the Night",
+        "date": "18 Jun, 2019",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co2mll.jpg",
+        "name": "Mafia III",
+        "date": "7 Oct, 2016",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co2807.jpg",
+        "name": "Halo Wars 2",
+        "date": "21 Feb, 2017",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co5zky.jpg",
+        "name": "Dead by Daylight",
+        "date": "14 Jun, 2016",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co2s0m.jpg",
+        "name": "Ori and the Blind Forest: Definitive Edition",
+        "date": "11 Mar, 2016",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1uv1.jpg",
+        "name": "BioShock: The Collection",
+        "date": "13 Sep, 2016",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co268v.jpg",
+        "name": "Tomb Raider: Definitive Edition",
+        "date": "28 Jan, 2014",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1w53.jpg",
+        "name": "Graveyard Keeper",
+        "date": "15 Aug, 2018",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1r69.jpg",
+        "name": "Code Vein",
+        "date": "26 Sep, 2019",
+        "platform": "No Platform"
+    }
+]
