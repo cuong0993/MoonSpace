@@ -3,7 +3,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moonspace/carousel/curved_carousel.dart';
 import 'package:moonspace/helper/extensions/theme_ext.dart';
-import 'package:moonspace/theme.dart';
 
 class Parallax extends StatelessWidget {
   const Parallax({super.key});
@@ -11,7 +10,7 @@ class Parallax extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CurvedCarousel(
-      count: DemoData._cities.length,
+      count: DemoData.cities.length,
       height: 350,
       width: 230,
       scaleMin: 1,
@@ -21,7 +20,7 @@ class Parallax extends StatelessWidget {
       animatedBuilder: (index, ratio) {
         return TravelCardRenderer(
           ratio,
-          city: DemoData._cities[index],
+          city: DemoData.cities[index],
           cardHeight: 340,
           cardWidth: 280,
         );
@@ -181,7 +180,7 @@ class Hotel {
 }
 
 class DemoData {
-  static List<City> get _cities => [
+  static List<City> get cities => [
     City(
       name: 'Pisa',
       title: 'Pisa, Italy',
@@ -282,6 +281,6 @@ class DemoData {
     ),
   ];
 
-  List<City> getCities() => _cities;
+  List<City> getCities() => cities;
   List<Hotel> getHotels(City city) => city.hotels;
 }

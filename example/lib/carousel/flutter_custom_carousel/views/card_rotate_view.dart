@@ -104,7 +104,7 @@ class _Card extends StatelessWidget {
       decoration: BoxDecoration(
         image: DecorationImage(
           image: AssetImage(
-            'assets/images/cover_slider/food-$category-$index.jpg',
+            'assets/images/cover_slider/food-$category-${(index % 6) + 1}.jpg',
           ),
           fit: BoxFit.cover,
         ),
@@ -140,7 +140,7 @@ class _DetailView extends StatelessWidget {
       decoration: BoxDecoration(
         image: DecorationImage(
           image: AssetImage(
-            'assets/images/cover_slider/food-$category-$index.jpg',
+            'assets/images/cover_slider/food-$category-${(index % 6) + 1}.jpg',
           ),
           fit: BoxFit.cover,
         ),

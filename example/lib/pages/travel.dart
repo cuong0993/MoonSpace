@@ -235,25 +235,37 @@ class CustomCacheImage extends StatelessWidget {
     required this.imageUrl,
     this.borderRadius = 0,
     this.showError = false,
+    this.gradient,
   });
 
   final String imageUrl;
   final double borderRadius;
   final bool showError;
+  final Gradient? gradient; // Optional gradient parameter
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(borderRadius),
-      child: CachedNetworkImage(
-        imageUrl: imageUrl,
-        fit: BoxFit.cover,
-        errorWidget: (context, url, error) => const SizedBox(),
-        imageBuilder: (context, imageProvider) => Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
+      child: Stack(
+        children: [
+          CachedNetworkImage(
+            imageUrl: imageUrl,
+            fit: BoxFit.cover,
+            errorWidget: (context, url, error) => const SizedBox(),
+            imageBuilder: (context, imageProvider) => Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
+              ),
+            ),
           ),
-        ),
+          if (gradient != null) // Check if a gradient is provided
+            Container(
+              decoration: BoxDecoration(
+                gradient: gradient, // Apply the gradient
+              ),
+            ),
+        ],
       ),
     );
   }

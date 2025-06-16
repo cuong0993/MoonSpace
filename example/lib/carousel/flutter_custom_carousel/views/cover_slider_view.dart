@@ -65,7 +65,7 @@ class CoverSliderView extends StatelessWidget {
       // Loop the items in the list infinitely:
       loop: true,
       // We don't want to let the user tap to scroll to (ie. select) a card:
-      tapToSelect: false,
+      tapToSelect: true,
       // The effectsBuilder takes a ratio from -1 to 1 that indicates this child's
       // current position in the scroll, where 0 is the selected item,
       // and uses it to wrap the child in other widgets that apply "effects":
@@ -114,7 +114,7 @@ class _Card extends StatelessWidget {
       decoration: BoxDecoration(
         image: DecorationImage(
           image: AssetImage(
-            'assets/images/cover_slider/food-$category-$index.jpg',
+            'assets/images/cover_slider/food-$category-${(index % 6) + 1}.jpg',
           ),
           fit: BoxFit.cover,
         ),
@@ -123,7 +123,8 @@ class _Card extends StatelessWidget {
     );
 
     return GestureDetector(
-      onTap: () => _showDetails(context, category, index),
+      // onTap: () => _showDetails(context, category, index),
+      onTap: () {},
       child: Hero(tag: 'food-$category-$index', child: content),
     );
   }
@@ -150,7 +151,7 @@ class _DetailView extends StatelessWidget {
       decoration: BoxDecoration(
         image: DecorationImage(
           image: AssetImage(
-            'assets/images/cover_slider/food-$category-$index.jpg',
+            'assets/images/cover_slider/food-$category-${(index % 6) + 1}.jpg',
           ),
           fit: BoxFit.cover,
         ),

@@ -16,6 +16,8 @@ class CurvedCarousel extends StatelessWidget {
     this.alignment = Alignment.center,
     this.staticBuilder,
     this.animatedBuilder,
+    this.onSelectedItemChanged,
+    this.onSettledItemChanged,
   });
 
   final int count;
@@ -30,6 +32,8 @@ class CurvedCarousel extends StatelessWidget {
   final Alignment? alignment;
   final Widget Function(int index)? staticBuilder;
   final Widget Function(int index, double ratio)? animatedBuilder;
+  final void Function(int index)? onSelectedItemChanged;
+  final void Function(int index)? onSettledItemChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +53,14 @@ class CurvedCarousel extends StatelessWidget {
       loop: true,
       depthOrder: DepthOrder.selectedInFront,
       tapToSelect: false,
+      onSelectedItemChanged: (index) {
+        onSelectedItemChanged?.call(index);
+      },
+      onSettledItemChanged: (index) {
+        if (index != null) {
+          onSettledItemChanged?.call(index);
+        }
+      },
       effectsBuilder: (index, ratio, child) {
         double angle = ratio * rotationMultiplier;
         double distance = ratio.abs();
@@ -56,14 +68,14 @@ class CurvedCarousel extends StatelessWidget {
         double scale = (1 - distance).clamp(scaleMin, 1.0);
         double opacity = (1 - distance).clamp(opacityMin, 1.0);
 
-        return Opacity(
-          opacity: opacity,
-          child: Transform.translate(
-            offset: Offset(ratio * width * xMultiplier, distance * yMultiplier),
-            child: Transform.rotate(
-              angle: angle,
-              child: Transform.scale(
-                scale: scale,
+        return Transform.translate(
+          offset: Offset(ratio * width * xMultiplier, distance * yMultiplier),
+          child: Transform.rotate(
+            angle: angle,
+            child: Transform.scale(
+              scale: scale,
+              child: Opacity(
+                opacity: opacity,
                 child: animatedBuilder?.call(index, ratio) ?? child,
               ),
             ),

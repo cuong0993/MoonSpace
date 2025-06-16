@@ -62,6 +62,8 @@ flutter:
 
     - assets/activities.json
     - assets/destinations.json
+    - assets/rankone.json
+    - assets/funko.json
 
     - assets/images/card_deck/
     - assets/images/cover_slider/

@@ -1,10 +1,12 @@
 import 'package:example/carousel/carouselmain.dart';
 import 'package:example/l10n/app_localizations.dart';
 import 'package:example/pages/compass.dart';
+import 'package:example/pages/funko.dart';
 import 'package:example/pages/manager.dart';
 import 'package:example/pages/music.dart';
 import 'package:example/pages/quiz.dart';
 import 'package:example/pages/hotel.dart';
+import 'package:example/pages/rankone.dart';
 import 'package:example/pages/recipe.dart';
 import 'package:example/router/router.dart';
 import 'package:example/smooth_sheets/main.dart';
@@ -75,6 +77,7 @@ void main() {
       ),
     ],
     router: () => GoRouter(
+      debugLogDiagnostics: true,
       routes: [
         GoRoute(
           path: "/",
@@ -129,6 +132,18 @@ void main() {
           path: "/music",
           builder: (context, state) {
             return MusicApp();
+          },
+        ),
+        GoRoute(
+          path: "/games",
+          builder: (context, state) {
+            return GamesApp();
+          },
+        ),
+        GoRoute(
+          path: "/funko",
+          builder: (context, state) {
+            return FunkoApp();
           },
         ),
         GoRoute(
@@ -812,6 +827,18 @@ class ThemeSettings extends StatelessWidget {
                 context.push("/music");
               },
               title: Text("Music"),
+            ),
+            ListTile(
+              onTap: () {
+                context.push("/games");
+              },
+              title: Text("Games"),
+            ),
+            ListTile(
+              onTap: () {
+                context.push("/funko");
+              },
+              title: Text("Funko"),
             ),
             ListTile(
               onTap: () {

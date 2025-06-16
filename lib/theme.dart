@@ -384,7 +384,7 @@ class AppTheme {
     //BottomNavBar, Navigation
     labelMedium: TextStyle(fontSize: (12, 13).c, fontWeight: FontWeight.w400),
 
-    labelSmall: TextStyle(fontSize: (11, 12).c, fontWeight: FontWeight.w400),
+    labelSmall: TextStyle(fontSize: (10, 11).c, fontWeight: FontWeight.w400),
   );
 
   ThemeData get theme {

@@ -1,7 +1,7 @@
-import 'package:example/pages/quiz.dart';
 import 'package:example/pages/travel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
@@ -24,7 +24,14 @@ List<RouteBase> get compassRoutes => $appRoutes;
       routes: [
         TypedGoRoute<CountryRoute>(
           path: ':country',
-          routes: [TypedGoRoute<ActivitiesRoute>(path: '/activities')],
+          routes: [
+            TypedGoRoute<ActivitiesRoute>(
+              path: ':destination',
+              routes: [
+                TypedGoRoute<DetailsRoute>(path: ':activites/:daterange'),
+              ],
+            ),
+          ],
         ),
       ],
     ),
@@ -75,8 +82,8 @@ class CountriesRoute extends GoRouteData with _$CountriesRoute {
 
                   ClipRRect(
                     child: asyncContinents.when(
-                      data: (countries) {
-                        if (countries.isEmpty) return const SizedBox();
+                      data: (continents) {
+                        if (continents.isEmpty) return const SizedBox();
 
                         return CurvedCarousel(
                           height: 150,
@@ -87,11 +94,51 @@ class CountriesRoute extends GoRouteData with _$CountriesRoute {
                           opacityMin: 1,
                           scaleMin: 1,
                           alignment: Alignment.centerLeft,
-                          count: countries.length,
+                          count: continents.length,
+                          onSelectedItemChanged: (index) {
+                            print(index);
+                          },
                           staticBuilder: (index) {
-                            return NewWidget(
-                              index: index,
-                              countries: countries,
+                            return SizedBox(
+                              key: ValueKey(index),
+                              width: 140,
+                              child: GestureDetector(
+                                onTap: () {
+                                  final continent = continents[index];
+                                  print("$index $continent");
+                                  ref
+                                      .read(currentContinentProvider.notifier)
+                                      .setContinent(continent);
+                                  CountryRoute(continent).push(context);
+                                },
+                                child: Stack(
+                                  alignment: AlignmentDirectional.center,
+                                  children: [
+                                    SizedBox(
+                                      width: 140,
+                                      child: Hero(
+                                        tag: 'continent-$index-image',
+                                        child: CustomCacheImage(
+                                          imageUrl:
+                                              images[index % images.length],
+                                          borderRadius: 24,
+                                        ),
+                                      ),
+                                    ),
+
+                                    Hero(
+                                      tag: 'continent-$index-title',
+                                      child: Text(
+                                        '$index + ${continents[index]}',
+                                        textAlign: TextAlign.center,
+                                        style: GoogleFonts.agbalumo(
+                                          textStyle: context.h4.c(Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             );
                           },
                         );
@@ -105,7 +152,7 @@ class CountriesRoute extends GoRouteData with _$CountriesRoute {
 
                   ListTile(
                     onTap: () async {
-                      final daterange = await showDateRangePicker(
+                      await showDateRangePicker(
                         context: context,
                         firstDate: DateTime(2020),
                         lastDate: DateTime.now(),
@@ -114,16 +161,7 @@ class CountriesRoute extends GoRouteData with _$CountriesRoute {
                     title: Text("When"),
                   ),
 
-                  ListTile(
-                    onTap: () async {
-                      final daterange = await showDateRangePicker(
-                        context: context,
-                        firstDate: DateTime(2020),
-                        lastDate: DateTime.now(),
-                      );
-                    },
-                    title: Text("Who"),
-                  ),
+                  ListTile(onTap: () async {}, title: Text("Who")),
                 ],
               ),
             ),
@@ -134,112 +172,6 @@ class CountriesRoute extends GoRouteData with _$CountriesRoute {
   }
 }
 
-class NewWidget extends StatelessWidget {
-  const NewWidget({super.key, required this.index, required this.countries});
-
-  final int index;
-  final List<String> countries;
-
-  @override
-  Widget build(BuildContext context) {
-    // return GestureDetector(
-    //   onTap: () {
-    //     print(countries[index]);
-    //     CountryRoute(countries[index]).push(context);
-    //   },
-
-    //   child: Material(
-    //     color: Colors.transparent,
-    //     child: Stack(
-    //       alignment: Alignment.center,
-    //       children: [
-    //         Container(
-    //           height: 140,
-    //           width: 140,
-    //           foregroundDecoration: BoxDecoration(
-    //             color: const Color(0x1A252525),
-    //           ),
-    //           child: CustomCacheImage(
-    //             imageUrl: images[index % images.length],
-    //             borderRadius: 24,
-    //           ),
-    //         ),
-    //         Text(countries[index], style: context.h5),
-    //       ],
-    //     ),
-    //   ),
-    // );
-
-    Widget content = Material(
-      color: Colors.transparent,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Align(
-            child: Container(
-              height: 140,
-              width: 140,
-              foregroundDecoration: BoxDecoration(
-                color: const Color(0x1A252525),
-              ),
-              child: CustomCacheImage(
-                imageUrl: images[index % images.length],
-                borderRadius: 24,
-              ),
-            ),
-          ),
-          Text(countries[index], style: context.h5),
-        ],
-      ),
-    );
-
-    // Widget content = Stack(
-    //   alignment: AlignmentDirectional.center,
-    //   children: [
-    //     Hero(
-    //       tag: 'food-c-$index',
-    //       child: Container(
-    //         width: 140,
-    //         decoration: BoxDecoration(
-    //           image: DecorationImage(
-    //             image: AssetImage(
-    //               'assets/images/cover_slider/food-c-$index.jpg',
-    //             ),
-    //             fit: BoxFit.cover,
-    //           ),
-    //           borderRadius: BorderRadius.circular(24),
-    //         ),
-    //       ),
-    //     ),
-
-    //     Hero(
-    //       tag: 'food-c-$index-title',
-    //       child: Text("c", style: GoogleFonts.agbalumo(textStyle: context.h4)),
-    //     ),
-
-    //     Align(
-    //       alignment: Alignment(0, -.9),
-    //       child: Container(
-    //         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-    //         decoration: BoxDecoration(
-    //           color: context.cs.secondary,
-    //           borderRadius: BorderRadius.circular(32),
-    //         ),
-    //         child: Text(
-    //           "FriendShip",
-    //           style: GoogleFonts.agbalumo(
-    //             textStyle: context.h4.c(context.cs.onSecondary),
-    //           ),
-    //         ),
-    //       ),
-    //     ),
-    //   ],
-    // );
-
-    return GestureDetector(onTap: () => print(index), child: content);
-  }
-}
-
 class CountryRoute extends GoRouteData with _$CountryRoute {
   const CountryRoute(this.country);
 
@@ -247,7 +179,101 @@ class CountryRoute extends GoRouteData with _$CountryRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return Scaffold(appBar: CompassAppBar(), body: Placeholder());
+    return Consumer(
+      builder: (context, ref, child) {
+        final currentDestinations = ref.watch(countryDestinationsProvider);
+
+        return Scaffold(
+          appBar: CompassAppBar(),
+          body: currentDestinations.when(
+            data: (data) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: GridView.builder(
+                  itemCount: data.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                    childAspectRatio: .85,
+                  ),
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () {
+                        ref
+                            .read(currentDestinationProvider.notifier)
+                            .setDestination(data[index].ref);
+                        ActivitiesRoute(country, data[index].ref).push(context);
+                      },
+                      child: Stack(
+                        children: [
+                          Hero(
+                            tag: 'country-$index-image',
+                            child: CustomCacheImage(
+                              imageUrl: data[index].imageUrl,
+                              borderRadius: 8,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  data[index].country,
+                                  style: context.h8.w6.c(Colors.white),
+                                ),
+                                Spacer(),
+                                Text(
+                                  data[index].name,
+                                  style: context.h8.w6.c(Colors.white),
+                                ),
+                                Wrap(
+                                  runSpacing: 4,
+                                  spacing: 4,
+                                  children: data[index].tags.map((tag) {
+                                    return Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 4,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: const Color.fromARGB(
+                                          82,
+                                          47,
+                                          47,
+                                          47,
+                                        ),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        tag,
+                                        style: context.ls.c(Colors.white),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+            error: (error, stackTrace) {
+              return Text(error.toString());
+            },
+            loading: () {
+              return Placeholder();
+            },
+          ),
+        );
+      },
+    );
   }
 }
 
@@ -255,24 +281,482 @@ class DestinationListRoute extends GoRouteData with _$DestinationListRoute {
   const DestinationListRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      const DestinationListScreen();
+  Widget build(BuildContext context, GoRouterState state) {
+    return Consumer(
+      builder: (context, ref, child) {
+        final asyncDestinations = ref.watch(destinationsProvider);
+        return Scaffold(
+          appBar: CompassAppBar(),
+          body: asyncDestinations.when(
+            data: (destinations) {
+              return ListView.builder(
+                itemCount: destinations.length,
+                itemBuilder: (context, index) {
+                  final destination = destinations[index];
+                  return ListTile(
+                    title: Text(destination.name),
+                    subtitle: Text(destination.country),
+                    leading: Image.network(destination.imageUrl),
+                  );
+                },
+              );
+            },
+            loading: () => Center(child: CircularProgressIndicator()),
+            error: (error, stack) => Center(child: Text('Error: $error')),
+          ),
+        );
+      },
+    );
+  }
 }
 
 class ActivitiesRoute extends GoRouteData with _$ActivitiesRoute {
-  const ActivitiesRoute();
+  const ActivitiesRoute(this.country, this.destination);
+
+  final String country;
+  final String destination;
+
+  Widget tile(
+    BuildContext context,
+    WidgetRef ref,
+    Activity activity,
+    List<String> selected,
+  ) {
+    return GestureDetector(
+      onTap: () {
+        ref.read(selectedActivitiesProvider.notifier).toggleActivity(activity);
+      },
+      child: ActivityTile(
+        activity: activity,
+        selected: selected.contains(activity.ref),
+      ),
+    );
+  }
 
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      const ActivityListScreen();
+  Widget build(BuildContext context, GoRouterState state) {
+    return Consumer(
+      builder: (context, ref, child) {
+        final asyncActivites = ref.watch(destinationActivitiesProvider);
+        final selected = ref.watch(selectedActivitiesProvider);
+
+        return PopScope(
+          onPopInvokedWithResult: (didPop, result) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              ref.read(selectedActivitiesProvider.notifier).clear();
+            });
+          },
+          child: Scaffold(
+            bottomNavigationBar: BottomAppBar(
+              padding: EdgeInsets.all(16),
+              height: 70,
+              child: Row(
+                children: <Widget>[
+                  Text("${selected.length} selected", style: context.h7),
+                  Spacer(),
+                  FilledButton.tonal(
+                    onPressed: () {
+                      DetailsRoute(
+                        country,
+                        destination,
+                        selected.join(","),
+                        "${DateTime(2022).toString()},${DateTime(2023).toString()}",
+                      ).push(context);
+                    },
+                    child: Text("Confirm"),
+                  ),
+                ],
+              ),
+            ),
+            body: CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  pinned: true,
+                  automaticallyImplyLeading: false,
+                  flexibleSpace: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          context.pop();
+                        },
+                        icon: Icon(CupertinoIcons.arrow_left),
+                      ),
+                      Text("Activites", style: context.h6),
+                      IconButton(
+                        onPressed: () {
+                          context.pop();
+                        },
+                        icon: Icon(CupertinoIcons.home),
+                      ),
+                    ],
+                  ),
+                ),
+                SliverAppBar(
+                  pinned: true,
+                  automaticallyImplyLeading: false,
+                  flexibleSpace: Text("Daytime"),
+                ),
+
+                asyncActivites.when(
+                  data: (activities) {
+                    return SliverList.list(
+                      children: activities
+                          .where(
+                            (a) =>
+                                a.timeOfDay == "morning" ||
+                                a.timeOfDay == "afternoon" ||
+                                a.timeOfDay == "any",
+                          )
+                          .map((a) => tile(context, ref, a, selected))
+                          .toList(),
+                    );
+                  },
+                  error: (error, stackTrace) {
+                    return SliverToBoxAdapter(child: Placeholder());
+                  },
+                  loading: () {
+                    return SliverToBoxAdapter(child: Placeholder());
+                  },
+                ),
+
+                SliverAppBar(
+                  pinned: true,
+                  automaticallyImplyLeading: false,
+                  flexibleSpace: Text("Night"),
+                ),
+
+                asyncActivites.when(
+                  data: (activities) {
+                    return SliverList.list(
+                      children: activities
+                          .where(
+                            (a) =>
+                                !(a.timeOfDay == "morning" ||
+                                    a.timeOfDay == "afternoon" ||
+                                    a.timeOfDay == "any"),
+                          )
+                          .map((a) => tile(context, ref, a, selected))
+                          .toList(),
+                    );
+                  },
+                  error: (error, stackTrace) {
+                    return SliverToBoxAdapter(child: Placeholder());
+                  },
+                  loading: () {
+                    return SliverToBoxAdapter(child: Placeholder());
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class ActivityTile extends StatelessWidget {
+  const ActivityTile({
+    super.key,
+    required this.activity,
+    required this.selected,
+  });
+
+  final Activity activity;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: selected ? context.cSur2 : context.cSur,
+      padding: const EdgeInsets.all(8.0),
+      height: 100,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadiusGeometry.circular(12),
+            child: SizedBox(
+              width: 75,
+              height: 75,
+              child: CustomCacheImage(imageUrl: activity.imageUrl),
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 8, 0),
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(activity.timeOfDay.toUpperCase(), style: context.ls),
+                  Text(
+                    activity.name,
+                    overflow: TextOverflow.clip,
+                    style: context.h8,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Center(
+            child: Icon(
+              selected ? CupertinoIcons.circle_fill : CupertinoIcons.circle,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class ActivityListRoute extends GoRouteData with _$ActivityListRoute {
   const ActivityListRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      const ActivityListScreen();
+  Widget build(BuildContext context, GoRouterState state) {
+    return Consumer(
+      builder: (context, ref, child) {
+        final asyncActivities = ref.watch(activitiesProvider);
+        return Scaffold(
+          appBar: AppBar(title: Text('Activities')),
+          body: asyncActivities.when(
+            data: (activities) {
+              return ListView.builder(
+                itemCount: activities.length,
+                itemBuilder: (context, index) {
+                  final activity = activities[index];
+                  return ListTile(
+                    title: Text(activity.name),
+                    subtitle: Text(activity.description),
+                    leading: Image.network(activity.imageUrl),
+                    onTap: () {
+                      // Handle activity tap
+                    },
+                  );
+                },
+              );
+            },
+            loading: () => Center(child: CircularProgressIndicator()),
+            error: (error, stack) => Center(child: Text('Error: $error')),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class DetailsRoute extends GoRouteData with _$DetailsRoute {
+  const DetailsRoute(
+    this.country,
+    this.destination,
+    this.activites,
+    this.daterange,
+  );
+
+  final String country;
+  final String destination;
+
+  final String activites;
+  final String daterange;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return Consumer(
+      builder: (context, ref, child) {
+        final selectedActivities = activites.split(",").toList();
+
+        return Consumer(
+          builder: (context, ref, child) {
+            final asyncDestination = ref.watch(destinationsProvider);
+            final asyncActivites = ref.watch(activitiesProvider);
+
+            if (asyncDestination.hasValue && asyncActivites.hasValue) {
+              final destinations = asyncDestination.value ?? [];
+              final activityList = asyncActivites.value ?? [];
+
+              final des = destinations.firstWhere((e) => e.ref == destination);
+
+              return Scaffold(
+                body: CustomScrollView(
+                  slivers: [
+                    SliverAppBar(
+                      collapsedHeight: 180,
+                      flexibleSpace: CustomCacheImage(imageUrl: des.imageUrl),
+                    ),
+                    SliverToBoxAdapter(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [Text(des.name), Text(des.knownFor)],
+                      ),
+                    ),
+                    SliverList.list(
+                      children:
+                          (activityList.where(
+                                (e) => selectedActivities.contains(e.ref),
+                              ))
+                              .map(
+                                (e) =>
+                                    ActivityTile(activity: e, selected: true),
+                              )
+                              .toList(),
+                    ),
+                  ],
+                ),
+              );
+            } else {
+              return Scaffold(
+                appBar: CompassAppBar(),
+                body: CircularProgressIndicator(),
+              );
+            }
+          },
+        );
+      },
+    );
+  }
+}
+
+class CompassAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const CompassAppBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      leading: IconButton(
+        onPressed: () {
+          context.pop();
+        },
+        icon: Icon(CupertinoIcons.arrow_left),
+      ),
+      title: Text(GoRouterState.of(context).uri.path),
+      actions: [
+        IconButton(
+          onPressed: () {
+            ActivityListRoute().push(context);
+          },
+          icon: Icon(CupertinoIcons.slowmo),
+        ),
+        IconButton(
+          onPressed: () {
+            DestinationListRoute().push(context);
+          },
+          icon: Icon(CupertinoIcons.cube),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+}
+
+@Riverpod(keepAlive: true)
+class Continents extends _$Continents {
+  @override
+  FutureOr<List<String>> build() async {
+    final asyncDestinations = ref.watch(destinationsProvider);
+    final destinations = asyncDestinations.asData?.value;
+    final uniqueContinents = destinations
+        ?.map((destination) => destination.continent)
+        .toSet()
+        .toList();
+
+    return uniqueContinents ?? [];
+  }
+
+  FutureOr<List<Destination>> getDestinations(String continent) async {
+    final asyncDestinations = ref.read(destinationsProvider);
+    final destinations = asyncDestinations.asData?.value;
+    final uniqueDestinations = destinations
+        ?.where((destination) => destination.continent == continent)
+        .toSet()
+        .toList();
+
+    return uniqueDestinations ?? [];
+  }
+}
+
+@Riverpod(keepAlive: true)
+class CurrentContinent extends _$CurrentContinent {
+  @override
+  String build() {
+    return "";
+  }
+
+  void setContinent(String continent) {
+    state = continent;
+  }
+}
+
+@Riverpod(keepAlive: true)
+class CountryDestinations extends _$CountryDestinations {
+  @override
+  FutureOr<List<Destination>> build() async {
+    final asyncDestinations = ref.watch(destinationsProvider);
+    final continent = ref.watch(currentContinentProvider);
+    final destinations = asyncDestinations.asData?.value;
+    final uniqueContinents = destinations
+        ?.where((destination) => destination.continent == continent)
+        .toSet()
+        .toList();
+
+    return uniqueContinents ?? [];
+  }
+}
+
+@Riverpod(keepAlive: true)
+class CurrentDestination extends _$CurrentDestination {
+  @override
+  String build() {
+    return "";
+  }
+
+  void setDestination(String destination) {
+    state = destination;
+  }
+}
+
+@Riverpod(keepAlive: true)
+class DestinationActivities extends _$DestinationActivities {
+  @override
+  FutureOr<List<Activity>> build() async {
+    final destination = ref.watch(currentDestinationProvider);
+    final asyncActivities = ref.watch(activitiesProvider);
+    final activities = asyncActivities.asData?.value;
+    final uniqueActivities = activities
+        ?.where((activity) => activity.destinationRef == destination)
+        .toSet()
+        .toList();
+
+    return uniqueActivities ?? [];
+  }
+}
+
+@Riverpod(keepAlive: true)
+class SelectedActivities extends _$SelectedActivities {
+  @override
+  List<String> build() {
+    return [];
+  }
+
+  void toggleActivity(Activity a) {
+    final currentState = List<String>.from(
+      state,
+    ); // Create a copy of the current state
+    if (currentState.contains(a.ref)) {
+      currentState.remove(a.ref);
+    } else {
+      currentState.add(a.ref);
+    }
+    state = currentState;
+  }
+
+  void clear() {
+    state = [];
+  }
 }
 
 class Destination {
@@ -316,51 +800,6 @@ class Destinations extends _$Destinations {
     );
     final List<dynamic> data = json.decode(response);
     return data.map((json) => Destination.fromJson(json)).toList();
-  }
-}
-
-@Riverpod(keepAlive: true)
-class Continents extends _$Continents {
-  @override
-  FutureOr<List<String>> build() async {
-    final asyncDestinations = ref.watch(destinationsProvider);
-    final destinations = asyncDestinations.asData?.value;
-    final uniqueContinents = destinations
-        ?.map((destination) => destination.continent)
-        .toSet()
-        .toList();
-
-    return uniqueContinents ?? [];
-  }
-}
-
-class DestinationListScreen extends ConsumerWidget {
-  const DestinationListScreen({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final asyncDestinations = ref.watch(destinationsProvider);
-
-    return Scaffold(
-      appBar: CompassAppBar(),
-      body: asyncDestinations.when(
-        data: (destinations) {
-          return ListView.builder(
-            itemCount: destinations.length,
-            itemBuilder: (context, index) {
-              final destination = destinations[index];
-              return ListTile(
-                title: Text(destination.name),
-                subtitle: Text(destination.country),
-                leading: Image.network(destination.imageUrl),
-              );
-            },
-          );
-        },
-        loading: () => Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('Error: $error')),
-      ),
-    );
   }
 }
 
@@ -410,74 +849,4 @@ FutureOr<List<Activity>> activities(Ref ref) async {
   final String response = await rootBundle.loadString('assets/activities.json');
   final List<dynamic> data = json.decode(response);
   return data.map((json) => Activity.fromJson(json)).toList();
-}
-
-class ActivityListScreen extends ConsumerWidget {
-  const ActivityListScreen({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Consumer(
-      builder: (context, ref, child) {
-        final asyncActivities = ref.watch(activitiesProvider);
-        return Scaffold(
-          appBar: AppBar(title: Text('Activities')),
-          body: asyncActivities.when(
-            data: (activities) {
-              return ListView.builder(
-                itemCount: activities.length,
-                itemBuilder: (context, index) {
-                  final activity = activities[index];
-                  return ListTile(
-                    title: Text(activity.name),
-                    subtitle: Text(activity.description),
-                    leading: Image.network(activity.imageUrl),
-                    onTap: () {
-                      // Handle activity tap
-                    },
-                  );
-                },
-              );
-            },
-            loading: () => Center(child: CircularProgressIndicator()),
-            error: (error, stack) => Center(child: Text('Error: $error')),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class CompassAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const CompassAppBar({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return AppBar(
-      leading: IconButton(
-        onPressed: () {
-          context.pop();
-        },
-        icon: Icon(CupertinoIcons.arrow_left),
-      ),
-      title: Text(GoRouterState.of(context).uri.path),
-      actions: [
-        IconButton(
-          onPressed: () {
-            ActivityListRoute().push(context);
-          },
-          icon: Icon(CupertinoIcons.slowmo),
-        ),
-        IconButton(
-          onPressed: () {
-            DestinationListRoute().push(context);
-          },
-          icon: Icon(CupertinoIcons.cube),
-        ),
-      ],
-    );
-  }
-
-  @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
 }
