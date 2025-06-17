@@ -1,24 +1,54 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:moonspace/carousel/curved_carousel.dart';
 import 'package:moonspace/helper/extensions/color.dart';
 import 'package:moonspace/helper/extensions/theme_ext.dart';
+import 'package:moonspace/theme.dart';
+import 'package:moonspace/widgets/expandable_text.dart';
+import 'package:moonspace/widgets/ratings.dart';
 
 class RecipeApp extends StatelessWidget {
   const RecipeApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    Theme.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.chevron_left),
-          onPressed: () => Navigator.of(context).pop(),
+    return SafeArea(
+      bottom: false,
+      child: Scaffold(
+        bottomNavigationBar: BottomNavigationBar(
+          showUnselectedLabels: true,
+          onTap: (value) {
+            if (value == 1) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => CheckoutCartPage()),
+              );
+            } else if (value == 2) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ReviewPage()),
+              );
+            }
+          },
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(CupertinoIcons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(CupertinoIcons.cart),
+              label: 'Cart',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.favorite_border_outlined),
+              label: 'Review',
+            ),
+          ],
         ),
-        title: Text('Dessert Recipes'),
+        body: RecipeListView(),
       ),
-      body: SafeArea(bottom: false, child: RecipeListView()),
     );
   }
 }
@@ -39,35 +69,206 @@ class _RecipeListViewState extends State<RecipeListView> {
       onNotification: (notification) {
         if (notification is ScrollUpdateNotification) {
           setState(() {
-            if (notification.scrollDelta! > 0) {
-              downScroll = true;
-            } else {
-              downScroll = false;
-            }
+            downScroll = notification.scrollDelta! > 0;
           });
         }
         return true;
       },
-      child: GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: context.r(1, 1, 2, 2, 3, 4).toInt(),
-          mainAxisSpacing: 24,
-          crossAxisSpacing: 24,
-          childAspectRatio: context.r(1.4, 1.8, 1.8, 1.8, 1.8, 1.8).toDouble(),
-        ),
-        cacheExtent: 0,
-        padding: const EdgeInsets.all(20),
-        itemCount: RecipesData.dessertMenu.length * 10,
-        itemBuilder: (context, index) {
-          // return Placeholder(
-          //   child: Text("${index % RecipesData.dessertMenu.length}"),
-          // );
-          return RecipeCard(
-            index: index % RecipesData.dessertMenu.length,
-            delayMs: 0,
-            downScroll: downScroll,
-          );
-        },
+      child: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            pinned: true,
+            floating: false,
+            automaticallyImplyLeading: false,
+            snap: false,
+            toolbarHeight: 50,
+            flexibleSpace: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Desserts',
+                    style: GoogleFonts.alice(textStyle: context.h2),
+                  ),
+                  IconButton(
+                    icon: const Icon(CupertinoIcons.clear, size: 16),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: GridView.count(
+                crossAxisCount: 3,
+                shrinkWrap: true,
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
+                physics: NeverScrollableScrollPhysics(),
+                children: RecipesData.dessertMenu
+                    .take(6)
+                    .map(
+                      (e) => ClipRRect(
+                        borderRadius: BorderRadiusGeometry.circular(8),
+                        child: Container(
+                          color: context.cSur3,
+                          child: Image.asset(
+                            e.image,
+                            scale: 8,
+                            alignment: Alignment(-2.2, -2.2),
+                            fit: BoxFit.none,
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+          ),
+
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Text(
+                "Categories",
+                style: GoogleFonts.alice(textStyle: context.h4),
+              ),
+            ),
+          ),
+
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: ClipRRect(
+                child: CurvedCarousel(
+                  height: 160,
+                  itemCountBefore: context.r(2, 3, 4, 5, 5, 5).toInt(),
+                  itemCountAfter: context.r(2, 3, 4, 5, 5, 5).toInt(),
+                  // width: context.mq.w,
+                  rotationMultiplier: 0,
+                  xMultiplier: context
+                      .r(2.2, (3.1, 3.2).c, 4, 4.8, 5, 6)
+                      .toDouble(),
+                  yMultiplier: 0,
+                  opacityMin: 1,
+                  scaleMin: 1,
+                  alignment: Alignment.centerLeft,
+                  count: RecipesData.dessertMenu.length,
+                  animatedBuilder: (index, ratio) {
+                    return SizedBox(
+                      key: ValueKey(index),
+                      width: 140,
+                      child: GestureDetector(
+                        onTap: () {
+                          // final continent = RecipesData.dessertMenu[index];
+                        },
+                        child: Stack(
+                          alignment: AlignmentDirectional.bottomCenter,
+                          children: [
+                            Container(
+                              height: 125,
+                              decoration: BoxDecoration(
+                                color: context.cSur4,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                16,
+                                0,
+                                16,
+                                56.0,
+                              ),
+                              child: Transform.rotate(
+                                angle: ratio * 5,
+                                child: Image.asset(
+                                  RecipesData.dessertMenu[index].image,
+                                ),
+                              ),
+                            ),
+
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          RecipesData.dessertMenu[index].title,
+                                          textAlign: TextAlign.start,
+                                          style: context.h9,
+                                          maxLines: 1,
+                                        ),
+                                        Text(
+                                          "\$8",
+                                          textAlign: TextAlign.start,
+                                          style: context.h9,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  IconButton(
+                                    onPressed: () {},
+                                    isSelected: index % 2 == 1,
+                                    icon: Icon(CupertinoIcons.heart),
+                                    selectedIcon: Icon(
+                                      CupertinoIcons.heart_fill,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              child: Text(
+                "Best Prices",
+                style: GoogleFonts.alice(textStyle: context.h4),
+              ),
+            ),
+          ),
+
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            sliver: SliverGrid(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: context.r(1, 1, 2, 2, 3, 4).toInt(),
+                mainAxisSpacing: 24,
+                crossAxisSpacing: 24,
+                childAspectRatio: context
+                    .r(1.4, 1.8, 1.8, 1.8, 1.8, 1.8)
+                    .toDouble(),
+              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                return RecipeCard(
+                  index: index % RecipesData.dessertMenu.length,
+                  delayMs: 0,
+                  downScroll: downScroll,
+                );
+              }, childCount: RecipesData.dessertMenu.length * 10),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -125,12 +326,12 @@ class RecipeCard extends StatelessWidget {
                       child:
                           RecipeImage(delay: delay, index: index, sliver: false)
                               .animate()
-                              .scale(end: Offset(1.2, 1.2))
+                              .scale(end: Offset(1.1, 1.1))
                               .rotate(
                                 delay: delay,
                                 alignment: Alignment.center,
                                 duration: 400.ms,
-                                begin: 0.2,
+                                begin: 0.4,
                                 end: 0,
                               )
                               .move(end: Offset(20, 20)),
@@ -158,8 +359,10 @@ class RecipeTitle extends StatelessWidget {
       tag: "RecipeTitle-$index",
       child: Text(
         recipe.title,
-        style: context.h5.w5.c(
-          sliver ? context.cOnSur : recipe.bgColor.getOnColor(),
+        style: GoogleFonts.alice(
+          textStyle: context.h2.w5.c(
+            sliver ? context.cOnSur : recipe.bgColor.getOnColor(),
+          ),
         ),
         maxLines: 2,
       ),
@@ -237,6 +440,11 @@ class _RecipePageState extends State<RecipePage> {
     final recipe = RecipesData.dessertMenu[widget.index];
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: recipe.bgColor,
+        onPressed: () {},
+        label: Text("Order now"),
+      ),
       body: context.widthM2
           ? _scroll(recipe, context)
           : Row(
@@ -317,6 +525,15 @@ class _RecipePageState extends State<RecipePage> {
                 const SizedBox(height: 16),
 
                 RecipeTitle(index: widget.index, sliver: true),
+
+                const SizedBox(height: 8),
+
+                Row(
+                  children: [
+                    Text("3.6  ", style: context.h6),
+                    MaskedRatingBar(rating: 3.6, filledColor: recipe.bgColor),
+                  ],
+                ),
 
                 const SizedBox(height: 8),
 
@@ -407,6 +624,345 @@ class SliverRecipeList extends StatelessWidget {
           ),
         ).animate().fadeIn(duration: 400.ms).moveY(begin: 100, end: 0);
       },
+    );
+  }
+}
+
+class CheckoutCartPage extends StatefulWidget {
+  const CheckoutCartPage({super.key});
+
+  @override
+  State<CheckoutCartPage> createState() => _CheckoutCartPageState();
+}
+
+class _CheckoutCartPageState extends State<CheckoutCartPage> {
+  final font = GoogleFonts.robotoMono();
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          centerTitle: false,
+          title: Row(
+            children: [
+              Text('Cart,', style: GoogleFonts.alice(textStyle: context.h2)),
+              Text(
+                ' 3 items',
+                style: GoogleFonts.alice(
+                  textStyle: context.h2,
+                ).c(context.cSur9),
+              ),
+            ],
+          ),
+          actions: [
+            IconButton(
+              onPressed: () {
+                context.nav.pop();
+              },
+              icon: Icon(CupertinoIcons.clear, size: 16),
+            ),
+          ],
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(60),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Search desserts...',
+                        prefixIcon: const Icon(Icons.search),
+                        filled: true,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  IconButton(
+                    icon: const Icon(Icons.filter_list),
+                    onPressed: () {
+                      // Open filter modal/sheet
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        bottomNavigationBar: BottomAppBar(
+          height: 125,
+          child: Column(
+            children: [
+              TextField(
+                decoration: InputDecoration(
+                  labelText: 'Promo Code',
+                  suffixIcon: TextButton(
+                    onPressed: () {},
+                    child: const Text('Apply'),
+                  ),
+                  border: const OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(child: Text('\$355.00', style: context.h5.w5)),
+                  SizedBox(
+                    width: 150,
+                    height: 40,
+                    child: FilledButton.tonal(
+                      onPressed: () {},
+                      child: const Text('Checkout'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        body: CustomScrollView(
+          slivers: [
+            SliverList(
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final item = RecipesData.dessertMenu[index];
+
+                return Container(
+                  height: 100,
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        height: 80,
+                        width: 80,
+                        child: RecipeImage(
+                          delay: 1.ms,
+                          index: index,
+                          sliver: false,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(item.title, style: context.h7),
+                                ),
+                                IconButton.outlined(
+                                  iconSize: 14,
+                                  constraints: BoxConstraints(
+                                    maxHeight: 32,
+                                    maxWidth: 32,
+                                  ),
+                                  padding: EdgeInsets.all(6),
+                                  icon: const Icon(CupertinoIcons.clear),
+                                  onPressed: () {},
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '\$95.00',
+                                      style: context.p.line.c(context.cSur8),
+                                    ),
+                                    Text('\$85.00', style: context.h7.w6),
+                                  ],
+                                ),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: context.cSur2,
+                                    borderRadius: 32.br,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.remove),
+                                        onPressed: () {},
+                                      ),
+                                      Text('1'),
+                                      IconButton(
+                                        icon: const Icon(Icons.add),
+                                        onPressed: () {},
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }, childCount: RecipesData.dessertMenu.length),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ReviewPage extends StatelessWidget {
+  const ReviewPage({super.key});
+
+  Widget _buildReviewCard(BuildContext context, int index) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const CircleAvatar(child: Icon(Icons.person)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('User $index', style: context.h8),
+                      MaskedRatingBar(rating: 4.3),
+                    ],
+                  ),
+                ),
+                const Text('May 2025', style: TextStyle(color: Colors.grey)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ExpandableText(
+              'This is a review text. It may be long so it might need a read more option. '
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus convallis, '
+              'massa nec tincidunt tincidunt, lorem nunc.',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            context.nav.pop();
+          },
+          icon: Icon(CupertinoIcons.arrow_left),
+        ),
+        title: Text('Reviews'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              context.nav.pop();
+            },
+            icon: Icon(CupertinoIcons.option),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {},
+        label: const Text('Write a Review'),
+        icon: const Icon(Icons.edit),
+      ),
+      body: CustomScrollView(
+        slivers: [
+          // Ratings Summary
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  // Left column: average rating and count
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text('4.9', style: context.h4),
+                      Text('123 reviews', style: context.ls),
+                    ],
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: RatingsBars(percentages: [.8, .6, .4, .2, .1]),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Search and Filter
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(CupertinoIcons.search),
+                        hintText: 'Search reviews...',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton.filled(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateColor.resolveWith(
+                        (e) => context.cOnSur,
+                      ),
+                      shape: WidgetStateOutlinedBorder.resolveWith(
+                        (e) => 0.bRound.r(8),
+                      ),
+                    ),
+                    onPressed: () {},
+                    icon: const Icon(CupertinoIcons.slider_horizontal_3),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Review List
+          SliverList.separated(
+            itemBuilder: (context, index) => _buildReviewCard(context, index),
+            // delegate: SliverChildBuilderDelegate(
+            //   (context, index) => _buildReviewCard(context, index),
+            //   childCount: 10,
+            // ),
+            itemCount: 10,
+            separatorBuilder: (context, index) =>
+                Divider(height: 0, indent: 30, endIndent: 30),
+          ),
+
+          // Spacer for bottom button
+          const SliverToBoxAdapter(child: SizedBox(height: 80)),
+        ],
+      ),
     );
   }
 }

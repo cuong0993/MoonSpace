@@ -41,7 +41,7 @@ void main() {
         name: "quiz",
         icon: CupertinoIcons.sun_min,
 
-        dark: false,
+        dark: true,
 
         size: const Size(360, 780),
         maxSize: const Size(1366, 1024),
@@ -53,6 +53,9 @@ void main() {
         primary: const Color(0xff717171),
         secondary: Color(0xFF787bce),
         tertiary: Color(0xFFEFD24F),
+
+        bodyTextStyle: (s) => GoogleFonts.robotoMono(textStyle: s),
+        headlineTextStyle: (s) => GoogleFonts.outfit(textStyle: s),
 
         baseunit: 1.0,
       ),
@@ -72,6 +75,81 @@ void main() {
         primary: const Color.fromARGB(255, 39, 39, 39),
         secondary: const Color.fromARGB(255, 107, 107, 107),
         tertiary: Color.fromARGB(255, 90, 239, 79),
+
+        baseunit: 1.0,
+      ),
+      AppTheme(
+        name: "Monochrome",
+        icon: Icons.icecream_outlined,
+
+        dark: false,
+
+        size: const Size(360, 780),
+        maxSize: const Size(1366, 1024),
+        designSize: const Size(360, 780),
+
+        borderRadius: (8, 10),
+        padding: (14, 16),
+
+        primary: const Color.fromARGB(255, 105, 187, 255),
+        secondary: const Color.fromARGB(255, 255, 109, 157),
+        tertiary: Colors.yellow,
+
+        themedata: ColorScheme.fromSeed(
+          seedColor: Colors.green,
+          brightness: Brightness.light,
+          dynamicSchemeVariant: DynamicSchemeVariant.monochrome,
+        ),
+
+        baseunit: 1.0,
+      ),
+      AppTheme(
+        name: "TonalSpot",
+        icon: Icons.icecream_outlined,
+
+        dark: false,
+
+        size: const Size(360, 780),
+        maxSize: const Size(1366, 1024),
+        designSize: const Size(360, 780),
+
+        borderRadius: (8, 10),
+        padding: (14, 16),
+
+        primary: const Color.fromARGB(255, 105, 187, 255),
+        secondary: const Color.fromARGB(255, 255, 109, 157),
+        tertiary: Colors.yellow,
+
+        themedata: ColorScheme.fromSeed(
+          seedColor: Colors.purple,
+          brightness: Brightness.light,
+          dynamicSchemeVariant: DynamicSchemeVariant.tonalSpot,
+        ),
+
+        baseunit: 1.0,
+      ),
+      AppTheme(
+        name: "MonochromeNight",
+        icon: Icons.icecream_outlined,
+
+        dark: true,
+
+        size: const Size(360, 780),
+        maxSize: const Size(1366, 1024),
+        designSize: const Size(360, 780),
+
+        borderRadius: (8, 10),
+        padding: (14, 16),
+
+        primary: const Color.fromARGB(255, 105, 187, 255),
+        secondary: const Color.fromARGB(255, 255, 109, 157),
+        tertiary: Colors.yellow,
+
+        themedata: ColorScheme.fromSeed(
+          seedColor: Colors.green,
+          brightness: Brightness.dark,
+          dynamicSchemeVariant: DynamicSchemeVariant.monochrome,
+        ),
 
         baseunit: 1.0,
       ),
@@ -225,76 +303,6 @@ class _HomeState extends ConsumerState<Home> {
 
   List<Widget> first(BuildContext context) => [
     Wrap(
-      children: [
-        Card(
-          color: context.cs.surface,
-          elevation: 0,
-          child: Container(
-            width: 100,
-            height: 100,
-            alignment: Alignment.center,
-            child: Text("surface"),
-          ),
-        ),
-        Card(
-          elevation: 0,
-          child: Container(
-            width: 100,
-            height: 100,
-            alignment: Alignment.center,
-            child: Text("none"),
-          ),
-        ),
-        Card(
-          color: context.cs.surfaceContainer,
-          elevation: 0,
-          child: Container(
-            width: 100,
-            height: 100,
-            alignment: Alignment.center,
-            child: Text("surcon"),
-          ),
-        ),
-        Card(
-          color: context.cs.surfaceContainerHighest,
-          elevation: 0,
-          child: Container(
-            width: 100,
-            height: 100,
-            alignment: Alignment.center,
-            child: Text("surconh"),
-          ),
-        ),
-        Card(
-          color: context.cs.secondary,
-          elevation: 0,
-          child: Container(
-            width: 100,
-            height: 100,
-            alignment: Alignment.center,
-            child: Text(
-              "secondary",
-              style: context.bm?.copyWith(color: context.cs.onSecondary),
-            ),
-          ),
-        ),
-        Card(
-          color: context.cs.tertiary,
-          elevation: 0,
-          child: Container(
-            width: 100,
-            height: 100,
-            alignment: Alignment.center,
-            child: Text(
-              "tertiary",
-              style: context.bm?.copyWith(color: context.cs.onTertiary),
-            ),
-          ),
-        ),
-      ],
-    ),
-
-    Wrap(
       children: <Widget>[
         Buttons(isDisabled: false, hasIcon: false),
         Buttons(isDisabled: false, hasIcon: true),
@@ -368,9 +376,21 @@ class _HomeState extends ConsumerState<Home> {
         ),
       ],
     ),
-  ];
+    Dropdown(),
 
-  List<Widget> second(BuildContext context) => [
+    SegmentedButton<String>(
+      segments: const <ButtonSegment<String>>[
+        ButtonSegment(value: "Sizes.extraSmall", label: Text('XS')),
+        ButtonSegment(value: "Sizes.small", label: Text('S')),
+        ButtonSegment(value: "Sizes.medium", label: Text('M')),
+        ButtonSegment(value: "Sizes.large", label: Text('L')),
+        ButtonSegment(value: "Sizes.extraLarge", label: Text('XL')),
+      ],
+      selected: {"Sizes.small"},
+      onSelectionChanged: (newSelection) {},
+      multiSelectionEnabled: true,
+    ),
+
     Row(
       children: [
         Flexible(
@@ -421,7 +441,9 @@ class _HomeState extends ConsumerState<Home> {
         ),
       ],
     ),
+  ];
 
+  List<Widget> second(BuildContext context) => [
     Slider(
       max: 100,
       divisions: 5,
@@ -510,21 +532,6 @@ class _HomeState extends ConsumerState<Home> {
   ];
 
   List<Widget> third(BuildContext context) => [
-    Dropdown(),
-
-    SegmentedButton<String>(
-      segments: const <ButtonSegment<String>>[
-        ButtonSegment(value: "Sizes.extraSmall", label: Text('XS')),
-        ButtonSegment(value: "Sizes.small", label: Text('S')),
-        ButtonSegment(value: "Sizes.medium", label: Text('M')),
-        ButtonSegment(value: "Sizes.large", label: Text('L')),
-        ButtonSegment(value: "Sizes.extraLarge", label: Text('XL')),
-      ],
-      selected: {"Sizes.small"},
-      onSelectionChanged: (newSelection) {},
-      multiSelectionEnabled: true,
-    ),
-
     Wrap(
       children: [
         SizedBox(height: 360, child: NavigationDrawerSection()),
@@ -950,6 +957,7 @@ class _NavigationDrawerSectionState extends State<NavigationDrawerSection> {
 
         ExpansionPanelList(
           materialGapSize: 0,
+          elevation: 0,
           expandedHeaderPadding: EdgeInsets.all(0),
           children: [
             ExpansionPanel(

@@ -8,6 +8,8 @@ class CurvedCarousel extends StatelessWidget {
     this.height = 100,
     this.width = 170,
     this.controller,
+    this.itemCountBefore = 2,
+    this.itemCountAfter = 2,
     this.rotationMultiplier = 0.2,
     this.xMultiplier = 3,
     this.yMultiplier = 50,
@@ -24,6 +26,8 @@ class CurvedCarousel extends StatelessWidget {
   final CustomCarouselScrollController? controller;
   final double height;
   final double width;
+  final int itemCountBefore;
+  final int itemCountAfter;
   final double rotationMultiplier;
   final double scaleMin;
   final double opacityMin;
@@ -45,8 +49,8 @@ class CurvedCarousel extends StatelessWidget {
     );
 
     Widget carousel = CustomCarousel(
-      itemCountBefore: 2,
-      itemCountAfter: 2,
+      itemCountBefore: itemCountBefore,
+      itemCountAfter: itemCountAfter,
       controller: controller,
       alignment: alignment,
       scrollDirection: Axis.horizontal,

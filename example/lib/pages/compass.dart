@@ -16,50 +16,20 @@ part 'compass.g.dart';
 
 List<RouteBase> get compassRoutes => $appRoutes;
 
-@TypedGoRoute<RootRoute>(
+@TypedGoRoute<CountriesRoute>(
   path: '/compass',
   routes: [
-    TypedGoRoute<CountriesRoute>(
-      path: 'countries',
+    TypedGoRoute<CountryRoute>(
+      path: ':country',
       routes: [
-        TypedGoRoute<CountryRoute>(
-          path: ':country',
-          routes: [
-            TypedGoRoute<ActivitiesRoute>(
-              path: ':destination',
-              routes: [
-                TypedGoRoute<DetailsRoute>(path: ':activites/:daterange'),
-              ],
-            ),
-          ],
+        TypedGoRoute<ActivitiesRoute>(
+          path: ':destination',
+          routes: [TypedGoRoute<DetailsRoute>(path: ':activites/:daterange')],
         ),
       ],
     ),
-    TypedGoRoute<DestinationListRoute>(path: 'destinations-list'),
-    TypedGoRoute<ActivityListRoute>(path: 'activities-list'),
   ],
 )
-class RootRoute extends GoRouteData with _$RootRoute {
-  const RootRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return Scaffold(
-      appBar: CompassAppBar(),
-      body: Column(
-        children: [
-          IconButton(
-            onPressed: () {
-              CountriesRoute().push(context);
-            },
-            icon: Icon(CupertinoIcons.cube),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class CountriesRoute extends GoRouteData with _$CountriesRoute {
   const CountriesRoute();
 
@@ -76,10 +46,6 @@ class CountriesRoute extends GoRouteData with _$CountriesRoute {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  Container(height: 80, child: Placeholder()),
-
-                  const SizedBox(height: 16),
-
                   ClipRRect(
                     child: asyncContinents.when(
                       data: (continents) {
@@ -143,7 +109,8 @@ class CountriesRoute extends GoRouteData with _$CountriesRoute {
                           },
                         );
                       },
-                      loading: () => Placeholder(),
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
                       error: (error, stack) => Text('Error: $error'),
                     ),
                   ),
@@ -264,45 +231,8 @@ class CountryRoute extends GoRouteData with _$CountryRoute {
                 ),
               );
             },
-            error: (error, stackTrace) {
-              return Text(error.toString());
-            },
-            loading: () {
-              return Placeholder();
-            },
-          ),
-        );
-      },
-    );
-  }
-}
-
-class DestinationListRoute extends GoRouteData with _$DestinationListRoute {
-  const DestinationListRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return Consumer(
-      builder: (context, ref, child) {
-        final asyncDestinations = ref.watch(destinationsProvider);
-        return Scaffold(
-          appBar: CompassAppBar(),
-          body: asyncDestinations.when(
-            data: (destinations) {
-              return ListView.builder(
-                itemCount: destinations.length,
-                itemBuilder: (context, index) {
-                  final destination = destinations[index];
-                  return ListTile(
-                    title: Text(destination.name),
-                    subtitle: Text(destination.country),
-                    leading: Image.network(destination.imageUrl),
-                  );
-                },
-              );
-            },
-            loading: () => Center(child: CircularProgressIndicator()),
-            error: (error, stack) => Center(child: Text('Error: $error')),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stack) => Text('Error: $error'),
           ),
         );
       },
@@ -382,7 +312,10 @@ class ActivitiesRoute extends GoRouteData with _$ActivitiesRoute {
                         },
                         icon: Icon(CupertinoIcons.arrow_left),
                       ),
-                      Text("Activites", style: context.h6),
+                      Text(
+                        "Activites",
+                        style: GoogleFonts.robotoMono(textStyle: context.h5),
+                      ),
                       IconButton(
                         onPressed: () {
                           context.pop();
@@ -392,10 +325,15 @@ class ActivitiesRoute extends GoRouteData with _$ActivitiesRoute {
                     ],
                   ),
                 ),
-                SliverAppBar(
-                  pinned: true,
-                  automaticallyImplyLeading: false,
-                  flexibleSpace: Text("Daytime"),
+
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      "Daytime",
+                      style: GoogleFonts.robotoMono(textStyle: context.h7),
+                    ),
+                  ),
                 ),
 
                 asyncActivites.when(
@@ -413,17 +351,25 @@ class ActivitiesRoute extends GoRouteData with _$ActivitiesRoute {
                     );
                   },
                   error: (error, stackTrace) {
-                    return SliverToBoxAdapter(child: Placeholder());
+                    return SliverToBoxAdapter(
+                      child: Center(child: Text(error.toString())),
+                    );
                   },
                   loading: () {
-                    return SliverToBoxAdapter(child: Placeholder());
+                    return SliverToBoxAdapter(
+                      child: Center(child: CircularProgressIndicator()),
+                    );
                   },
                 ),
 
-                SliverAppBar(
-                  pinned: true,
-                  automaticallyImplyLeading: false,
-                  flexibleSpace: Text("Night"),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      "Night",
+                      style: GoogleFonts.robotoMono(textStyle: context.h7),
+                    ),
+                  ),
                 ),
 
                 asyncActivites.when(
@@ -441,10 +387,14 @@ class ActivitiesRoute extends GoRouteData with _$ActivitiesRoute {
                     );
                   },
                   error: (error, stackTrace) {
-                    return SliverToBoxAdapter(child: Placeholder());
+                    return SliverToBoxAdapter(
+                      child: Center(child: Text(error.toString())),
+                    );
                   },
                   loading: () {
-                    return SliverToBoxAdapter(child: Placeholder());
+                    return SliverToBoxAdapter(
+                      child: Center(child: CircularProgressIndicator()),
+                    );
                   },
                 ),
               ],
@@ -508,42 +458,6 @@ class ActivityTile extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class ActivityListRoute extends GoRouteData with _$ActivityListRoute {
-  const ActivityListRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return Consumer(
-      builder: (context, ref, child) {
-        final asyncActivities = ref.watch(activitiesProvider);
-        return Scaffold(
-          appBar: AppBar(title: Text('Activities')),
-          body: asyncActivities.when(
-            data: (activities) {
-              return ListView.builder(
-                itemCount: activities.length,
-                itemBuilder: (context, index) {
-                  final activity = activities[index];
-                  return ListTile(
-                    title: Text(activity.name),
-                    subtitle: Text(activity.description),
-                    leading: Image.network(activity.imageUrl),
-                    onTap: () {
-                      // Handle activity tap
-                    },
-                  );
-                },
-              );
-            },
-            loading: () => Center(child: CircularProgressIndicator()),
-            error: (error, stack) => Center(child: Text('Error: $error')),
-          ),
-        );
-      },
     );
   }
 }
@@ -632,20 +546,7 @@ class CompassAppBar extends StatelessWidget implements PreferredSizeWidget {
         icon: Icon(CupertinoIcons.arrow_left),
       ),
       title: Text(GoRouterState.of(context).uri.path),
-      actions: [
-        IconButton(
-          onPressed: () {
-            ActivityListRoute().push(context);
-          },
-          icon: Icon(CupertinoIcons.slowmo),
-        ),
-        IconButton(
-          onPressed: () {
-            DestinationListRoute().push(context);
-          },
-          icon: Icon(CupertinoIcons.cube),
-        ),
-      ],
+      actions: [],
     );
   }
 

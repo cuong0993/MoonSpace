@@ -1,4 +1,3 @@
-import 'dart:math' as Math;
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -12,7 +11,7 @@ int getCircularDistance(int current, int target, int totalItems) {
   int counterClockwise = (current - target + totalItems) % totalItems;
 
   // Return the minimum of the two distances
-  return Math.min(clockwise, counterClockwise);
+  return math.min(clockwise, counterClockwise);
 }
 
 enum CoverFlowStyle {

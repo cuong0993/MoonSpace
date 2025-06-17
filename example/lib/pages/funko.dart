@@ -93,7 +93,6 @@ class FunkoApp extends ConsumerWidget {
                     .animate()
                     .scale(begin: Offset(0.9, 0.9), end: Offset(1, 1))
                     .fadeIn(begin: .5);
-                ;
               },
             ),
           ),

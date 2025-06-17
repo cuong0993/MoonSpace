@@ -21,6 +21,10 @@ extension AppThemeRange on (num, num) {
       ($1 + ($2 - $1) * AppTheme.rc).toDouble();
 }
 
+TextStyle samestyle(TextStyle s) {
+  return s;
+}
+
 class AppTheme {
   final String name;
   final IconData icon;
@@ -39,6 +43,9 @@ class AppTheme {
   final (int, int) padding;
   final bool inputfilled;
   final bool inputOutlined;
+
+  final TextStyle Function(TextStyle style) bodyTextStyle;
+  final TextStyle Function(TextStyle style) headlineTextStyle;
 
   final double baseunit;
 
@@ -59,6 +66,9 @@ class AppTheme {
 
       borderRadius: borderRadius,
       padding: padding,
+
+      bodyTextStyle: bodyTextStyle,
+      headlineTextStyle: headlineTextStyle,
 
       baseunit: baseunit,
     );
@@ -83,6 +93,9 @@ class AppTheme {
 
     this.inputOutlined = false,
     this.inputfilled = false,
+
+    this.bodyTextStyle = samestyle,
+    this.headlineTextStyle = samestyle,
 
     required this.baseunit,
   });
@@ -124,119 +137,6 @@ class AppTheme {
       primary: const Color(0xff8a73cf),
       secondary: const Color(0xffb2d2a4),
       tertiary: const Color(0xffffffff),
-
-      baseunit: 1.0,
-    ),
-    AppTheme(
-      name: "Happy",
-      icon: Icons.icecream_outlined,
-
-      dark: false,
-
-      size: const Size(360, 780),
-      maxSize: const Size(1366, 1024),
-      designSize: const Size(360, 780),
-
-      borderRadius: (8, 10),
-      padding: (14, 16),
-
-      primary: const Color(0xfff7ec1a),
-      secondary: const Color(0xff4281d4),
-      tertiary: const Color(0xffefae35),
-
-      baseunit: 1.0,
-    ),
-    AppTheme(
-      name: "HappyNight",
-      icon: Icons.icecream_outlined,
-
-      dark: true,
-
-      size: const Size(360, 780),
-      maxSize: const Size(1366, 1024),
-      designSize: const Size(360, 780),
-
-      borderRadius: (8, 10),
-      padding: (14, 16),
-
-      primary: const Color(0xfff7ec1a),
-      secondary: const Color(0xff4281d4),
-      tertiary: const Color(0xffefae35),
-
-      baseunit: 1.0,
-    ),
-    AppTheme(
-      name: "Monochrome",
-      icon: Icons.icecream_outlined,
-
-      dark: false,
-
-      size: const Size(360, 780),
-      maxSize: const Size(1366, 1024),
-      designSize: const Size(360, 780),
-
-      borderRadius: (8, 10),
-      padding: (14, 16),
-
-      primary: const Color.fromARGB(255, 105, 187, 255),
-      secondary: const Color.fromARGB(255, 255, 109, 157),
-      tertiary: Colors.yellow,
-
-      themedata: ColorScheme.fromSeed(
-        seedColor: Colors.green,
-        brightness: Brightness.light,
-        dynamicSchemeVariant: DynamicSchemeVariant.monochrome,
-      ),
-
-      baseunit: 1.0,
-    ),
-    AppTheme(
-      name: "TonalSpot",
-      icon: Icons.icecream_outlined,
-
-      dark: false,
-
-      size: const Size(360, 780),
-      maxSize: const Size(1366, 1024),
-      designSize: const Size(360, 780),
-
-      borderRadius: (8, 10),
-      padding: (14, 16),
-
-      primary: const Color.fromARGB(255, 105, 187, 255),
-      secondary: const Color.fromARGB(255, 255, 109, 157),
-      tertiary: Colors.yellow,
-
-      themedata: ColorScheme.fromSeed(
-        seedColor: Colors.purple,
-        brightness: Brightness.light,
-        dynamicSchemeVariant: DynamicSchemeVariant.tonalSpot,
-      ),
-
-      baseunit: 1.0,
-    ),
-    AppTheme(
-      name: "MonochromeNight",
-      icon: Icons.icecream_outlined,
-
-      dark: true,
-
-      size: const Size(360, 780),
-      maxSize: const Size(1366, 1024),
-      designSize: const Size(360, 780),
-
-      borderRadius: (8, 10),
-      padding: (14, 16),
-
-      primary: const Color.fromARGB(255, 105, 187, 255),
-      secondary: const Color.fromARGB(255, 255, 109, 157),
-      tertiary: Colors.yellow,
-
-      themedata: ColorScheme.fromSeed(
-        seedColor: Colors.green,
-        brightness: Brightness.dark,
-        dynamicSchemeVariant: DynamicSchemeVariant.monochrome,
-      ),
 
       baseunit: 1.0,
     ),
@@ -335,57 +235,83 @@ class AppTheme {
       onTertiaryFixedVariant: Colors.red, //tertiary.getOnColor(),
 
       surfaceContainerHighest: surface.lighten(isDark ? 0.02 : -0.02),
-      surfaceContainerLow: surface.lighten(isDark ? 0.06 : -0.06),
-      surfaceContainer: surface.lighten(isDark ? 0.08 : -0.08),
-      surfaceContainerHigh: surface.lighten(isDark ? 0.04 : -0.04),
+      surfaceContainerLow: surface.lighten(isDark ? 0.06 : -0.02),
+      surfaceContainer: surface.lighten(isDark ? 0.08 : -0.03),
+      surfaceContainerHigh: surface.lighten(isDark ? 0.04 : -0.03),
       surfaceBright: surface.lighten(isDark ? 0.02 : -0.02),
-      surfaceContainerLowest: surface.lighten(isDark ? 0.04 : -0.04),
-      surfaceDim: surface.lighten(isDark ? 0.08 : -0.08),
+      surfaceContainerLowest: surface.lighten(isDark ? 0.04 : -0.03),
+      surfaceDim: surface.lighten(isDark ? 0.08 : -0.03),
     );
   }
 
-  TextTheme get textTheme => TextTheme(
-    //h0
-    displayLarge: TextStyle(letterSpacing: .5.c, fontSize: (42, 50).c),
-    //h1
-    displayMedium: TextStyle(letterSpacing: .5.c, fontSize: (36, 42).c),
-    //h2
-    displaySmall: TextStyle(letterSpacing: .5.c, fontSize: (32, 36).c),
+  TextTheme get textTheme {
+    return TextTheme(
+      //h0
+      displayLarge: headlineTextStyle(
+        TextStyle(letterSpacing: .5.c, fontSize: (42, 50).c),
+      ),
+      //h1
+      displayMedium: headlineTextStyle(
+        TextStyle(letterSpacing: .5.c, fontSize: (36, 42).c),
+      ),
+      //h2
+      displaySmall: headlineTextStyle(
+        TextStyle(letterSpacing: .5.c, fontSize: (32, 36).c),
+      ),
 
-    //h3
-    headlineLarge: TextStyle(letterSpacing: .5.c, fontSize: (26, 32).c),
-    //h4
-    headlineMedium: TextStyle(letterSpacing: .5.c, fontSize: (22, 26).c),
-    //h5
-    headlineSmall: TextStyle(fontSize: (19, 22).c),
+      //h3
+      headlineLarge: headlineTextStyle(
+        TextStyle(letterSpacing: .5.c, fontSize: (26, 32).c),
+      ),
+      //h4
+      headlineMedium: headlineTextStyle(
+        TextStyle(letterSpacing: .5.c, fontSize: (22, 26).c),
+      ),
+      //h5
+      headlineSmall: headlineTextStyle(TextStyle(fontSize: (19, 22).c)),
 
-    //h6, Appbar
-    titleLarge: TextStyle(letterSpacing: 0.c, fontSize: (17, 19).c),
+      //h6, Appbar
+      titleLarge: bodyTextStyle(
+        TextStyle(letterSpacing: 0.c, fontSize: (17, 19).c),
+      ),
 
-    //h7, CupertinoListTile, ListTile Title, Textfield label
-    titleMedium: TextStyle(
-      letterSpacing: 1.c,
-      fontSize: (15, 16).c,
-      fontWeight: FontWeight.w400,
-    ),
+      //h7, CupertinoListTile, ListTile Title, Textfield label
+      titleMedium: bodyTextStyle(
+        TextStyle(
+          letterSpacing: 1.c,
+          fontSize: (15, 16).c,
+          fontWeight: FontWeight.w400,
+        ),
+      ),
 
-    //h8, Tabs
-    titleSmall: TextStyle(fontSize: (14, 14).c, fontWeight: FontWeight.w400),
-    //TextFormField, CupertinoFormSection header, ListTile, SwitchTile, RadioTile
-    bodyLarge: TextStyle(fontSize: (14, 15).c),
+      //h8, Tabs
+      titleSmall: bodyTextStyle(
+        TextStyle(fontSize: (14, 14).c, fontWeight: FontWeight.w400),
+      ),
+      //TextFormField, CupertinoFormSection header, ListTile, SwitchTile, RadioTile
+      bodyLarge: bodyTextStyle(TextStyle(fontSize: (14, 15).c)),
 
-    //h9, Text,  Textfield font, Tile subtitle
-    bodyMedium: TextStyle(fontSize: (13, 14).c, fontWeight: FontWeight.w400),
-    //Buttons
-    labelLarge: TextStyle(fontSize: (13, 14).c, fontWeight: FontWeight.w400),
+      //h9, Text,  Textfield font, Tile subtitle
+      bodyMedium: bodyTextStyle(
+        TextStyle(fontSize: (13, 14).c, fontWeight: FontWeight.w400),
+      ),
+      //Buttons
+      labelLarge: bodyTextStyle(
+        TextStyle(fontSize: (13, 14).c, fontWeight: FontWeight.w400),
+      ),
 
-    //p, ListTile subtitle, errortext
-    bodySmall: TextStyle(fontSize: (12, 13).c),
-    //BottomNavBar, Navigation
-    labelMedium: TextStyle(fontSize: (12, 13).c, fontWeight: FontWeight.w400),
+      //p, ListTile subtitle, errortext
+      bodySmall: bodyTextStyle(TextStyle(fontSize: (12, 13).c)),
+      //BottomNavBar, Navigation
+      labelMedium: bodyTextStyle(
+        TextStyle(fontSize: (12, 13).c, fontWeight: FontWeight.w400),
+      ),
 
-    labelSmall: TextStyle(fontSize: (10, 11).c, fontWeight: FontWeight.w400),
-  );
+      labelSmall: bodyTextStyle(
+        TextStyle(fontSize: (10, 11).c, fontWeight: FontWeight.w400),
+      ),
+    );
+  }
 
   ThemeData get theme {
     final colorScheme = themedata ?? buildColorScheme();
@@ -408,6 +334,7 @@ class AppTheme {
                 borderRadius: BorderRadius.circular(borderRadius.c),
               ),
         filled: inputfilled,
+        fillColor: colorScheme.surfaceContainerHigh,
 
         contentPadding: EdgeInsets.all(padding.c),
       ),
@@ -428,8 +355,6 @@ class AppTheme {
       iconButtonTheme: IconButtonThemeData(
         // style: IconButton.styleFrom(foregroundColor: colorScheme.onSurface),
       ),
-
-      //
 
       //
       floatingActionButtonTheme: FloatingActionButtonThemeData(

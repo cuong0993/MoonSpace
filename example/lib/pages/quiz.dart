@@ -8,7 +8,6 @@ import 'package:moonspace/form/async_text_field.dart';
 import 'package:moonspace/helper/extensions/theme_ext.dart';
 import 'package:moonspace/theme.dart';
 import 'package:moonspace/widgets/button_animated_slide.dart';
-import 'package:moonspace/widgets/ratings.dart';
 
 class Quiz extends StatelessWidget {
   const Quiz({super.key});
@@ -102,8 +101,6 @@ class Quiz extends StatelessWidget {
                     ),
                   ),
                 ),
-
-                MaskedRatingBar(rating: 3.6),
 
                 SizedBox(height: 16),
 
@@ -573,7 +570,7 @@ class NameCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Animals Name", style: context.h5.c(onColor)),
+                  Text("Quiz", style: context.h5.c(onColor)),
                   SizedBox(height: 8),
                   Text("10 questions", style: context.h6.c(onColor)),
                   SizedBox(height: 8),
@@ -601,18 +598,11 @@ class QuizHeader extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.max,
       children: [
-        InkWell(
-          onTap: () {
+        IconButton.outlined(
+          onPressed: () {
             context.pop();
           },
-          child: Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: context.cs.tertiary,
-            ),
-          ),
+          icon: Icon(CupertinoIcons.arrow_left),
         ),
         Expanded(
           child: Padding(

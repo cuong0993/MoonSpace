@@ -131,7 +131,7 @@ class _Card extends StatelessWidget {
 
   void _showDetails(BuildContext context, String category, int index) {
     PageRouteBuilder route = PageRouteBuilder(
-      pageBuilder: (_, __, ___) => _DetailView(category, index),
+      pageBuilder: (_, _, _) => _DetailView(category, index),
       transitionDuration: 300.ms,
       transitionsBuilder: (_, a, __, c) => FadeTransition(opacity: a, child: c),
     );

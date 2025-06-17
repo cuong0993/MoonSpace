@@ -6,78 +6,41 @@ part of 'compass.dart';
 // GoRouterGenerator
 // **************************************************************************
 
-List<RouteBase> get $appRoutes => [$rootRoute];
+List<RouteBase> get $appRoutes => [$countriesRoute];
 
-RouteBase get $rootRoute => GoRouteData.$route(
+RouteBase get $countriesRoute => GoRouteData.$route(
   path: '/compass',
 
-  factory: _$RootRoute._fromState,
+  factory: _$CountriesRoute._fromState,
   routes: [
     GoRouteData.$route(
-      path: 'countries',
+      path: ':country',
 
-      factory: _$CountriesRoute._fromState,
+      factory: _$CountryRoute._fromState,
       routes: [
         GoRouteData.$route(
-          path: ':country',
+          path: ':destination',
 
-          factory: _$CountryRoute._fromState,
+          factory: _$ActivitiesRoute._fromState,
           routes: [
             GoRouteData.$route(
-              path: ':destination',
+              path: ':activites/:daterange',
 
-              factory: _$ActivitiesRoute._fromState,
-              routes: [
-                GoRouteData.$route(
-                  path: ':activites/:daterange',
-
-                  factory: _$DetailsRoute._fromState,
-                ),
-              ],
+              factory: _$DetailsRoute._fromState,
             ),
           ],
         ),
       ],
     ),
-    GoRouteData.$route(
-      path: 'destinations-list',
-
-      factory: _$DestinationListRoute._fromState,
-    ),
-    GoRouteData.$route(
-      path: 'activities-list',
-
-      factory: _$ActivityListRoute._fromState,
-    ),
   ],
 );
-
-mixin _$RootRoute on GoRouteData {
-  static RootRoute _fromState(GoRouterState state) => const RootRoute();
-
-  @override
-  String get location => GoRouteData.$location('/compass');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
 
 mixin _$CountriesRoute on GoRouteData {
   static CountriesRoute _fromState(GoRouterState state) =>
       const CountriesRoute();
 
   @override
-  String get location => GoRouteData.$location('/compass/countries');
+  String get location => GoRouteData.$location('/compass');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -100,9 +63,8 @@ mixin _$CountryRoute on GoRouteData {
   CountryRoute get _self => this as CountryRoute;
 
   @override
-  String get location => GoRouteData.$location(
-    '/compass/countries/${Uri.encodeComponent(_self.country)}',
-  );
+  String get location =>
+      GoRouteData.$location('/compass/${Uri.encodeComponent(_self.country)}');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -128,7 +90,7 @@ mixin _$ActivitiesRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location(
-    '/compass/countries/${Uri.encodeComponent(_self.country)}/${Uri.encodeComponent(_self.destination)}',
+    '/compass/${Uri.encodeComponent(_self.country)}/${Uri.encodeComponent(_self.destination)}',
   );
 
   @override
@@ -157,50 +119,8 @@ mixin _$DetailsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location(
-    '/compass/countries/${Uri.encodeComponent(_self.country)}/${Uri.encodeComponent(_self.destination)}/${Uri.encodeComponent(_self.activites)}/${Uri.encodeComponent(_self.daterange)}',
+    '/compass/${Uri.encodeComponent(_self.country)}/${Uri.encodeComponent(_self.destination)}/${Uri.encodeComponent(_self.activites)}/${Uri.encodeComponent(_self.daterange)}',
   );
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin _$DestinationListRoute on GoRouteData {
-  static DestinationListRoute _fromState(GoRouterState state) =>
-      const DestinationListRoute();
-
-  @override
-  String get location => GoRouteData.$location('/compass/destinations-list');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin _$ActivityListRoute on GoRouteData {
-  static ActivityListRoute _fromState(GoRouterState state) =>
-      const ActivityListRoute();
-
-  @override
-  String get location => GoRouteData.$location('/compass/activities-list');
 
   @override
   void go(BuildContext context) => context.go(location);

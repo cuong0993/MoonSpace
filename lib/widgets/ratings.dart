@@ -63,3 +63,37 @@ class _RatingClipper extends CustomClipper<Rect> {
     return oldClipper.percent != percent;
   }
 }
+
+class RatingsBars extends StatelessWidget {
+  const RatingsBars({super.key, required this.percentages});
+
+  final List<double> percentages;
+
+  Widget _buildStarBar(int stars, double percent) {
+    return Row(
+      children: [
+        Text('$stars'),
+        const SizedBox(width: 6),
+        Expanded(
+          child: LinearProgressIndicator(
+            value: percent,
+            // backgroundColor: Colors.grey.shade300,
+            // valueColor: AlwaysStoppedAnimation(Colors.amber),
+            minHeight: 5,
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: percentages
+          .asMap()
+          .entries
+          .map((e) => _buildStarBar(percentages.length - e.key, e.value))
+          .toList(),
+    );
+  }
+}
