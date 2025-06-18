@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moonspace/carousel/curved_carousel.dart';
+import 'package:moonspace/form/select.dart';
 import 'package:moonspace/helper/extensions/color.dart';
 import 'package:moonspace/helper/extensions/theme_ext.dart';
 import 'package:moonspace/theme.dart';
@@ -543,7 +544,7 @@ class _RecipePageState extends State<RecipePage> {
 
                 Text('INGREDIENTS', style: context.h6.w5),
 
-                // const SizedBox(height: 16),
+                const SizedBox(height: 8),
               ],
             ),
           ),
@@ -553,12 +554,109 @@ class _RecipePageState extends State<RecipePage> {
 
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text('STEPS', style: context.h6.w5),
           ),
         ),
 
         SliverRecipeList(recipe: recipe, ingredients: false),
+
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 240,
+                  child: GridView.count(
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisCount: 2,
+                    shrinkWrap: true,
+                    childAspectRatio: 3,
+                    children: List.generate(4, (index) {
+                      return ListTile(
+                        onTap: () {},
+                        contentPadding: EdgeInsets.symmetric(horizontal: 4),
+                        leading: Icon(CupertinoIcons.heart),
+                        titleAlignment: ListTileTitleAlignment.top,
+                        title: Text('Heart'),
+                        dense: true,
+                      );
+                    }),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                GridView.count(
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  shrinkWrap: true,
+                  children: List.generate(6, (index) {
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: context.cSur2,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.yard_outlined,
+                            size: 50,
+                            color: context.cSur9,
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Item ${index + 1}',
+                            style: context.h8.c(context.cSur9),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Mayan, Mexico',
+                  style: GoogleFonts.ibmPlexMono(textStyle: context.h8),
+                ),
+                const SizedBox(height: 8),
+                OptionBox(
+                  options: [
+                    Option(
+                      value: "1",
+                      title: Text("Home"),
+                      secondary: Icon(CupertinoIcons.cloud_moon_rain),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Mayan, Mexico"),
+                          Text("Mayan, Mexico"),
+                        ],
+                      ),
+                    ),
+                    Option(
+                      value: "2",
+                      title: Text("Home"),
+                      secondary: Icon(CupertinoIcons.cloud_moon_rain),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Mayan, Mexico"),
+                          Text("Mayan, Mexico"),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 50),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }

@@ -5,7 +5,6 @@ import 'package:example/pages/funko.dart';
 import 'package:example/pages/manager.dart';
 import 'package:example/pages/music.dart';
 import 'package:example/pages/quiz.dart';
-import 'package:example/pages/hotel.dart';
 import 'package:example/pages/rankone.dart';
 import 'package:example/pages/recipe.dart';
 import 'package:example/router/router.dart';
@@ -185,12 +184,6 @@ void main() {
           path: "/quiz",
           builder: (context, state) {
             return Quiz();
-          },
-        ),
-        GoRoute(
-          path: "/hotel",
-          builder: (context, state) {
-            return HotelApp();
           },
         ),
         GoRoute(
@@ -804,12 +797,6 @@ class ThemeSettings extends StatelessWidget {
                 context.push("/quiz");
               },
               title: Text("Quiz"),
-            ),
-            ListTile(
-              onTap: () {
-                context.push("/hotel");
-              },
-              title: Text("Hotel"),
             ),
             ListTile(
               onTap: () {

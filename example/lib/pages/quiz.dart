@@ -138,26 +138,6 @@ class Quiz extends StatelessWidget {
 
                 SizedBox(height: 16),
 
-                DefaultTabController(
-                  length: 3,
-                  child: TabBar(
-                    indicatorSize: TabBarIndicatorSize.tab,
-                    dividerColor: Colors.transparent,
-                    indicator: BoxDecoration(
-                      borderRadius: 24.br,
-                      color: context.cs.secondary,
-                    ),
-                    labelColor: context.cs.onSecondary,
-                    tabs: const [
-                      Tab(text: 'Video'),
-                      Tab(text: 'Photos'),
-                      Tab(text: 'Audio'),
-                    ],
-                  ),
-                ),
-
-                SizedBox(height: 16),
-
                 Text(
                   "Welcome to the family! Unwind with me as we play through Zelda and cozy games together",
                   style: GoogleFonts.inter(textStyle: context.h3),

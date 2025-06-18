@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:moonspace/helper/extensions/color.dart';
+import 'package:moonspace/helper/extensions/theme_ext.dart';
 
 extension AppThemeNumber on num {
   double get a => (this * AppTheme.a).toDouble();
@@ -406,9 +407,14 @@ class AppTheme {
       ),
 
       tabBarTheme: TabBarThemeData(
-        indicatorSize: TabBarIndicatorSize.label,
-        labelStyle: textTheme.bodySmall,
+        indicatorSize: TabBarIndicatorSize.tab,
+        indicator: BoxDecoration(
+          color: colorScheme.secondary,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        labelStyle: textTheme.bodySmall.c(colorScheme.onSecondary),
         unselectedLabelStyle: textTheme.bodySmall,
+        dividerColor: Colors.transparent,
       ),
 
       //

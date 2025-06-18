@@ -1,9 +1,21 @@
 [
     {
-        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9xjb.jpg",
-        "name": "Resident Evil: Requiem",
-        "date": "27 Feb, 2026",
-        "platform": "gamepad\nSeries X|S, PC, PS5"
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1zjz.jpg",
+        "name": "Pokémon: Let's Go, Eevee!",
+        "date": "16 Nov, 2018",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co22a9.jpg",
+        "name": "Luigi's Mansion 3",
+        "date": "31 Oct, 2019",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co5s5v.jpg",
+        "name": "God of War Ragnarök",
+        "date": "9 Nov, 2022",
+        "platform": "gamepad\nPS4, PC, PS5"
     },
     {
         "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9gam.jpg",
@@ -12,16 +24,28 @@
         "platform": "gamepad\nSeries X|S, PC, PS5"
     },
     {
-        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9wy4.jpg",
-        "name": "Silent Hill f",
-        "date": "25 Sep, 2025",
-        "platform": "gamepad\nSeries X|S, PC, PS5"
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co8hl0.jpg",
+        "name": "Astro Bot",
+        "date": "6 Sep, 2024",
+        "platform": "No Platform"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1nc7.jpg",
+        "name": "Doom",
+        "date": "12 May, 2016",
+        "platform": "No Platform"
     },
     {
         "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co6lxr.jpg",
         "name": "Lies of P",
         "date": "18 Sep, 2023",
         "platform": "gamepad\nSeries X|S, PS4, PC, PS5, Mac, XONE"
+    },
+    {
+        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9wy4.jpg",
+        "name": "Silent Hill f",
+        "date": "25 Sep, 2025",
+        "platform": "gamepad\nSeries X|S, PC, PS5"
     },
     {
         "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co95gk.jpg",
@@ -46,12 +70,6 @@
         "name": "Red Dead Redemption 2",
         "date": "26 Oct, 2018",
         "platform": "gamepad\nStadia, PS4, PC, XONE"
-    },
-    {
-        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co5s5v.jpg",
-        "name": "God of War Ragnarök",
-        "date": "9 Nov, 2022",
-        "platform": "gamepad\nPS4, PC, PS5"
     },
     {
         "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co2zpu.jpg",
@@ -156,18 +174,6 @@
         "platform": "No Platform"
     },
     {
-        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1zjz.jpg",
-        "name": "Pokémon: Let's Go, Eevee!",
-        "date": "16 Nov, 2018",
-        "platform": "No Platform"
-    },
-    {
-        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co22a9.jpg",
-        "name": "Luigi's Mansion 3",
-        "date": "31 Oct, 2019",
-        "platform": "No Platform"
-    },
-    {
         "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co27kt.jpg",
         "name": "Xenoblade Chronicles: Definitive Edition",
         "date": "29 May, 2020",
@@ -228,12 +234,6 @@
         "platform": "No Platform"
     },
     {
-        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co8hl0.jpg",
-        "name": "Astro Bot",
-        "date": "6 Sep, 2024",
-        "platform": "No Platform"
-    },
-    {
         "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9rwo.jpg",
         "name": "Grand Theft Auto VI",
         "date": "26 May, 2026",
@@ -285,12 +285,6 @@
         "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1rba.jpg",
         "name": "Bloodborne",
         "date": "24 Mar, 2015",
-        "platform": "No Platform"
-    },
-    {
-        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co1nc7.jpg",
-        "name": "Doom",
-        "date": "12 May, 2016",
         "platform": "No Platform"
     },
     {
@@ -351,12 +345,6 @@
         "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9xwq.jpg",
         "name": "Clockwork Revolution",
         "date": "No Date",
-        "platform": "No Platform"
-    },
-    {
-        "image_src": "https://images.igdb.com/igdb/image/upload/t_cover_big/co9rwo.jpg",
-        "name": "Grand Theft Auto VI",
-        "date": "26 May, 2026",
         "platform": "No Platform"
     },
     {
