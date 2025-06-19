@@ -1,16 +1,22 @@
 import 'package:example/pages/travel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:moonspace/form/sherlock.dart';
 import 'package:moonspace/carousel/curved_carousel.dart';
 import 'package:moonspace/helper/extensions/theme_ext.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:go_router/go_router.dart';
+
+import 'package:connectrpc/http2.dart';
+import 'package:connectrpc/protobuf.dart';
+import 'package:connectrpc/protocol/connect.dart' as protocol;
+import 'package:example/proto/v1/data.connect.client.dart' as protoclient;
+import 'package:example/proto/v1/data.pbserver.dart' as proto;
 
 part 'compass.g.dart';
 
@@ -46,6 +52,40 @@ class CountriesRoute extends GoRouteData with _$CountriesRoute {
             child: SingleChildScrollView(
               child: Column(
                 children: [
+                  Sherlock<Destination>(
+                    fetch: (query) async {
+                      return ref
+                          .read(travelClientProvider.notifier)
+                          .searchDestination(query);
+                    },
+                    builder: (data, controller) {
+                      return ListView(
+                        shrinkWrap: true,
+                        children: data
+                            .map(
+                              (d) => ListTile(
+                                title: Text(d.name),
+                                subtitle: Text(d.country),
+                                onTap: () {
+                                  ref
+                                      .read(currentDestinationProvider.notifier)
+                                      .setDestination(d.ref);
+                                  ActivitiesRoute(
+                                    d.country,
+                                    d.ref,
+                                  ).push(context);
+                                },
+                              ),
+                            )
+                            .toList(),
+                      );
+                    },
+                    bar: true,
+                    hint: "Search destinations?",
+                  ),
+
+                  const SizedBox(height: 16),
+
                   ClipRRect(
                     child: asyncContinents.when(
                       data: (continents) {
@@ -568,7 +608,9 @@ class Continents extends _$Continents {
     return uniqueContinents ?? [];
   }
 
-  FutureOr<List<Destination>> getDestinations(String continent) async {
+  FutureOr<List<Destination>> getDestinationsInContinent(
+    String continent,
+  ) async {
     final asyncDestinations = ref.read(destinationsProvider);
     final destinations = asyncDestinations.asData?.value;
     final uniqueDestinations = destinations
@@ -690,6 +732,18 @@ class Destination {
       imageUrl: json['imageUrl'],
     );
   }
+
+  factory Destination.fromProto(proto.Destination d) {
+    return Destination(
+      ref: d.ref,
+      name: d.name,
+      country: d.country,
+      continent: d.continent,
+      knownFor: d.knownFor,
+      tags: d.tags,
+      imageUrl: d.imageUrl,
+    );
+  }
 }
 
 @Riverpod(keepAlive: true)
@@ -743,6 +797,21 @@ class Activity {
       imageUrl: json['imageUrl'],
     );
   }
+
+  factory Activity.fromProto(proto.Activity a) {
+    return Activity(
+      name: a.name,
+      description: a.description,
+      locationName: a.locationName,
+      duration: a.duration.toInt(),
+      timeOfDay: a.timeOfDay,
+      familyFriendly: a.familyFriendly,
+      price: a.price.toInt(),
+      destinationRef: a.destinationRef,
+      ref: a.ref,
+      imageUrl: a.imageUrl,
+    );
+  }
 }
 
 @Riverpod(keepAlive: true)
@@ -750,4 +819,45 @@ FutureOr<List<Activity>> activities(Ref ref) async {
   final String response = await rootBundle.loadString('assets/activities.json');
   final List<dynamic> data = json.decode(response);
   return data.map((json) => Activity.fromJson(json)).toList();
+}
+
+@Riverpod(keepAlive: true)
+class TravelClient extends _$TravelClient {
+  protoclient.TravelServiceClient get client => state;
+  @override
+  protoclient.TravelServiceClient build() {
+    final transport = protocol.Transport(
+      baseUrl: "http://localhost:8080",
+      codec: const ProtoCodec(),
+      httpClient: createHttpClient(),
+    );
+
+    final travelClient = protoclient.TravelServiceClient(transport);
+
+    return travelClient;
+  }
+
+  Future<Destination> getDestination(String name) async {
+    try {
+      final response = await client.getDestination(
+        proto.GetDestinationRequest(ref: name),
+      );
+      return Destination.fromProto(response);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<Destination>> searchDestination(String name) async {
+    try {
+      final response = await client.searchDestinations(
+        proto.GetDestinationRequest(ref: name),
+      );
+      return response.destinations
+          .map((d) => Destination.fromProto(d))
+          .toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

@@ -1,9 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:moonspace/helper/extensions/theme_ext.dart';
-
-import 'package:flutter/services.dart';
 import 'package:smooth_sheets/smooth_sheets.dart';
 
 List<String> get images => [
@@ -27,8 +25,6 @@ class _TravelAppState extends State<TravelApp> {
   @override
   Widget build(BuildContext context) {
     final systemUiInsets = MediaQuery.of(context).padding;
-
-    // return _Home();
 
     return DefaultTabController(
       length: _AppBar.tabs.length,

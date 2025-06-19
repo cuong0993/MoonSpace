@@ -170,7 +170,7 @@ final class ContinentsProvider
   ) => $AsyncNotifierProviderElement(pointer);
 }
 
-String _$continentsHash() => r'c0c5639fa73efa02b4f66ef13154aadd158fc409';
+String _$continentsHash() => r'5b2a8c02346d6afb1bc1288aa0949395323e1f76';
 
 abstract class _$Continents extends $AsyncNotifier<List<String>> {
   FutureOr<List<String>> build();
@@ -562,6 +562,65 @@ final class ActivitiesProvider
 }
 
 String _$activitiesHash() => r'8e5bc45cb867ddfb6d1eb0123689f7cd02ec4dfb';
+
+@ProviderFor(TravelClient)
+const travelClientProvider = TravelClientProvider._();
+
+final class TravelClientProvider
+    extends $NotifierProvider<TravelClient, protoclient.TravelServiceClient> {
+  const TravelClientProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'travelClientProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$travelClientHash();
+
+  @$internal
+  @override
+  TravelClient create() => TravelClient();
+
+  @$internal
+  @override
+  $NotifierProviderElement<TravelClient, protoclient.TravelServiceClient>
+  $createElement($ProviderPointer pointer) => $NotifierProviderElement(pointer);
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(protoclient.TravelServiceClient value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $ValueProvider<protoclient.TravelServiceClient>(value),
+    );
+  }
+}
+
+String _$travelClientHash() => r'e2392e744224421d161507177da5b1c50da55bf0';
+
+abstract class _$TravelClient
+    extends $Notifier<protoclient.TravelServiceClient> {
+  protoclient.TravelServiceClient build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<protoclient.TravelServiceClient>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<protoclient.TravelServiceClient>,
+              protoclient.TravelServiceClient,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}
 
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

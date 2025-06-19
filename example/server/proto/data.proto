@@ -1,0 +1,119 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package moon.space.v1;
+
+option go_package = "github.com/codeharik/moonspace/proto/v1;spacev1";
+
+message Destination {
+    string ref = 1;
+    string name = 2;
+    string country = 3;
+    string continent = 4;
+    string known_for = 5;
+    repeated string tags = 6;
+    string image_url = 7;
+}
+
+message Activity {
+    string ref = 1;
+    string name = 2;
+    string description = 3;
+    string location_name = 4;
+    float duration = 5;
+    string time_of_day = 6;
+    bool family_friendly = 7;
+    int32 price = 8;
+    string destination_ref = 9;
+    string image_url = 10;
+}
+
+// --------------------- Request / Response Messages ---------------------
+
+// Destination messages
+message GetDestinationRequest {
+    string ref = 1;
+}
+
+message ListDestinationsRequest {}
+message ListDestinationsResponse {
+    repeated Destination destinations = 1;
+}
+
+message CreateDestinationRequest {
+    Destination destination = 1;
+}
+
+message UpdateDestinationRequest {
+    Destination destination = 1;
+}
+
+message DeleteDestinationRequest {
+    string ref = 1;
+}
+
+// Activity messages
+message GetActivityRequest {
+    string ref = 1;
+}
+
+message ListActivitiesRequest {
+    string destination_ref = 1; // optional filter by destination
+}
+message ListActivitiesResponse {
+    repeated Activity activities = 1;
+}
+
+message CreateActivityRequest {
+    Activity activity = 1;
+}
+
+message UpdateActivityRequest {
+    Activity activity = 1;
+}
+message DeleteActivityRequest {
+    string ref = 1;
+}
+
+enum BookingStatus {
+    BOOKING_STATUS_UNSPECIFIED = 0;
+    BOOKING_STATUS_PENDING = 1;
+    BOOKING_STATUS_CONFIRMED = 2;
+    BOOKING_STATUS_CANCELLED = 3;
+    BOOKING_STATUS_COMPLETED = 4;
+}
+
+// Booking
+message BookingRequest {
+    string destination_ref = 1;
+    repeated string activity_refs = 2;
+    google.protobuf.Timestamp start_date = 3;
+    google.protobuf.Timestamp end_date = 4;
+    string user_id = 5;
+}
+message BookingResponse {
+    string booking_id = 1;
+    BookingStatus status = 6;
+}
+
+message EmptyResponse {}
+
+// ---------------------------- Services ----------------------------
+
+service TravelService {
+    rpc GetDestination(GetDestinationRequest) returns (Destination);
+    rpc SearchDestinations(GetDestinationRequest) returns (ListDestinationsResponse);
+    rpc ListDestinations(ListDestinationsRequest) returns (ListDestinationsResponse);
+    rpc CreateDestination(CreateDestinationRequest) returns (Destination);
+    rpc UpdateDestination(UpdateDestinationRequest) returns (Destination);
+    rpc DeleteDestination(DeleteDestinationRequest) returns (EmptyResponse);
+
+    rpc GetActivity(GetActivityRequest) returns (Activity);
+    rpc ListActivities(ListActivitiesRequest) returns (ListActivitiesResponse);
+    rpc CreateActivity(CreateActivityRequest) returns (Activity);
+    rpc UpdateActivity(UpdateActivityRequest) returns (Activity);
+    rpc DeleteActivity(DeleteActivityRequest) returns (EmptyResponse);
+
+    rpc BookDestination(BookingRequest) returns (BookingResponse);
+}

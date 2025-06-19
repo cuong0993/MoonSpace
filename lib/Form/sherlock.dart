@@ -230,22 +230,7 @@ class _SherlockState<T> extends State<Sherlock<T>> {
           if (snapshot.data == null) {
             return Placeholder(fallbackHeight: 30, fallbackWidth: 30);
           }
-          return Expanded(
-            child: widget.builder(snapshot.data!, controller),
-            // child: GridView.count(
-            //   crossAxisCount: 2,
-            //   children: [
-            //     Container(color: Colors.blue),
-            //     Container(color: Colors.red),
-            //     Container(color: Colors.green),
-            //     Container(color: Colors.yellow),
-            //     Container(color: Colors.blue),
-            //     Container(color: Colors.red),
-            //     Container(color: Colors.green),
-            //     Container(color: Colors.yellow),
-            //   ],
-            // ),
-          );
+          return widget.builder(snapshot.data!, controller);
         },
       ),
     ];

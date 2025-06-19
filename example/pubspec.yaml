@@ -20,6 +20,8 @@ dependencies:
   flutter_riverpod: ^3.0.0-dev.15
   riverpod_annotation: ^3.0.0-dev.15
 
+  protobuf: ^4.1.0
+  connectrpc: ^0.4.1
   http: ^1.4.0
   go_router: ^15.1.2
   provider: ^6.1.5
