@@ -4,6 +4,7 @@ import 'package:example/pages/compass.dart';
 import 'package:example/pages/funko.dart';
 import 'package:example/pages/manager.dart';
 import 'package:example/pages/music.dart';
+import 'package:example/pages/node_editor.dart';
 import 'package:example/pages/quiz.dart';
 import 'package:example/pages/rankone.dart';
 import 'package:example/pages/recipe.dart';
@@ -26,8 +27,11 @@ import 'package:moonspace/widgets/functions.dart';
 import 'package:moonspace/widgets/animated/neon_button.dart';
 
 void main() {
+  runApp(const NodeEditorScaffold());
   // runApp(const GoRouterApp());
   // runApp(const SmoothSheetApp());
+
+  return;
 
   electrify(
     title: "Home",

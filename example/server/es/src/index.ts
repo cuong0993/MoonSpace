@@ -4,6 +4,7 @@ import fastifyCors from '@fastify/cors';
 import type { FastifyCorsOptions } from '@fastify/cors';
 
 import http from "http";
+
 import express from "express";
 import { expressConnectMiddleware } from "@connectrpc/connect-express";
 
@@ -106,32 +107,23 @@ async function main() {
 
     const { destinations, activities } = await load();
 
-    // await server.register(fastifyConnectPlugin, {
-    //     routes: (router) => routes(router, { destinations, activities }),
-    // });
-
-    // await server.register(fastifyCors, {
-    //     origin: "*", // Or your actual origin
-    //     methods: ["GET", "POST", "OPTIONS"],
-    //     allowedHeaders: ["Content-Type", "Custom-Request-Header"],
-    //     exposedHeaders: ["Custom-Response-Header", "Trailer-Response-Id"],
-    //     credentials: true,
-    //     maxAge: 2 * 60 * 60,
-    // });
-
-    // server.get("/", (_, reply) => {
-    //     reply.type("text/plain");
-    //     reply.send("Hello World!");
-    // });
-    // await server.listen({ host: "localhost", port: 8080 });
-    // console.log("server is listening at", server.addresses());
-
-
-    const app = express();
-
-    app.use(expressConnectMiddleware({
+    await server.register(fastifyConnectPlugin, {
         routes: (router) => routes(router, { destinations, activities }),
-    }));
+    });
 
-    http.createServer(app).listen(8080);
+    await server.register(fastifyCors, {
+        origin: "*", // Or your actual origin
+        methods: ["GET", "POST", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Custom-Request-Header"],
+        exposedHeaders: ["Custom-Response-Header", "Trailer-Response-Id"],
+        credentials: true,
+        maxAge: 2 * 60 * 60,
+    });
+
+    server.get("/", (_, reply) => {
+        reply.type("text/plain");
+        reply.send("Hello World!");
+    });
+    await server.listen({ host: "localhost", port: 8080 });
+    console.log("server is listening at", server.addresses());
 }
