@@ -113,6 +113,7 @@ class _NodeEditorState extends State<NodeEditor> {
                       interval: 400,
                     ),
                   ),
+
                   ...editor.nodes.entries.map((entry) {
                     final node = entry.value;
                     return CustomNode(
@@ -120,6 +121,8 @@ class _NodeEditorState extends State<NodeEditor> {
                       innerWidget: editor.buildNodeWidget(context, node),
                     );
                   }),
+
+                  CustomPaint(painter: LinkPainter(editor)),
                 ],
               ),
             ),
@@ -128,6 +131,72 @@ class _NodeEditorState extends State<NodeEditor> {
       ),
     );
   }
+}
+
+class LinkPainter extends CustomPainter {
+  final EditorChangeNotifier editor;
+
+  LinkPainter(this.editor);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.black
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+
+    for (final link in editor.links) {
+      if (link.inputId != null && link.outputId != null) {
+        final iPos = editor.getNodePosition(link.inputId!);
+        final iSize = editor.getNodeSize(link.inputId!) + PortWidget.size;
+        final iRot = editor.getNodeRotation(link.inputId!);
+
+        final oPos = editor.getNodePosition(link.outputId!);
+        final oSize = editor.getNodeSize(link.outputId!) + PortWidget.size;
+        final oRot = editor.getNodeRotation(link.outputId!);
+
+        final isx = iSize.width * link.inputOffset.dx;
+        final isy = iSize.height * link.inputOffset.dy;
+        final osx = oSize.width * link.outputOffset.dx;
+        final osy = oSize.height * link.outputOffset.dy;
+
+        final iCenter = iPos + iSize.center(Offset.zero);
+        final oCenter = oPos + oSize.center(Offset.zero);
+
+        final iOffset = Offset(isx, isy) - iSize.center(Offset.zero);
+        final oOffset = Offset(osx, osy) - oSize.center(Offset.zero);
+
+        final p1 = rotateAroundCenter(iCenter + iOffset, iCenter, iRot);
+        final p2 = rotateAroundCenter(oCenter + oOffset, oCenter, oRot);
+
+        // final cp1 = Offset(p1.dx + 50, p1.dy);
+        // final cp2 = Offset(p2.dx - 50, p2.dy);
+
+        final path = Path()
+          ..moveTo(p1.dx, p1.dy)
+          ..lineTo(p2.dx, p2.dy);
+        // ..cubicTo(cp1.dx, cp1.dy, cp2.dx, cp2.dy, p2.dx, p2.dy);
+
+        canvas.drawPath(path, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+Offset rotateAroundCenter(Offset point, Offset center, double angle) {
+  final dx = point.dx - center.dx;
+  final dy = point.dy - center.dy;
+
+  final cosA = math.cos(angle);
+  final sinA = math.sin(angle);
+
+  final rotatedDx = dx * cosA - dy * sinA;
+  final rotatedDy = dx * sinA + dy * cosA;
+
+  return Offset(rotatedDx + center.dx, rotatedDy + center.dy);
 }
 
 class EditorState extends StatelessWidget {
@@ -150,11 +219,19 @@ class EditorState extends StatelessWidget {
           Text('Active: ${editor.activeNodeId}'),
           Text('Function: ${editor.activeFunction}'),
           Text('Nodes: ${editor.nodes.length}'),
+          Text(
+            'Links: ${editor.links.length}, ${editor.linkMap.length}, ${editor.nodeLinkMap.length}',
+          ),
           Text('Key: ${editor.activeKey}'),
           Text('Control: ${editor.activeKey == LogicalKeyboardKey.metaLeft}'),
 
-          ...editor.nodes.entries.map((e) {
-            return Text(e.value.id);
+          ...editor.nodes.entries.map((node) {
+            return TextButton(
+              onPressed: () {
+                editor.updateActive(node.value.id, null);
+              },
+              child: Text(node.value.id),
+            );
           }),
         ],
       ),

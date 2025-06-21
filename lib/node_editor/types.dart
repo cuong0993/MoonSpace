@@ -3,23 +3,46 @@ import 'package:flutter/widgets.dart';
 
 enum ActiveFunction { move, rotate, resize }
 
-class PortData<T> {
+class LinkData<T> {
   final String id;
+  final String? inputId;
+  final String? outputId;
   T? value;
   final Widget? innerWidget;
-  final Offset offset;
+  final Offset inputOffset;
+  final Offset outputOffset;
 
-  PortData({
+  LinkData({
     required this.id,
+    this.inputId,
+    this.outputId,
     this.value,
     this.innerWidget,
-    this.offset = Offset.zero,
+    this.inputOffset = Offset.zero,
+    this.outputOffset = Offset.zero,
   });
 
-  Map<String, dynamic> toJson() => {'id': id, 'value': value};
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'inputId': inputId,
+    'outputId': outputId,
+    'value': value,
+    'inputOffset': {'dx': inputOffset.dx, 'dy': inputOffset.dy},
+    'outputOffset': {'dx': outputOffset.dx, 'dy': outputOffset.dy},
+  };
 
-  factory PortData.fromJson(Map<String, dynamic> json) =>
-      PortData(id: json['id'], value: json['value'], innerWidget: null);
+  factory LinkData.fromJson(Map<String, dynamic> json) => LinkData(
+    id: json['id'],
+    inputId: json['inputId'],
+    outputId: json['outputId'],
+    value: json['value'],
+    inputOffset: Offset(json['inputOffset']['dx'], json['inputOffset']['dy']),
+    outputOffset: Offset(
+      json['outputOffset']['dx'],
+      json['outputOffset']['dy'],
+    ),
+    innerWidget: null,
+  );
 }
 
 class TypeRegistryEntry<T> {
@@ -43,7 +66,6 @@ class NodeData<T> {
   Color backgroundColor;
   double borderRadius;
   T value;
-  List<PortData> ports;
 
   NodeData({
     required this.id,
@@ -54,7 +76,6 @@ class NodeData<T> {
     this.backgroundColor = const Color(0xFFFFFFFF),
     this.borderRadius = 12.0,
     required this.value,
-    this.ports = const [],
   });
 
   Map<String, dynamic> toJson(Map<String, TypeRegistryEntry> registry) {
@@ -69,7 +90,6 @@ class NodeData<T> {
       'backgroundColor': backgroundColor.value,
       'borderRadius': borderRadius,
       'value': entry?.toJson(value),
-      'ports': ports.map((p) => p.toJson()).toList(),
     };
   }
 
@@ -91,11 +111,6 @@ class NodeData<T> {
       backgroundColor: Color(json['backgroundColor']),
       borderRadius: json['borderRadius'],
       value: value,
-      ports:
-          (json['ports'] as List<dynamic>?)
-              ?.map((p) => PortData.fromJson(p))
-              .toList() ??
-          [],
     );
   }
 }
@@ -104,6 +119,11 @@ class EditorChangeNotifier extends ChangeNotifier {
   EditorChangeNotifier({required this.typeRegistry});
 
   final Map<String, NodeData> nodes = {};
+
+  final Map<String, Set<String>> nodeLinkMap = {}; // nodeId → Set of link IDs
+  final Map<String, LinkData> linkMap = {}; // linkId → LinkData
+  final List<LinkData> links = [];
+
   final Map<String, TypeRegistryEntry> typeRegistry;
 
   String? activeNodeId;
@@ -125,9 +145,26 @@ class EditorChangeNotifier extends ChangeNotifier {
   }
 
   void addNodes(List<NodeData> nodelist) {
-    for (var n in nodelist) {
-      nodes[n.id] = n;
+    for (var node in nodelist) {
+      nodes[node.id] = node;
     }
+    notifyListeners();
+  }
+
+  void addLinks(List<LinkData> linklist) {
+    for (var link in linklist) {
+      links.add(link);
+      linkMap[link.id] = link;
+
+      void mapNode(String? nodeId) {
+        if (nodeId == null) return;
+        nodeLinkMap.putIfAbsent(nodeId, () => {}).add(link.id);
+      }
+
+      mapNode(link.inputId);
+      mapNode(link.outputId);
+    }
+
     notifyListeners();
   }
 
@@ -165,8 +202,51 @@ class EditorChangeNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  void deleteNode(NodeData node) {
+  List<LinkData> getLinksForNode(String nodeId) {
+    final ids = nodeLinkMap[nodeId] ?? {};
+    return ids.map((id) => linkMap[id]!).toList();
+  }
+
+  LinkData? getLinkById(String id) {
+    return linkMap[id];
+  }
+
+  void removeNode(NodeData node) {
     nodes.remove(node.id);
+
+    // Collect affected link IDs
+    final affectedLinkIds = linkMap.entries
+        .where(
+          (entry) =>
+              entry.value.inputId == node.id || entry.value.outputId == node.id,
+        )
+        .map((entry) => entry.key)
+        .toList();
+
+    for (final id in affectedLinkIds) {
+      removeLinkById(id);
+    }
+
+    notifyListeners();
+  }
+
+  void removeLinkById(String id) {
+    final link = linkMap.remove(id);
+    if (link != null) {
+      links.remove(link);
+
+      void unmapNode(String? nodeId) {
+        if (nodeId == null) return;
+        nodeLinkMap[nodeId]?.remove(id);
+        if (nodeLinkMap[nodeId]?.isEmpty ?? false) {
+          nodeLinkMap.remove(nodeId);
+        }
+      }
+
+      unmapNode(link.inputId);
+      unmapNode(link.outputId);
+    }
+
     notifyListeners();
   }
 

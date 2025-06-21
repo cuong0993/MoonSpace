@@ -55,25 +55,37 @@ class _CustomNodeState extends State<CustomNode> {
                 ),
               ),
 
-              ...widget.node.ports.map(
-                (p) => Positioned(
-                  left: p.offset.dx * size.width,
-                  top: p.offset.dy * size.height,
-                  child: PortWidget(color: Colors.green),
-                ),
-              ),
+              ...editor.getLinksForNode(widget.node.id).map((p) {
+                if (p.inputId == widget.node.id) {
+                  return Positioned(
+                    right: p.inputOffset.dx > .5
+                        ? (1 - p.inputOffset.dx) * size.width
+                        : null,
+                    left: p.inputOffset.dx > .5
+                        ? null
+                        : p.inputOffset.dx * size.width,
+                    top: p.inputOffset.dy * size.height,
+                    child: PortWidget(
+                      color: Colors.red,
+                      value: p.value.toString(),
+                    ),
+                  );
+                }
+                return Positioned(
+                  right: p.outputOffset.dx > .5
+                      ? (1 - p.outputOffset.dx) * size.width
+                      : null,
+                  left: p.outputOffset.dx > .5
+                      ? null
+                      : p.outputOffset.dx * size.width,
 
-              // Positioned(
-              //   left: -8,
-              //   top: size.height / 2,
-              //   child: PortWidget(color: Colors.green),
-              // ),
-
-              // Positioned(
-              //   right: -8,
-              //   top: size.height / 2,
-              //   child: PortWidget(color: Colors.red),
-              // ),
+                  top: p.outputOffset.dy * size.height,
+                  child: PortWidget(
+                    color: Colors.green,
+                    value: p.value.toString(),
+                  ),
+                );
+              }),
 
               //
               Positioned(
@@ -125,7 +137,7 @@ class _CustomNodeState extends State<CustomNode> {
                   child: InkWell(
                     hoverColor: Colors.red,
                     onTap: () {
-                      editor.deleteNode(widget.node);
+                      editor.removeNode(widget.node);
                     },
                     child: const Icon(Icons.clear, size: 16),
                   ),
@@ -140,21 +152,25 @@ class _CustomNodeState extends State<CustomNode> {
 }
 
 class PortWidget extends StatelessWidget {
-  final Color color;
+  const PortWidget({super.key, required this.color, required this.value});
 
-  const PortWidget({super.key, required this.color});
+  final Color color;
+  final String value;
+
+  static const size = Offset(32, 32);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 16,
-      height: 16,
+      alignment: Alignment.center,
+      width: size.dx,
+      height: size.dy,
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
         border: Border.all(color: Colors.black),
       ),
-      // child: Row(children: [Text("hello")]),
+      child: Text(value),
     );
   }
 }
