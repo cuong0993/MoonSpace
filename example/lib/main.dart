@@ -27,11 +27,10 @@ import 'package:moonspace/widgets/functions.dart';
 import 'package:moonspace/widgets/animated/neon_button.dart';
 
 void main() {
-  runApp(const NodeEditorScaffold());
   // runApp(const GoRouterApp());
   // runApp(const SmoothSheetApp());
 
-  return;
+  // return;
 
   electrify(
     title: "Home",
@@ -159,6 +158,7 @@ void main() {
     ],
     router: () => GoRouter(
       debugLogDiagnostics: true,
+      initialLocation: '/node_editor',
       routes: [
         GoRoute(
           path: "/",
@@ -225,6 +225,12 @@ void main() {
           path: "/travel",
           builder: (context, state) {
             return TravelApp();
+          },
+        ),
+        GoRoute(
+          path: "/node_editor",
+          builder: (context, state) {
+            return NodeEditorScaffold();
           },
         ),
       ],
@@ -843,6 +849,12 @@ class ThemeSettings extends StatelessWidget {
                 context.push("/travel");
               },
               title: Text("Travel"),
+            ),
+            ListTile(
+              onTap: () {
+                context.push("/node_editor");
+              },
+              title: Text("Node Editor"),
             ),
           ],
         ),

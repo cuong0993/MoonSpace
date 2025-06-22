@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:moonspace/node_editor/types.dart';
 
 class CustomNode extends StatefulWidget {
-  final NodeData node;
+  final Node node;
   final Widget innerWidget;
 
   const CustomNode({super.key, required this.node, required this.innerWidget});
@@ -15,8 +15,8 @@ class _CustomNodeState extends State<CustomNode> {
   @override
   Widget build(BuildContext context) {
     final editor = EditorNotifier.of(context);
-    final size = editor.getNodeSize(widget.node.id);
-    final rotation = editor.getNodeRotation(widget.node.id);
+    final size = editor.getNode(widget.node.id)!.size;
+    final rotation = editor.getNode(widget.node.id)!.rotation;
 
     return Positioned(
       left: widget.node.position.dx,
@@ -30,6 +30,7 @@ class _CustomNodeState extends State<CustomNode> {
             borderRadius: BorderRadius.circular(widget.node.borderRadius),
           ),
           child: Stack(
+            alignment: Alignment.center,
             clipBehavior: Clip.none,
             children: [
               Padding(
@@ -38,7 +39,7 @@ class _CustomNodeState extends State<CustomNode> {
                   child: InkWell(
                     splashColor: Colors.transparent,
                     overlayColor: WidgetStateColor.resolveWith(
-                      (c) => const Color.fromARGB(255, 239, 255, 217),
+                      (c) => Theme.of(context).colorScheme.onSecondary,
                     ),
                     onTapDown: (_) {
                       editor.updateActive(widget.node.id, ActiveFunction.move);
@@ -55,35 +56,28 @@ class _CustomNodeState extends State<CustomNode> {
                 ),
               ),
 
-              ...editor.getLinksForNode(widget.node.id).map((p) {
-                if (p.inputId == widget.node.id) {
-                  return Positioned(
-                    right: p.inputOffset.dx > .5
-                        ? (1 - p.inputOffset.dx) * size.width
-                        : null,
-                    left: p.inputOffset.dx > .5
-                        ? null
-                        : p.inputOffset.dx * size.width,
-                    top: p.inputOffset.dy * size.height,
-                    child: PortWidget(
-                      color: Colors.red,
-                      value: p.value.toString(),
-                    ),
-                  );
-                }
-                return Positioned(
-                  right: p.outputOffset.dx > .5
-                      ? (1 - p.outputOffset.dx) * size.width
-                      : null,
-                  left: p.outputOffset.dx > .5
-                      ? null
-                      : p.outputOffset.dx * size.width,
+              ...widget.node.ports.map((port) {
+                final inputOffset = port.offsetRatio;
 
-                  top: p.outputOffset.dy * size.height,
-                  child: PortWidget(
-                    color: Colors.green,
-                    value: p.value.toString(),
-                  ),
+                return Positioned(
+                  right: inputOffset.dx > .5
+                      ? (1 - inputOffset.dx) * size.width
+                      : null,
+                  left: inputOffset.dx > .5
+                      ? null
+                      : inputOffset.dx * size.width,
+
+                  bottom: inputOffset.dy > .5
+                      ? (1 - inputOffset.dy) * size.height
+                      : null,
+                  top: inputOffset.dy > .5
+                      ? null
+                      : inputOffset.dy * size.height,
+
+                  width: PortWidget.size.dx * 2,
+                  height: PortWidget.size.dy * 2,
+
+                  child: PortWidget(port: port, right: inputOffset.dx > .5),
                 );
               }),
 
@@ -92,7 +86,8 @@ class _CustomNodeState extends State<CustomNode> {
                 right: 0,
                 bottom: 0,
                 child: Material(
-                  color: Colors.transparent,
+                  color: Theme.of(context).colorScheme.primary,
+
                   child: InkWell(
                     hoverColor: Colors.red,
                     onTapDown: (_) {
@@ -112,7 +107,8 @@ class _CustomNodeState extends State<CustomNode> {
                 right: 0,
                 top: 0,
                 child: Material(
-                  color: Colors.transparent,
+                  color: Theme.of(context).colorScheme.primary,
+
                   child: InkWell(
                     hoverColor: Colors.red,
                     onTapDown: (_) {
@@ -133,7 +129,7 @@ class _CustomNodeState extends State<CustomNode> {
                 left: 0,
                 top: 0,
                 child: Material(
-                  color: Colors.transparent,
+                  color: Theme.of(context).colorScheme.primary,
                   child: InkWell(
                     hoverColor: Colors.red,
                     onTap: () {
@@ -152,25 +148,50 @@ class _CustomNodeState extends State<CustomNode> {
 }
 
 class PortWidget extends StatelessWidget {
-  const PortWidget({super.key, required this.color, required this.value});
+  const PortWidget({super.key, required this.port, required this.right});
 
-  final Color color;
-  final String value;
+  final Port port;
 
-  static const size = Offset(32, 32);
+  final bool right;
+
+  static const size = Offset(16, 16);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.center,
-      width: size.dx,
-      height: size.dy,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.black),
+    final editor = EditorNotifier.of(context);
+
+    return Transform.translate(
+      offset: Offset(right ? 16 : -16, -8),
+      child: Material(
+        color: Theme.of(context).colorScheme.primary,
+        borderRadius: BorderRadius.circular(16),
+        child: MouseRegion(
+          onEnter: (event) {
+            if (editor.startPort != null && editor.startPort != port) {
+              editor.addLinks([
+                Link(inputPort: editor.startPort, outputPort: port, value: 2.2),
+              ]);
+            }
+          },
+          child: GestureDetector(
+            onPanStart: (details) {
+              editor.startPort ??= port;
+            },
+            onPanUpdate: (details) {
+              if (editor.startPort != null) {
+                editor.updateTempLinkPosition(details.localPosition, context);
+              }
+            },
+            onPanEnd: (details) {
+              editor.removeTempLink();
+            },
+            child: Container(
+              alignment: Alignment.center,
+              child: Text(port.value.toString()),
+            ),
+          ),
+        ),
       ),
-      child: Text(value),
     );
   }
 }
