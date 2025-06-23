@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:moonspace/node_editor/links.dart';
@@ -52,88 +53,122 @@ class _NodeEditorState extends State<NodeEditor> {
       },
       child: Focus(
         autofocus: true,
-        child: SizedBox.expand(
-          child: InteractiveViewer(
-            constrained: false,
-            panEnabled: editor.activeNodeId == null,
-            transformationController: _controller,
-            boundaryMargin: const EdgeInsets.all(double.infinity),
-            onInteractionEnd: (details) {
-              editor.updateActive(null, null);
-            },
-            onInteractionUpdate: (details) {
-              final activeId = editor.activeNodeId;
-              final activeFunction = editor.activeFunction;
+        child: InteractiveViewer(
+          constrained: false,
+          panEnabled: editor.activeNodeId == null,
+          transformationController: _controller,
+          boundaryMargin: const EdgeInsets.all(double.infinity),
+          onInteractionEnd: (details) {
+            editor.updateActive(null, null);
+          },
+          onInteractionUpdate: (details) {
+            final activeId = editor.activeNodeId;
+            final activeFunction = editor.activeFunction;
 
-              final control = editor.activeKey == LogicalKeyboardKey.metaLeft;
+            final control = editor.activeKey == LogicalKeyboardKey.metaLeft;
 
-              if (activeId != null && activeFunction != null) {
-                if (activeFunction == ActiveFunction.move) {
-                  final current = editor.getNode(activeId)!.position;
-                  editor.updateNodePosition(
-                    activeId,
-                    current + details.focalPointDelta,
-                  );
-                } else if (activeFunction == ActiveFunction.rotate) {
-                  final current = editor.getNode(activeId)!.rotation;
-                  double rotation =
-                      (current +
-                      (control ? 0.08 : 0.005) *
-                          (details.focalPointDelta.dx +
-                              details.focalPointDelta.dy));
+            if (activeId != null && activeFunction != null) {
+              if (activeFunction == ActiveFunction.move) {
+                final current = editor.getNode(activeId)!.position;
+                editor.updateNodePosition(
+                  activeId,
+                  current + details.focalPointDelta,
+                );
+              } else if (activeFunction == ActiveFunction.rotate) {
+                final current = editor.getNode(activeId)!.rotation;
+                double rotation =
+                    (current +
+                    (control ? 0.08 : 0.005) *
+                        (details.focalPointDelta.dx +
+                            details.focalPointDelta.dy));
 
-                  if (control) {
-                    final snapStep = math.pi / 12;
-                    rotation = (rotation / snapStep).round() * snapStep;
-                  }
-
-                  editor.updateNodeRotation(
-                    activeId,
-                    (rotation % (math.pi * 2)),
-                  );
-                } else if (activeFunction == ActiveFunction.resize) {
-                  final current = editor.getNode(activeId)!.size;
-                  final newSize = Size(
-                    (current.width + details.focalPointDelta.dx).clamp(50, 500),
-                    (current.height + details.focalPointDelta.dy).clamp(
-                      30,
-                      500,
-                    ),
-                  );
-                  editor.updateNodeSize(activeId, newSize);
+                if (control) {
+                  final snapStep = math.pi / 12;
+                  rotation = (rotation / snapStep).round() * snapStep;
                 }
+
+                editor.updateNodeRotation(activeId, (rotation % (math.pi * 2)));
+              } else if (activeFunction == ActiveFunction.resize) {
+                final current = editor.getNode(activeId)!.size;
+                final newSize = Size(
+                  (current.width + details.focalPointDelta.dx).clamp(50, 500),
+                  (current.height + details.focalPointDelta.dy).clamp(30, 500),
+                );
+                editor.updateNodeSize(activeId, newSize);
               }
-            },
-            minScale: 0.5,
-            maxScale: 2.5,
-            child: SizedBox(
-              width: 2000,
-              height: 2000,
-              child: Stack(
-                children: [
-                  SizedBox(
-                    width: 2000,
-                    height: 2000,
+            }
+          },
+          minScale: 0.5,
+          maxScale: 2.5,
+          child: Stack(
+            children: [
+              Listener(
+                onPointerDown: (event) {
+                  // editor.secondaryMouseClick = false;
+                  if (event.kind == PointerDeviceKind.mouse &&
+                      event.buttons == kSecondaryMouseButton) {
+                    // editor.secondaryMouseClick = true;
+
+                    if (editor.activeLinkId != null) {
+                      final offset = event.position;
+
+                      final linkId = editor.activeLinkId;
+
+                      showMenu(
+                        context: context,
+                        menuPadding: EdgeInsets.zero,
+                        position: RelativeRect.fromLTRB(
+                          offset.dx,
+                          offset.dy,
+                          offset.dx + 200,
+                          offset.dy + 200,
+                        ),
+                        items: [
+                          PopupMenuItem(
+                            child: Text('Delete link'),
+                            onTap: () {
+                              editor.removeLinkById(linkId!);
+                            },
+                          ),
+                        ],
+                      );
+                    }
+                  }
+                },
+                child: MouseRegion(
+                  onHover: (event) {
+                    editor.updateMousePosition(event.position, context);
+                  },
+                  onExit: (event) {
+                    editor.updateMousePosition(null, context);
+                  },
+                  child: Container(
+                    color: Colors.transparent,
+                    width: editor.divisions * editor.interval,
+                    height: editor.divisions * editor.interval,
                     child: GridPaper(
                       color: Theme.of(context).colorScheme.primary,
-                      divisions: 20,
+                      divisions: editor.divisions,
                       subdivisions: 1,
-                      interval: 400,
+                      interval: editor.interval,
                     ),
                   ),
-
-                  CustomPaint(painter: LinkPainter(editor)),
-
-                  ...editor.nodes.entries.map((entry) {
-                    final node = entry.value;
-                    return CustomNode(
-                      node: node,
-                      innerWidget: editor.buildNodeWidget(context, node),
-                    );
-                  }),
-                ],
+                ),
               ),
-            ),
+
+              LinkBuilder(
+                editor: editor,
+                animate: editor.tempLinkEndPos != null,
+              ),
+
+              ...editor.nodes.entries.map((entry) {
+                final node = entry.value;
+                return CustomNode(
+                  node: node,
+                  innerWidget: editor.buildNodeWidget(context, node),
+                );
+              }),
+            ],
           ),
         ),
       ),
@@ -163,9 +198,7 @@ class EditorState extends StatelessWidget {
           Text('Active: ${editor.activeNodeId}'),
           Text('Function: ${editor.activeFunction}'),
           Text('Nodes: ${editor.nodes.length}'),
-          Text(
-            'Links: ${editor.links.length}, ${editor.linkMap.length}, ${editor.nodeLinkMap.length}',
-          ),
+          Column(children: editor.links.values.map((v) => Text(v.id)).toList()),
           Text('Key: ${editor.activeKey}'),
           Text('Control: ${editor.activeKey == LogicalKeyboardKey.metaLeft}'),
 

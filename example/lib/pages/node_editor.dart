@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:moonspace/node_editor/export.dart';
+import 'package:moonspace/node_editor/links.dart';
 
 class ColumnText {
   final String title;
@@ -36,9 +37,13 @@ class _SliderBoxState extends State<SliderBox> {
           onChanged: (value) {
             setState(() {
               widget.node.value = value;
-              editor.updateLinkValue(
-                editor.getLinksForNode(widget.node.id).first.id,
-                value,
+              editor.updatePortValue(widget.node.ports.first, value);
+              editor.updateNodeRotation(
+                editor
+                    .getLinkById(widget.node.ports.first.linkId!)!
+                    .outputPort
+                    .nodeId,
+                value * 6.28,
               );
             });
           },
@@ -55,10 +60,16 @@ class NodeEditorScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final editor =
         EditorChangeNotifier(
+          linkStyle: LinkStyle(
+            linkColor: Colors.yellow,
+            linkType: LinkType.bezier,
+            weight: 0,
+          ),
+          divisions: 4,
+          interval: 250,
           typeRegistry: {
             'columntext': TypeRegistryEntry<ColumnText>(
               builder: (context, node) {
-                final editor = EditorNotifier.of(context);
                 final pos = node.position;
                 if (node.value is! ColumnText) return Text("Undefined");
                 final ColumnText val = node.value;
@@ -69,13 +80,6 @@ class NodeEditorScaffold extends StatelessWidget {
                     Text(val.subtitle),
                     Text(node.id),
                     Text("Rot ${node.rotation.toStringAsFixed(2)}"),
-                    Text("Links ${editor.links.length}"),
-                    Text("Links ${editor.links.length}"),
-                    ...editor.links.map(
-                      (e) => Text(
-                        "${e.id} ${(e.value as double).toStringAsFixed(2)}",
-                      ),
-                    ),
                     Text(
                       "Pos ${pos.dx.toStringAsFixed(0)},${pos.dy.toStringAsFixed(0)}",
                     ),
@@ -98,17 +102,16 @@ class NodeEditorScaffold extends StatelessWidget {
           Node(
             id: 'nodeA',
             type: "columntext",
-            position: const Offset(250, 100),
+            position: const Offset(250, 50),
             rotation: 0,
-            size: const Size(150, 200),
-            backgroundColor: Colors.white,
-            borderRadius: 8,
+            size: const Size(180, 250),
             value: ColumnText(title: 'Hello', subtitle: 'World'),
             ports: [
               Port(
                 index: 0,
                 nodeId: "nodeA",
-                // linkId: "linkAB1",
+                origin: true,
+                linkId: "linkAB1",
                 offsetRatio: Offset(0, 0.5),
                 value: 2.0,
               ),
@@ -117,17 +120,17 @@ class NodeEditorScaffold extends StatelessWidget {
           Node(
             id: 'nodeB',
             type: "slider",
-            position: const Offset(20, 250),
+            position: const Offset(20, 300),
             rotation: 0,
             size: const Size(150, 100),
-            backgroundColor: Colors.white,
-            borderRadius: 8,
+
             value: .5,
             ports: [
               Port(
                 index: 0,
                 nodeId: "nodeB",
-                // linkId: "linkAB1",
+                origin: false,
+                linkId: "linkAB1",
                 offsetRatio: Offset(1, 0.5),
                 value: 2.0,
               ),

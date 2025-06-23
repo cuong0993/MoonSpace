@@ -18,44 +18,46 @@ class _CustomNodeState extends State<CustomNode> {
     final size = editor.getNode(widget.node.id)!.size;
     final rotation = editor.getNode(widget.node.id)!.rotation;
 
+    final cs = Theme.of(context).colorScheme;
+
     return Positioned(
       left: widget.node.position.dx,
       top: widget.node.position.dy,
       child: Transform.rotate(
         angle: rotation,
-        child: Container(
-          decoration: BoxDecoration(
-            color: widget.node.backgroundColor,
-            border: Border.all(),
-            borderRadius: BorderRadius.circular(widget.node.borderRadius),
+        child: Card(
+          clipBehavior: Clip.hardEdge,
+          elevation: 8,
+          shape: BeveledRectangleBorder(
+            side: BorderSide(),
+            borderRadius: BorderRadiusGeometry.circular(8),
           ),
           child: Stack(
             alignment: Alignment.center,
             clipBehavior: Clip.none,
             children: [
+              //
               Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Material(
-                  child: InkWell(
-                    splashColor: Colors.transparent,
-                    overlayColor: WidgetStateColor.resolveWith(
-                      (c) => Theme.of(context).colorScheme.onSecondary,
-                    ),
-                    onTapDown: (_) {
-                      editor.updateActive(widget.node.id, ActiveFunction.move);
-                    },
-                    onTapUp: (_) {
-                      editor.updateActive(null, null);
-                    },
-                    child: SizedBox(
-                      width: size.width,
-                      height: size.height,
-                      child: Center(child: widget.innerWidget),
-                    ),
+                padding: const EdgeInsets.all(16.0),
+                child: GestureDetector(
+                  onTapDown: (details) {
+                    editor.updateActive(widget.node.id, ActiveFunction.move);
+                  },
+                  onTapUp: (details) {
+                    editor.updateActive(null, null);
+                  },
+                  child: Container(
+                    color: editor.activeNodeId == widget.node.id
+                        ? cs.surfaceContainerHigh
+                        : cs.surface,
+                    width: size.width,
+                    height: size.height,
+                    child: Center(child: widget.innerWidget),
                   ),
                 ),
               ),
 
+              //
               ...widget.node.ports.map((port) {
                 final inputOffset = port.offsetRatio;
 
@@ -99,7 +101,11 @@ class _CustomNodeState extends State<CustomNode> {
                     onTapUp: (_) {
                       editor.updateActive(null, null);
                     },
-                    child: const Icon(Icons.drag_handle, size: 16),
+                    child: Icon(
+                      Icons.drag_handle,
+                      size: 16,
+                      color: cs.onPrimary,
+                    ),
                   ),
                 ),
               ),
@@ -120,22 +126,25 @@ class _CustomNodeState extends State<CustomNode> {
                     onTapUp: (_) {
                       editor.updateActive(null, null);
                     },
-                    child: const Icon(Icons.rotate_right, size: 16),
+                    child: Icon(
+                      Icons.rotate_right,
+                      size: 16,
+                      color: cs.onPrimary,
+                    ),
                   ),
                 ),
               ),
-
               Positioned(
                 left: 0,
                 top: 0,
                 child: Material(
-                  color: Theme.of(context).colorScheme.primary,
+                  color: cs.primary,
                   child: InkWell(
                     hoverColor: Colors.red,
                     onTap: () {
                       editor.removeNode(widget.node);
                     },
-                    child: const Icon(Icons.clear, size: 16),
+                    child: Icon(Icons.clear, size: 16, color: cs.onPrimary),
                   ),
                 ),
               ),
@@ -160,35 +169,45 @@ class PortWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final editor = EditorNotifier.of(context);
 
-    return Transform.translate(
-      offset: Offset(right ? 16 : -16, -8),
-      child: Material(
-        color: Theme.of(context).colorScheme.primary,
-        borderRadius: BorderRadius.circular(16),
-        child: MouseRegion(
-          onEnter: (event) {
-            if (editor.startPort != null && editor.startPort != port) {
-              editor.addLinks([
-                Link(inputPort: editor.startPort, outputPort: port, value: 2.2),
-              ]);
-            }
-          },
-          child: GestureDetector(
-            onPanStart: (details) {
-              editor.startPort ??= port;
-            },
-            onPanUpdate: (details) {
-              if (editor.startPort != null) {
-                editor.updateTempLinkPosition(details.localPosition, context);
-              }
-            },
-            onPanEnd: (details) {
-              editor.removeTempLink();
-            },
-            child: Container(
-              alignment: Alignment.center,
-              child: Text(port.value.toString()),
+    final cs = Theme.of(context).colorScheme;
+
+    return MouseRegion(
+      onEnter: (event) {
+        if (editor.tempLinkStartPort != null &&
+            editor.tempLinkStartPort != port) {
+          editor.addLinks([
+            Link(
+              inputPort: editor.tempLinkStartPort!,
+              outputPort: port,
+              value: 2.2,
             ),
+          ]);
+        }
+      },
+      child: GestureDetector(
+        onPanStart: (details) {
+          if (port.linkId != null) {
+            final linkedPort = editor.getLinkedPort(port);
+            editor.tempLinkStartPort ??= linkedPort;
+            editor.removeLinkById(port.linkId!);
+          } else {
+            editor.tempLinkStartPort ??= port;
+          }
+        },
+        onPanUpdate: (details) {
+          if (editor.tempLinkStartPort != null) {
+            editor.updateTempLinkPosition(details.localPosition, context);
+          }
+        },
+        onPanEnd: (details) {
+          editor.removeTempLink();
+        },
+        child: Container(
+          alignment: Alignment.center,
+          color: editor.tempLinkStartPort == port ? Colors.red : cs.primary,
+          child: Text(
+            port.value.toString(),
+            style: TextStyle(color: cs.onPrimary),
           ),
         ),
       ),

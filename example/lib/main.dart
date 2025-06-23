@@ -32,6 +32,8 @@ void main() {
 
   // return;
 
+  final initialLocation = '/node_editor';
+
   electrify(
     title: "Home",
     before: (widgetsBinding) {},
@@ -158,7 +160,7 @@ void main() {
     ],
     router: () => GoRouter(
       debugLogDiagnostics: true,
-      initialLocation: '/node_editor',
+      initialLocation: initialLocation,
       routes: [
         GoRoute(
           path: "/",
