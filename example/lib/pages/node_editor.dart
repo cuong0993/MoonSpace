@@ -2,57 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:moonspace/node_editor/export.dart';
 import 'package:moonspace/node_editor/links.dart';
 
-class ColumnText {
-  final String title;
-  final String subtitle;
-
-  ColumnText({required this.title, required this.subtitle});
-
-  factory ColumnText.fromJson(Map<String, dynamic> json) =>
-      ColumnText(title: json['title'] ?? '', subtitle: json['subtitle'] ?? '');
-
-  dynamic toJson() => {'title': title, 'subtitle': subtitle};
-}
-
-class SliderBox extends StatefulWidget {
-  const SliderBox({super.key, required this.node});
-
-  final Node node;
-
-  @override
-  State<SliderBox> createState() => _SliderBoxState();
-}
-
-class _SliderBoxState extends State<SliderBox> {
-  @override
-  Widget build(BuildContext context) {
-    final editor = EditorNotifier.of(context);
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(widget.node.value.toStringAsFixed(2)),
-        Slider(
-          value: widget.node.value,
-          onChanged: (value) {
-            setState(() {
-              widget.node.value = value;
-              editor.updatePortValue(widget.node.ports.first, value);
-              editor.updateNodeRotation(
-                editor
-                    .getLinkById(widget.node.ports.first.linkId!)!
-                    .outputPort
-                    .nodeId,
-                value * 6.28,
-              );
-            });
-          },
-        ),
-      ],
-    );
-  }
-}
-
 class NodeEditorScaffold extends StatelessWidget {
   const NodeEditorScaffold({super.key});
 
@@ -86,20 +35,20 @@ class NodeEditorScaffold extends StatelessWidget {
                   ],
                 );
               },
-              fromJson: (json) => ColumnText.fromJson(json),
-              toJson: (dynamic val) => val.toJson(),
+              deserialize: (json) => ColumnText.fromMap(json),
+              serialize: (val) => val.toMap(),
             ),
             'slider': TypeRegistryEntry<double>(
               builder: (context, Node node) {
                 if (node.value is! double) return Text("Undefined");
                 return SliderBox(node: node);
               },
-              fromJson: (json) => json as double,
-              toJson: (dynamic value) => value as dynamic,
+              deserialize: (json) => json,
+              serialize: (value) => value,
             ),
           },
         )..addNodes([
-          Node(
+          Node<ColumnText>(
             id: 'nodeA',
             type: "columntext",
             position: const Offset(250, 50),
@@ -107,26 +56,33 @@ class NodeEditorScaffold extends StatelessWidget {
             size: const Size(180, 250),
             value: ColumnText(title: 'Hello', subtitle: 'World'),
             ports: [
-              Port(
+              Port<double>(
                 index: 0,
                 nodeId: "nodeA",
                 origin: true,
                 linkId: "linkAB1",
-                offsetRatio: Offset(0, 0.5),
+                offsetRatio: Offset(0, 0.25),
                 value: 2.0,
+              ),
+              Port<String>(
+                index: 1,
+                nodeId: "nodeA",
+                origin: false,
+                // linkId: "linkAB1",
+                offsetRatio: Offset(0, 0.5),
+                value: "2.0",
               ),
             ],
           ),
-          Node(
+          Node<double>(
             id: 'nodeB',
             type: "slider",
             position: const Offset(20, 300),
             rotation: 0,
             size: const Size(150, 100),
-
             value: .5,
             ports: [
-              Port(
+              Port<double>(
                 index: 0,
                 nodeId: "nodeB",
                 origin: false,
@@ -141,6 +97,58 @@ class NodeEditorScaffold extends StatelessWidget {
     return EditorNotifier(
       model: editor,
       child: Scaffold(body: Stack(children: [NodeEditor(), EditorState()])),
+    );
+  }
+}
+
+class ColumnText {
+  final String title;
+  final String subtitle;
+
+  ColumnText({required this.title, required this.subtitle});
+
+  factory ColumnText.fromMap(Map<String, dynamic> json) =>
+      ColumnText(title: json['title'] ?? '', subtitle: json['subtitle'] ?? '');
+
+  Map<String, dynamic> toMap() => {'title': title, 'subtitle': subtitle};
+}
+
+class SliderBox extends StatefulWidget {
+  const SliderBox({super.key, required this.node});
+
+  final Node node;
+
+  @override
+  State<SliderBox> createState() => _SliderBoxState();
+}
+
+class _SliderBoxState extends State<SliderBox> {
+  @override
+  Widget build(BuildContext context) {
+    final editor = EditorNotifier.of(context);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(widget.node.value.toStringAsFixed(2)),
+        Slider(
+          value: widget.node.value,
+          onChanged: (value) {
+            setState(() {
+              widget.node.value = value;
+              editor.updatePortValue(
+                widget.node.ports.first,
+                (value * 100).toInt() / 100,
+              );
+
+              final linkedPort = editor.getLinkedPort(widget.node.ports.first);
+              if (linkedPort != null) {
+                editor.updateNodeRotation(linkedPort.nodeId, (value * 6.28));
+              }
+            });
+          },
+        ),
+      ],
     );
   }
 }

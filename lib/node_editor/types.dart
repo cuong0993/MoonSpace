@@ -8,7 +8,7 @@ class Port<T> {
   final int index;
   final String nodeId;
   String? linkId;
-  final bool origin;
+  bool origin;
 
   /// (x : 0 to 1, y : 0 to 1)
   final Offset offsetRatio;
@@ -19,12 +19,12 @@ class Port<T> {
     required this.index,
     required this.nodeId,
     this.linkId,
-    required this.origin,
+    this.origin = false,
     required this.offsetRatio,
     required this.value,
   });
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toMap() => {
     'index': index,
     'nodeId': nodeId,
     'linkId': linkId,
@@ -35,7 +35,7 @@ class Port<T> {
 
   String get id => '${nodeId}_$index';
 
-  factory Port.fromJson(Map<String, dynamic> json) => Port(
+  factory Port.fromMap(Map<String, dynamic> json) => Port(
     index: json['index'],
     nodeId: json['nodeId'],
     linkId: json['linkId'],
@@ -58,28 +58,28 @@ class Link<T> {
 
   Link({required this.inputPort, required this.outputPort, this.value});
 
-  Map<String, dynamic> toJson() => {
-    'inputPort': inputPort.toJson(),
-    'outputPort': outputPort.toJson(),
+  Map<String, dynamic> toMap() => {
+    'inputPort': inputPort.toMap(),
+    'outputPort': outputPort.toMap(),
     'value': value,
   };
 
-  factory Link.fromJson(Map<String, dynamic> json) => Link(
-    inputPort: Port.fromJson(json['inputPort']),
-    outputPort: Port.fromJson(json['outputPort']),
+  factory Link.fromMap(Map<String, dynamic> json) => Link(
+    inputPort: Port.fromMap(json['inputPort']),
+    outputPort: Port.fromMap(json['outputPort']),
     value: json['value'],
   );
 }
 
 class TypeRegistryEntry<T> {
   final Widget Function(BuildContext context, Node node) builder;
-  final T Function(dynamic json) fromJson;
-  final dynamic Function(T value) toJson;
+  final T Function(dynamic state) deserialize;
+  final dynamic Function(T state) serialize;
 
   TypeRegistryEntry({
     required this.builder,
-    required this.fromJson,
-    required this.toJson,
+    required this.deserialize,
+    required this.serialize,
   });
 }
 
@@ -102,6 +102,9 @@ class Node<T> {
     required this.ports,
   });
 
+  Offset get center =>
+      Offset(position.dx + size.width / 2, position.dy + size.height / 2);
+
   Map<String, dynamic> toJson(Map<String, TypeRegistryEntry> registry) {
     final entry = registry[type];
 
@@ -111,8 +114,8 @@ class Node<T> {
       'position': {'dx': position.dx, 'dy': position.dy},
       'rotation': rotation,
       'size': {'width': size.width, 'height': size.height},
-      'value': entry?.toJson(value),
-      'ports': ports.map((p) => p.toJson()).toList(),
+      'value': entry?.serialize(value),
+      'ports': ports.map((p) => p.toMap()).toList(),
     };
   }
 
@@ -123,7 +126,7 @@ class Node<T> {
     final type = json['type'];
     final registry = typeRegistry[type];
 
-    final dynamic value = registry?.fromJson(json['value']);
+    final dynamic value = registry?.deserialize(json['value']);
 
     return Node(
       id: json['id'],
@@ -133,7 +136,7 @@ class Node<T> {
       size: Size(json['size']['width'], json['size']['height']),
       value: value,
       ports:
-          (json['ports'] as List?)?.map((p) => Port.fromJson(p)).toList() ?? [],
+          (json['ports'] as List?)?.map((p) => Port.fromMap(p)).toList() ?? [],
     );
   }
 }
@@ -166,8 +169,6 @@ class EditorChangeNotifier extends ChangeNotifier {
 
   String? activeLinkId;
 
-  // bool secondaryMouseClick = false;
-
   Offset? mousePosition;
 
   LogicalKeyboardKey? activeKey;
@@ -182,15 +183,72 @@ class EditorChangeNotifier extends ChangeNotifier {
   final TransformationController interactiveController =
       TransformationController();
 
-  void updateZoom(double z) {
-    zoom = z;
-    notifyListeners();
+  //----------------
+
+  Map<String, dynamic> toMap() => {
+    'zoom': zoom,
+    'offset': {'dx': offset.dx, 'dy': offset.dy},
+    'interval': interval,
+    'divisions': divisions,
+    'nodes': nodes.map(
+      (key, value) => MapEntry(key, value.toJson(typeRegistry)),
+    ),
+    'links': links.values.map((link) => link.toMap()).toList(),
+  };
+
+  factory EditorChangeNotifier.fromMap(
+    Map<String, dynamic> json,
+    Map<String, TypeRegistryEntry<dynamic>> typeRegistry,
+  ) {
+    final editor = EditorChangeNotifier(typeRegistry: typeRegistry);
+
+    editor.zoom = json['zoom'];
+    editor.offset = Offset(json['offset']['dx'], json['offset']['dy']);
+    editor.interval = json['interval'];
+    editor.divisions = json['divisions'];
+
+    final nodeMap = (json['nodes'] as Map<String, dynamic>).map(
+      (key, nodedata) => MapEntry(key, Node.fromJson(nodedata, typeRegistry)),
+    );
+    editor.nodes.addAll(nodeMap);
+
+    final linkList = (json['links'] as List<dynamic>?) ?? [];
+    final parsedLinks = linkList
+        .map((linkJson) => Link.fromMap(linkJson))
+        .toList();
+
+    editor.addLinks(parsedLinks);
+
+    return editor;
   }
 
-  void updateOffset(Offset o) {
-    offset = o;
-    notifyListeners();
+  //----------------
+
+  Widget buildNodeWidget(BuildContext context, Node node) {
+    final entry = typeRegistry[node.type];
+    if (entry == null) return Text('Unknown type: ${node.type}');
+    return entry.builder(context, node);
   }
+
+  //----
+
+  Node? getNode(String id) => nodes[id];
+
+  Link? getLinkById(String id) {
+    return links[id];
+  }
+
+  List<Link> getLinksForNode(String nodeId) {
+    return links.values
+        .where(
+          (link) =>
+              link.inputPort.nodeId == nodeId ||
+              link.outputPort.nodeId == nodeId,
+        )
+        .toList();
+  }
+
+  //----
 
   void addNodes(List<Node> nodelist) {
     for (var node in nodelist) {
@@ -198,20 +256,14 @@ class EditorChangeNotifier extends ChangeNotifier {
     }
 
     final List<Link> newLinks = [];
-    for (var inputNode in nodelist) {
-      for (var outputNode in nodes.entries) {
-        for (final inputport in inputNode.ports) {
-          for (final outputport in outputNode.value.ports) {
-            if (inputport.linkId != null &&
-                (inputport != outputport) &&
-                !links.containsKey(outputport.linkId)) {
-              newLinks.add(
-                Link(
-                  inputPort: inputport,
-                  outputPort: outputport,
-                  value: inputport.value,
-                ),
-              );
+    for (var newnode in nodelist) {
+      for (var anode in nodes.entries) {
+        for (final inputPort in newnode.ports) {
+          for (final outputPort in anode.value.ports) {
+            //
+            final link = checkLink(inputPort, outputPort);
+            if (link != null) {
+              newLinks.add(link);
             }
           }
         }
@@ -222,15 +274,84 @@ class EditorChangeNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  Link? checkLink(Port<dynamic> inputPort, Port<dynamic> outputPort) {
+    if (inputPort.linkId != null &&
+        //
+        inputPort.linkId == outputPort.linkId &&
+        //
+        inputPort.nodeId != outputPort.nodeId &&
+        //
+        !links.containsKey(outputPort.linkId) &&
+        //
+        inputPort.origin != outputPort.origin
+    //
+    ) {
+      return Link(
+        inputPort: inputPort.origin ? inputPort : outputPort,
+        outputPort: inputPort.origin ? outputPort : inputPort,
+        value: inputPort.value,
+      );
+    }
+
+    return null;
+  }
+
   void addLinks(List<Link> linklist) {
     for (var link in linklist) {
+      if (link.inputPort.nodeId == link.outputPort.nodeId ||
+          link.inputPort.value.runtimeType !=
+              link.outputPort.value.runtimeType) {
+        continue;
+      }
+      final ilinkid = link.inputPort.linkId;
+      if (ilinkid != null) {
+        removeLinkById(ilinkid);
+      }
+      final olinkid = link.outputPort.linkId;
+      if (olinkid != null) {
+        removeLinkById(olinkid);
+      }
+
       links[link.id] = link;
       link.inputPort.linkId = link.id;
       link.outputPort.linkId = link.id;
+      link.inputPort.origin = true;
+      link.outputPort.origin = false;
     }
 
     notifyListeners();
   }
+
+  void removeNodeById(String nodeId) {
+    nodes.remove(nodeId);
+
+    final affectedLinkIds = links.entries
+        .where(
+          (entry) =>
+              entry.value.inputPort.nodeId == nodeId ||
+              entry.value.outputPort.nodeId == nodeId,
+        )
+        .map((entry) => entry.key)
+        .toList();
+
+    for (final id in affectedLinkIds) {
+      removeLinkById(id);
+    }
+
+    notifyListeners();
+  }
+
+  void removeLinkById(String id) {
+    final link = links.remove(id);
+    if (link != null) {
+      link.inputPort.linkId = null;
+      link.outputPort.linkId = null;
+      link.inputPort.origin = false;
+      link.outputPort.origin = false;
+    }
+  }
+
+  //----
 
   void updateNodePosition(String id, Offset pos) {
     if (nodes.containsKey(id)) {
@@ -253,30 +374,7 @@ class EditorChangeNotifier extends ChangeNotifier {
     }
   }
 
-  void updateActive(String? id, ActiveFunction? function) {
-    activeNodeId = id;
-    activeFunction = function;
-    notifyListeners();
-  }
-
-  void updateKey(LogicalKeyboardKey? key) {
-    activeKey = key;
-    notifyListeners();
-  }
-
-  List<Link> getLinksForNode(String nodeId) {
-    return links.values
-        .where(
-          (link) =>
-              link.inputPort.nodeId == nodeId ||
-              link.outputPort.nodeId == nodeId,
-        )
-        .toList();
-  }
-
-  Link? getLinkById(String id) {
-    return links[id];
-  }
+  //----
 
   void updateLinkValue(String linkId, dynamic value) {
     final link = links[linkId];
@@ -299,6 +397,39 @@ class EditorChangeNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  Port? getLinkedPort(Port port) {
+    if (port.linkId != null) {
+      final link = getLinkById(port.linkId!);
+      if (link != null) {
+        return link.inputPort == port ? link.outputPort : link.inputPort;
+      }
+    }
+    return null;
+  }
+
+  //----------------
+
+  void updateInteractiveZoom(double z) {
+    zoom = z;
+    notifyListeners();
+  }
+
+  void updateInteractiveOffset(Offset off) {
+    offset = off;
+    notifyListeners();
+  }
+
+  void updateActiveFunction(String? id, ActiveFunction? function) {
+    activeNodeId = id;
+    activeFunction = function;
+    notifyListeners();
+  }
+
+  void updateKeyboardKey(LogicalKeyboardKey? key) {
+    activeKey = key;
+    notifyListeners();
+  }
+
   void updateTempLinkPosition(Offset pos, BuildContext context) {
     tempLinkEndPos = globalToCanvasOffset(pos, context);
     notifyListeners();
@@ -315,41 +446,17 @@ class EditorChangeNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  void removeNode(Node node) {
-    nodes.remove(node.id);
+  void interactiveAnimateTo(Offset sceneTarget, BuildContext context) {
+    final zoom = interactiveController.value.getMaxScaleOnAxis();
 
-    final affectedLinkIds = links.entries
-        .where(
-          (entry) =>
-              entry.value.inputPort.nodeId == node.id ||
-              entry.value.outputPort.nodeId == node.id,
-        )
-        .map((entry) => entry.key)
-        .toList();
+    final size = MediaQuery.of(context).size;
+    final screenCenter = size.center(Offset.zero);
+    final dx = screenCenter.dx - sceneTarget.dx * zoom;
+    final dy = screenCenter.dy - sceneTarget.dy * zoom;
 
-    for (final id in affectedLinkIds) {
-      removeLinkById(id);
-    }
-
-    notifyListeners();
-  }
-
-  void removeLinkById(String id) {
-    final link = links.remove(id);
-    if (link != null) {
-      link.inputPort.linkId = null;
-      link.outputPort.linkId = null;
-    }
-  }
-
-  Port? getLinkedPort(Port port) {
-    if (port.linkId != null) {
-      final link = getLinkById(port.linkId!);
-      if (link != null) {
-        return link.inputPort == port ? link.outputPort : link.inputPort;
-      }
-    }
-    return null;
+    interactiveController.value = Matrix4.identity()
+      ..translate(dx, dy)
+      ..scale(zoom);
   }
 
   Offset getPortOffset(Port<dynamic> port) {
@@ -360,53 +467,8 @@ class EditorChangeNotifier extends ChangeNotifier {
     final isx = iSize.width * port.offsetRatio.dx;
     final isy = iSize.height * port.offsetRatio.dy;
     final iOffset = Offset(isx, isy) - iSize.center(Offset.zero);
-    final p1 = rotateAroundCenter(iCenter + iOffset, iCenter, iRot);
-    return p1;
-  }
-
-  Node? getNode(String id) => nodes[id];
-
-  Widget buildNodeWidget(BuildContext context, Node node) {
-    final entry = typeRegistry[node.type];
-    if (entry == null) return Text('Unknown type: ${node.type}');
-    return entry.builder(context, node);
-  }
-
-  Map<String, dynamic> toJson() => {
-    'zoom': zoom,
-    'offset': {'dx': offset.dx, 'dy': offset.dy},
-    'interval': interval,
-    'divisions': divisions,
-    'nodes': nodes.map(
-      (key, value) => MapEntry(key, value.toJson(typeRegistry)),
-    ),
-    'links': links.values.map((link) => link.toJson()).toList(),
-  };
-
-  factory EditorChangeNotifier.fromJson(
-    Map<String, dynamic> json,
-    Map<String, TypeRegistryEntry<dynamic>> typeRegistry,
-  ) {
-    final editor = EditorChangeNotifier(typeRegistry: typeRegistry);
-
-    editor.zoom = json['zoom'];
-    editor.offset = Offset(json['offset']['dx'], json['offset']['dy']);
-    editor.interval = json['interval'];
-    editor.divisions = json['divisions'];
-
-    final nodeMap = (json['nodes'] as Map<String, dynamic>).map(
-      (key, nodedata) => MapEntry(key, Node.fromJson(nodedata, typeRegistry)),
-    );
-    editor.nodes.addAll(nodeMap);
-
-    final linkList = (json['links'] as List<dynamic>?) ?? [];
-    final parsedLinks = linkList
-        .map((linkJson) => Link.fromJson(linkJson))
-        .toList();
-
-    editor.addLinks(parsedLinks);
-
-    return editor;
+    final loc = rotateAroundCenter(iCenter + iOffset, iCenter, iRot);
+    return loc;
   }
 }
 

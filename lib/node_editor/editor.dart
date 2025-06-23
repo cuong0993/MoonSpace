@@ -30,8 +30,8 @@ class _NodeEditorState extends State<NodeEditor> {
         final zoom = matrix.getMaxScaleOnAxis();
         final offset = Offset(matrix.row0[3], matrix.row1[3]);
         final editor = EditorNotifier.of(context);
-        editor.updateZoom(zoom);
-        editor.updateOffset(offset);
+        editor.updateInteractiveZoom(zoom);
+        editor.updateInteractiveOffset(offset);
       });
       _listenerAttached = true;
     }
@@ -46,9 +46,9 @@ class _NodeEditorState extends State<NodeEditor> {
       focusNode: focusNode,
       onKeyEvent: (KeyEvent event) {
         if (event is KeyDownEvent) {
-          EditorNotifier.of(context).updateKey(event.logicalKey);
+          EditorNotifier.of(context).updateKeyboardKey(event.logicalKey);
         } else if (event is KeyUpEvent) {
-          EditorNotifier.of(context).updateKey(null);
+          EditorNotifier.of(context).updateKeyboardKey(null);
         }
       },
       child: Focus(
@@ -59,7 +59,7 @@ class _NodeEditorState extends State<NodeEditor> {
           transformationController: _controller,
           boundaryMargin: const EdgeInsets.all(double.infinity),
           onInteractionEnd: (details) {
-            editor.updateActive(null, null);
+            editor.updateActiveFunction(null, null);
           },
           onInteractionUpdate: (details) {
             final activeId = editor.activeNodeId;
@@ -144,8 +144,8 @@ class _NodeEditorState extends State<NodeEditor> {
                   },
                   child: Container(
                     color: Colors.transparent,
-                    width: editor.divisions * editor.interval,
-                    height: editor.divisions * editor.interval,
+                    width: 1000, // editor.divisions * editor.interval,
+                    height: 1000, // editor.divisions * editor.interval,
                     child: GridPaper(
                       color: Theme.of(context).colorScheme.primary,
                       divisions: editor.divisions,
@@ -201,11 +201,18 @@ class EditorState extends StatelessWidget {
           Column(children: editor.links.values.map((v) => Text(v.id)).toList()),
           Text('Key: ${editor.activeKey}'),
           Text('Control: ${editor.activeKey == LogicalKeyboardKey.metaLeft}'),
+          FilledButton(
+            onPressed: () {
+              editor.interactiveController.value = Matrix4.identity();
+            },
+            child: Text("Center"),
+          ),
 
           ...editor.nodes.entries.map((node) {
-            return TextButton(
+            return FilledButton(
               onPressed: () {
-                editor.updateActive(node.value.id, null);
+                editor.updateActiveFunction(node.value.id, null);
+                editor.interactiveAnimateTo(node.value.center, context);
               },
               child: Text(node.value.id),
             );

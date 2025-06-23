@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:moonspace/helper/extensions/color.dart';
 import 'package:moonspace/node_editor/types.dart';
 
 class CustomNode extends StatefulWidget {
@@ -41,10 +42,13 @@ class _CustomNodeState extends State<CustomNode> {
                 padding: const EdgeInsets.all(16.0),
                 child: GestureDetector(
                   onTapDown: (details) {
-                    editor.updateActive(widget.node.id, ActiveFunction.move);
+                    editor.updateActiveFunction(
+                      widget.node.id,
+                      ActiveFunction.move,
+                    );
                   },
                   onTapUp: (details) {
-                    editor.updateActive(null, null);
+                    editor.updateActiveFunction(null, null);
                   },
                   child: Container(
                     color: editor.activeNodeId == widget.node.id
@@ -76,10 +80,9 @@ class _CustomNodeState extends State<CustomNode> {
                       ? null
                       : inputOffset.dy * size.height,
 
-                  width: PortWidget.size.dx * 2,
-                  height: PortWidget.size.dy * 2,
-
-                  child: PortWidget(port: port, right: inputOffset.dx > .5),
+                  // width: PortWidget.size.dx * 2,
+                  // height: PortWidget.size.dy * 2,
+                  child: PortWidget(port: port),
                 );
               }),
 
@@ -93,13 +96,13 @@ class _CustomNodeState extends State<CustomNode> {
                   child: InkWell(
                     hoverColor: Colors.red,
                     onTapDown: (_) {
-                      editor.updateActive(
+                      editor.updateActiveFunction(
                         widget.node.id,
                         ActiveFunction.resize,
                       );
                     },
                     onTapUp: (_) {
-                      editor.updateActive(null, null);
+                      editor.updateActiveFunction(null, null);
                     },
                     child: Icon(
                       Icons.drag_handle,
@@ -118,13 +121,13 @@ class _CustomNodeState extends State<CustomNode> {
                   child: InkWell(
                     hoverColor: Colors.red,
                     onTapDown: (_) {
-                      editor.updateActive(
+                      editor.updateActiveFunction(
                         widget.node.id,
                         ActiveFunction.rotate,
                       );
                     },
                     onTapUp: (_) {
-                      editor.updateActive(null, null);
+                      editor.updateActiveFunction(null, null);
                     },
                     child: Icon(
                       Icons.rotate_right,
@@ -142,7 +145,7 @@ class _CustomNodeState extends State<CustomNode> {
                   child: InkWell(
                     hoverColor: Colors.red,
                     onTap: () {
-                      editor.removeNode(widget.node);
+                      editor.removeNodeById(widget.node.id);
                     },
                     child: Icon(Icons.clear, size: 16, color: cs.onPrimary),
                   ),
@@ -157,11 +160,9 @@ class _CustomNodeState extends State<CustomNode> {
 }
 
 class PortWidget extends StatelessWidget {
-  const PortWidget({super.key, required this.port, required this.right});
+  const PortWidget({super.key, required this.port});
 
   final Port port;
-
-  final bool right;
 
   static const size = Offset(16, 16);
 
@@ -169,7 +170,8 @@ class PortWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final editor = EditorNotifier.of(context);
 
-    final cs = Theme.of(context).colorScheme;
+    final color = colorFromType(port.value.runtimeType);
+    final onColor = color.getOnColor();
 
     return MouseRegion(
       onEnter: (event) {
@@ -203,11 +205,15 @@ class PortWidget extends StatelessWidget {
           editor.removeTempLink();
         },
         child: Container(
+          padding: EdgeInsets.all(2),
           alignment: Alignment.center,
-          color: editor.tempLinkStartPort == port ? Colors.red : cs.primary,
+          // color: editor.tempLinkStartPort == port
+          //     ? Colors.red
+          //     : (port.origin ? Colors.red : color),
+          color: color,
           child: Text(
-            port.value.toString(),
-            style: TextStyle(color: cs.onPrimary),
+            "${port.id} ${port.value}",
+            style: TextStyle(color: onColor),
           ),
         ),
       ),

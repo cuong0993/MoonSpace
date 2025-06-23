@@ -55,6 +55,11 @@ extension Shade on Color {
   }
 }
 
+Color colorFromType(Type t) {
+  final int hash = t.toString().hashCode & 0xFFFFFF;
+  return Color(0xFF000000 | hash);
+}
+
 extension AsHtmlColorToColor on String {
   Color htmlColorToColor() =>
       Color(int.parse(removeAll(['0x', '#']).padLeft(8, 'ff'), radix: 16));
