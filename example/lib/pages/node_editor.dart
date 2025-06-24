@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:moonspace/helper/extensions/string.dart';
+import 'package:moonspace/helper/extensions/theme_ext.dart';
 import 'package:moonspace/node_editor/export.dart';
 import 'package:moonspace/node_editor/links.dart';
 
@@ -94,19 +95,21 @@ class NodeEditorScaffold extends StatelessWidget {
       child: Scaffold(
         body: Stack(
           children: [
-            Align(
+            Positioned(
+              left: (context.mq.size.width - 500) / 2,
+              top: (context.mq.size.height - 500) / 2,
+              width: 500,
+              height: 500,
               child: Container(
-                width: 500,
-                height: 500,
                 color: const Color.fromARGB(255, 39, 39, 39),
                 child: NodeEditor(),
               ),
             ),
-            EditorState(),
-            Positioned(
-              bottom: 0,
-              left: 0,
+            Align(alignment: Alignment.bottomLeft, child: EditorState()),
+            Align(
+              alignment: Alignment.bottomRight,
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: editor.typeRegistry.entries
                     .map(
                       (e) => InkWell(

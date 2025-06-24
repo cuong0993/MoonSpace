@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:moonspace/node_editor/helper.dart';
 import 'package:moonspace/node_editor/types.dart';
 
 class LinkStyle {
@@ -39,7 +40,13 @@ class LinkPainter extends CustomPainter {
   final EditorChangeNotifier editor;
   final Animation<double> repaint;
 
-  LinkPainter(this.editor, {required this.repaint}) : super(repaint: repaint);
+  Offset? mousePosition;
+
+  LinkPainter({
+    required this.editor,
+    required this.mousePosition,
+    required this.repaint,
+  }) : super(repaint: repaint);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -60,9 +67,9 @@ class LinkPainter extends CustomPainter {
 
       final path = approximateLinkPath(start, end, linkStyle);
 
-      bool isHovered = editor.mousePosition == null
+      bool isHovered = mousePosition == null
           ? false
-          : pathHovered(path, editor.mousePosition!, linkStyle.linkWidth);
+          : pathHovered(path, mousePosition!, linkStyle.linkWidth);
 
       if (isHovered) {
         editor.activeLinkId = link.value.id;
@@ -74,8 +81,8 @@ class LinkPainter extends CustomPainter {
       animatedTravelLink(start, end, linkStyle, canvas, paint, progress);
     }
 
-    if (editor.mousePosition != null) {
-      canvas.drawCircle(editor.mousePosition!, 4, paint);
+    if (mousePosition != null) {
+      canvas.drawCircle(mousePosition!, 4, paint);
     }
 
     final tempPaint = Paint()
@@ -113,6 +120,8 @@ class _LinkBuilderState extends State<LinkBuilder>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
+  Offset? mousePosition;
+
   @override
   void initState() {
     super.initState();
@@ -145,10 +154,30 @@ class _LinkBuilderState extends State<LinkBuilder>
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: LinkPainter(widget.editor, repaint: _controller),
-      isComplex: true,
-      willChange: true,
+    return RepaintBoundary(
+      child: MouseRegion(
+        onHover: (event) {
+          mousePosition = (globalToCanvasOffset(
+            event.position -
+                Offset(2 * widget.editor.left, 2 * widget.editor.top),
+            context,
+          ));
+          setState(() {});
+        },
+        onExit: (event) {
+          mousePosition = null;
+          setState(() {});
+        },
+        child: CustomPaint(
+          painter: LinkPainter(
+            editor: widget.editor,
+            mousePosition: mousePosition,
+            repaint: _controller,
+          ),
+          isComplex: true,
+          willChange: true,
+        ),
+      ),
     );
   }
 }

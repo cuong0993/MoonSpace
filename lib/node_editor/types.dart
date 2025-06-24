@@ -150,6 +150,11 @@ class EditorChangeNotifier extends ChangeNotifier {
     this.interval = 500,
     this.divisions = 4,
 
+    this.left = 0,
+    this.top = 0,
+    this.width = 500,
+    this.height = 500,
+
     //
     this.linkStyle = const LinkStyle(),
   });
@@ -170,14 +175,17 @@ class EditorChangeNotifier extends ChangeNotifier {
 
   String? activeLinkId;
 
-  Offset? mousePosition;
-
   LogicalKeyboardKey? activeKey;
 
   double zoom;
   Offset offset;
   double interval;
   int divisions;
+
+  double left;
+  double top;
+  double width;
+  double height;
 
   final LinkStyle linkStyle;
 
@@ -391,12 +399,7 @@ class EditorChangeNotifier extends ChangeNotifier {
   }
 
   void updateTempLinkPosition(Offset pos, BuildContext context) {
-    tempLinkEndPos = globalToCanvasOffset(pos, context);
-    notifyListeners();
-  }
-
-  void updateMousePosition(Offset? pos, BuildContext context) {
-    mousePosition = pos == null ? null : globalToCanvasOffset(pos, context);
+    tempLinkEndPos = globalToCanvasOffset(pos - Offset(left, top), context);
     notifyListeners();
   }
 
