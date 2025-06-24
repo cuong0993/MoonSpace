@@ -62,80 +62,17 @@ class _NodeEditorState extends State<NodeEditor> {
             editor.updateActiveFunction(null, null);
           },
           onInteractionUpdate: (details) {
-            final activeId = editor.activeNodeId;
-            final activeFunction = editor.activeFunction;
-
-            final control = editor.activeKey == LogicalKeyboardKey.metaLeft;
-
-            if (activeId != null && activeFunction != null) {
-              if (activeFunction == ActiveFunction.move) {
-                final current = editor.getNode(activeId)!.position;
-                editor.updateNodePosition(
-                  activeId,
-                  current + details.focalPointDelta,
-                );
-              } else if (activeFunction == ActiveFunction.rotate) {
-                final current = editor.getNode(activeId)!.rotation;
-                double rotation =
-                    (current +
-                    (control ? 0.08 : 0.005) *
-                        (details.focalPointDelta.dx +
-                            details.focalPointDelta.dy));
-
-                if (control) {
-                  final snapStep = math.pi / 12;
-                  rotation = (rotation / snapStep).round() * snapStep;
-                }
-
-                editor.updateNodeRotation(activeId, (rotation % (math.pi * 2)));
-              } else if (activeFunction == ActiveFunction.resize) {
-                final current = editor.getNode(activeId)!.size;
-                final newSize = Size(
-                  (current.width + details.focalPointDelta.dx).clamp(50, 500),
-                  (current.height + details.focalPointDelta.dy).clamp(30, 500),
-                );
-                editor.updateNodeSize(activeId, newSize);
-              }
-            }
+            onInteractionUpdate(editor, details);
           },
           minScale: 0.5,
           maxScale: 2.5,
-          child: Stack(
-            children: [
-              Listener(
-                onPointerDown: (event) {
-                  // editor.secondaryMouseClick = false;
-                  if (event.kind == PointerDeviceKind.mouse &&
-                      event.buttons == kSecondaryMouseButton) {
-                    // editor.secondaryMouseClick = true;
-
-                    if (editor.activeLinkId != null) {
-                      final offset = event.position;
-
-                      final linkId = editor.activeLinkId;
-
-                      showMenu(
-                        context: context,
-                        menuPadding: EdgeInsets.zero,
-                        position: RelativeRect.fromLTRB(
-                          offset.dx,
-                          offset.dy,
-                          offset.dx + 200,
-                          offset.dy + 200,
-                        ),
-                        items: [
-                          PopupMenuItem(
-                            child: Text('Delete link'),
-                            onTap: () {
-                              editor.removeLinkById(linkId!);
-                            },
-                          ),
-                        ],
-                      );
-                    }
-                  }
-                },
-                child: MouseRegion(
+          child: Listener(
+            onPointerDown: (event) {
+              editorPointerDown(editor, context, event);
+            },
+            child: Stack(
+              children: [
+                MouseRegion(
                   onHover: (event) {
                     editor.updateMousePosition(event.position, context);
                   },
@@ -154,21 +91,21 @@ class _NodeEditorState extends State<NodeEditor> {
                     ),
                   ),
                 ),
-              ),
 
-              LinkBuilder(
-                editor: editor,
-                animate: editor.tempLinkEndPos != null,
-              ),
+                LinkBuilder(
+                  editor: editor,
+                  animate: editor.tempLinkEndPos != null,
+                ),
 
-              ...editor.nodes.entries.map((entry) {
-                final node = entry.value;
-                return CustomNode(
-                  node: node,
-                  innerWidget: editor.buildNodeWidget(context, node),
-                );
-              }),
-            ],
+                ...editor.nodes.entries.map((entry) {
+                  final node = entry.value;
+                  return CustomNode(
+                    node: node,
+                    innerWidget: editor.buildNodeWidget(context, node),
+                  );
+                }),
+              ],
+            ),
           ),
         ),
       ),
@@ -220,5 +157,76 @@ class EditorState extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+void onInteractionUpdate(
+  EditorChangeNotifier editor,
+  ScaleUpdateDetails details,
+) {
+  final activeId = editor.activeNodeId;
+  final activeFunction = editor.activeFunction;
+
+  final control = editor.activeKey == LogicalKeyboardKey.metaLeft;
+
+  if (activeId != null && activeFunction != null) {
+    if (activeFunction == ActiveFunction.move) {
+      final current = editor.getNodeById(activeId)!.position;
+      editor.updateNodePosition(activeId, current + details.focalPointDelta);
+    } else if (activeFunction == ActiveFunction.rotate) {
+      final current = editor.getNodeById(activeId)!.rotation;
+      double rotation =
+          (current +
+          (control ? 0.08 : 0.005) *
+              (details.focalPointDelta.dx + details.focalPointDelta.dy));
+
+      if (control) {
+        final snapStep = math.pi / 12;
+        rotation = (rotation / snapStep).round() * snapStep;
+      }
+
+      editor.updateNodeRotation(activeId, (rotation % (math.pi * 2)));
+    } else if (activeFunction == ActiveFunction.resize) {
+      final current = editor.getNodeById(activeId)!.size;
+      final newSize = Size(
+        (current.width + details.focalPointDelta.dx).clamp(50, 500),
+        (current.height + details.focalPointDelta.dy).clamp(30, 500),
+      );
+      editor.updateNodeSize(activeId, newSize);
+    }
+  }
+}
+
+void editorPointerDown(
+  EditorChangeNotifier editor,
+  BuildContext context,
+  PointerDownEvent event,
+) {
+  if (event.kind == PointerDeviceKind.mouse &&
+      event.buttons == kSecondaryMouseButton) {
+    if (editor.activeLinkId != null) {
+      final offset = event.position;
+
+      final linkId = editor.activeLinkId;
+
+      showMenu(
+        context: context,
+        menuPadding: EdgeInsets.zero,
+        position: RelativeRect.fromLTRB(
+          offset.dx,
+          offset.dy,
+          offset.dx + 200,
+          offset.dy + 200,
+        ),
+        items: [
+          PopupMenuItem(
+            child: Text('Delete link'),
+            onTap: () {
+              editor.removeLinkById(linkId!);
+            },
+          ),
+        ],
+      );
+    }
   }
 }

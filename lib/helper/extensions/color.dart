@@ -55,7 +55,7 @@ extension Shade on Color {
   }
 }
 
-Color colorFromType(Type t) {
+Color colorFromType(dynamic t) {
   final int hash = t.toString().hashCode & 0xFFFFFF;
   return Color(0xFF000000 | hash);
 }

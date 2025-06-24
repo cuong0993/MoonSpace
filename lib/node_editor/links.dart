@@ -55,8 +55,8 @@ class LinkPainter extends CustomPainter {
     editor.activeLinkId = null;
 
     for (final link in editor.links.entries) {
-      Offset start = editor.getPortOffset(link.value.inputPort);
-      Offset end = editor.getPortOffset(link.value.outputPort);
+      Offset start = editor.getPortOffset(link.value.outputPort);
+      Offset end = editor.getPortOffset(link.value.inputPort);
 
       final path = approximateLinkPath(start, end, linkStyle);
 
@@ -71,25 +71,7 @@ class LinkPainter extends CustomPainter {
       paint.color = isHovered ? Colors.blue : linkStyle.linkColor;
       canvas.drawPath(path, paint);
 
-      {
-        final path = approximateLinkPath(start, end, linkStyle);
-        canvas.drawPath(path, paint);
-
-        // Animate multiple dots
-        final metric = path.computeMetrics().first;
-        const dotCount = 5;
-        const spacing = 0.2; // offset between dots
-
-        for (int i = 0; i < dotCount; i++) {
-          final t = (progress + i * spacing) % 1.0;
-          final offset = metric
-              .getTangentForOffset(metric.length * t)
-              ?.position;
-          if (offset != null) {
-            canvas.drawCircle(offset, 4, Paint()..color = Colors.orange);
-          }
-        }
-      }
+      animatedTravelLink(start, end, linkStyle, canvas, paint, progress);
     }
 
     if (editor.mousePosition != null) {
@@ -219,4 +201,29 @@ bool pathHovered(Path path, Offset point, double dis) {
     }
   }
   return false;
+}
+
+void animatedTravelLink(
+  Offset start,
+  Offset end,
+  LinkStyle linkStyle,
+  Canvas canvas,
+  Paint paint,
+  double progress,
+) {
+  final path = approximateLinkPath(start, end, linkStyle);
+  canvas.drawPath(path, paint);
+
+  // Animate multiple dots
+  final metric = path.computeMetrics().first;
+  const dotCount = 5;
+  const spacing = 0.2; // offset between dots
+
+  for (int i = 0; i < dotCount; i++) {
+    final t = (progress + i * spacing) % 1.0;
+    final offset = metric.getTangentForOffset(metric.length * t)?.position;
+    if (offset != null) {
+      canvas.drawCircle(offset, 4, Paint()..color = Colors.orange);
+    }
+  }
 }

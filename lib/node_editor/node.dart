@@ -16,8 +16,8 @@ class _CustomNodeState extends State<CustomNode> {
   @override
   Widget build(BuildContext context) {
     final editor = EditorNotifier.of(context);
-    final size = editor.getNode(widget.node.id)!.size;
-    final rotation = editor.getNode(widget.node.id)!.rotation;
+    final size = editor.getNodeById(widget.node.id)!.size;
+    final rotation = editor.getNodeById(widget.node.id)!.rotation;
 
     final cs = Theme.of(context).colorScheme;
 
@@ -170,29 +170,27 @@ class PortWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final editor = EditorNotifier.of(context);
 
-    final color = colorFromType(port.value.runtimeType);
+    final color = colorFromType(port);
     final onColor = color.getOnColor();
 
     return MouseRegion(
       onEnter: (event) {
         if (editor.tempLinkStartPort != null &&
             editor.tempLinkStartPort != port) {
-          editor.addLinks([
-            Link(
-              inputPort: editor.tempLinkStartPort!,
-              outputPort: port,
-              value: 2.2,
-            ),
-          ]);
+          final a = editor.tempLinkStartPort!;
+          final inputPort = a.input ? a : port;
+          final outputPort = a.input ? port : a;
+          editor.addLinks([Link(inputPort: inputPort, outputPort: outputPort)]);
         }
       },
       child: GestureDetector(
         onPanStart: (details) {
-          if (port.linkId != null) {
-            final linkedPort = editor.getLinkedPort(port);
-            editor.tempLinkStartPort ??= linkedPort;
-            editor.removeLinkById(port.linkId!);
-          } else {
+          // if (port.linkId != null) {
+          //   final linkedPort = editor.getLinkedPort(port);
+          //   editor.tempLinkStartPort ??= linkedPort;
+          //   editor.removeLinkById(port.linkId!);
+          // } else
+          {
             editor.tempLinkStartPort ??= port;
           }
         },
@@ -205,16 +203,30 @@ class PortWidget extends StatelessWidget {
           editor.removeTempLink();
         },
         child: Container(
+          width: size.dx * 2,
+          height: size.dy * 2,
           padding: EdgeInsets.all(2),
           alignment: Alignment.center,
-          // color: editor.tempLinkStartPort == port
-          //     ? Colors.red
-          //     : (port.origin ? Colors.red : color),
-          color: color,
-          child: Text(
-            "${port.id} ${port.value}",
-            style: TextStyle(color: onColor),
-          ),
+          decoration: port.input
+              ? ShapeDecoration(
+                  color: Colors.red,
+                  shape: StarBorder.polygon(
+                    sides: 3.00,
+                    rotation: -90,
+                    pointRounding: .4,
+                    squash: 0.25,
+                  ),
+                )
+              : BoxDecoration(
+                  color: editor.tempLinkStartPort == port
+                      ? Colors.black
+                      : color,
+                ),
+          // child: Text(
+          //   // "${port.value}",
+          //   "${port.id} ${port.value}",
+          //   style: TextStyle(color: onColor),
+          // ),
         ),
       ),
     );
