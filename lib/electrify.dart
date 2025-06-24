@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+// ignore: depend_on_referenced_packages
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:moonspace/controller/app_scroll_behavior.dart';
 import 'package:moonspace/feedback/feedback_form.dart';
@@ -22,8 +23,8 @@ class Electric {
       GlobalKey<NavigatorState>();
   static final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey();
-  static const String spacemoonRestorationScopeId =
-      'SpacemoonRestorationScopeId';
+  static const String moonspaceRestorationScopeId =
+      'MoonSpaceRestorationScopeId';
   static const String appRestorationScopeId = 'AppRestorationScopeId';
 
   static BuildContext get context => electricNavigatorKey.currentContext!;
@@ -143,7 +144,7 @@ void electrify({
             },
             theme: FeedbackThemeData(),
             localizationsDelegates: [GlobalFeedbackLocalizationsDelegate()],
-            child: SpaceMoonHome(
+            child: MoonSpaceHome(
               title: title,
               router: router(),
               localizationsDelegates: localizationsDelegates,
@@ -170,8 +171,8 @@ void electrify({
   );
 }
 
-class SpaceMoonHome extends ConsumerWidget {
-  const SpaceMoonHome({
+class MoonSpaceHome extends ConsumerWidget {
+  const MoonSpaceHome({
     super.key,
     required this.router,
     required this.title,
@@ -197,14 +198,14 @@ class SpaceMoonHome extends ConsumerWidget {
     final globalAppTheme = ref.watch(globalThemeProvider);
 
     return RootRestorationScope(
-      restorationId: Electric.spacemoonRestorationScopeId,
+      restorationId: Electric.moonspaceRestorationScopeId,
       child: LayoutBuilder(
         builder: (context, constraints) {
           AppTheme.currentTheme = AppTheme.currentTheme.copyWith(
             size: constraints.biggest,
           );
 
-          dino('SpaceMoon Rebuild ${constraints.biggest} \n');
+          dino('MoonSpace Rebuild ${constraints.biggest} \n');
 
           return CupertinoTheme(
             data: CupertinoThemeData(

@@ -3,9 +3,11 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:moonspace/helper/extensions/theme_ext.dart';
 import 'package:moonspace/node_editor/links.dart';
 import 'package:moonspace/node_editor/node.dart';
 import 'package:moonspace/node_editor/types.dart';
+import 'package:moonspace/theme.dart';
 
 class NodeEditor extends StatefulWidget {
   const NodeEditor({super.key});
@@ -81,8 +83,8 @@ class _NodeEditorState extends State<NodeEditor> {
                   },
                   child: Container(
                     color: Colors.transparent,
-                    width: 1000, // editor.divisions * editor.interval,
-                    height: 1000, // editor.divisions * editor.interval,
+                    width: editor.divisions * editor.interval,
+                    height: editor.divisions * editor.interval,
                     child: GridPaper(
                       color: Theme.of(context).colorScheme.primary,
                       divisions: editor.divisions,
@@ -97,13 +99,7 @@ class _NodeEditorState extends State<NodeEditor> {
                   animate: editor.tempLinkEndPos != null,
                 ),
 
-                ...editor.nodes.entries.map((entry) {
-                  final node = entry.value;
-                  return CustomNode(
-                    node: node,
-                    innerWidget: editor.buildNodeWidget(context, node),
-                  );
-                }),
+                ...renderNodes(context, editor),
               ],
             ),
           ),
@@ -120,14 +116,15 @@ class EditorState extends StatelessWidget {
   Widget build(BuildContext context) {
     final editor = EditorNotifier.of(context);
     return Container(
+      width: 200,
+      height: 400,
       decoration: BoxDecoration(
         border: Border.all(color: Theme.of(context).colorScheme.primary),
       ),
       padding: EdgeInsets.all(4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
+      child: ListView(
         children: [
+          Text('Size: ${context.mq.size}'),
           Text('Zoom: ${editor.zoom.toStringAsFixed(2)}'),
           Text(
             'Offset: ${editor.offset.dx.toStringAsFixed(1)},${editor.offset.dy.toStringAsFixed(1)}',
@@ -151,7 +148,7 @@ class EditorState extends StatelessWidget {
                 editor.updateActiveFunction(node.value.id, null);
                 editor.interactiveAnimateTo(node.value.center, context);
               },
-              child: Text(node.value.id),
+              child: Text("Focus ${node.value.id}"),
             );
           }),
         ],
@@ -229,4 +226,54 @@ void editorPointerDown(
       );
     }
   }
+}
+
+List<Widget> renderNodes(BuildContext context, EditorChangeNotifier editor) {
+  List<Widget> visibleNodes = [];
+
+  for (final entry in editor.nodes.entries) {
+    final node = entry.value;
+    final isVisible = checkIfNodeVisible(node, editor.offset, editor.zoom);
+    if (isVisible) {
+      visibleNodes.add(
+        CustomNode(
+          node: node,
+          innerWidget: editor.buildNodeWidget(context, node),
+        ),
+      );
+    } else {
+      print("Avoid ${node.id}");
+    }
+  }
+  return visibleNodes;
+}
+
+bool checkIfNodeVisible(
+  Node node,
+  Offset offset,
+  double zoom, {
+  double padding = 100,
+}) {
+  // Viewport in scene space
+  final screenWidth = AppTheme.currentTheme.size.width;
+  final screenHeight = AppTheme.currentTheme.size.height;
+
+  final sceneTopLeft = (Offset.zero - offset) / zoom;
+  final sceneBottomRight = (Offset(screenWidth, screenHeight) - offset) / zoom;
+
+  // Expand viewport with padding (converted to scene scale)
+  final scenePadding = padding / 1; //zoom;
+  final viewport = Rect.fromPoints(
+    sceneTopLeft,
+    sceneBottomRight,
+  ).inflate(scenePadding);
+
+  final nodeRect = Rect.fromLTWH(
+    node.position.dx,
+    node.position.dy,
+    node.size.width,
+    node.size.height,
+  );
+
+  return nodeRect.overlaps(viewport);
 }

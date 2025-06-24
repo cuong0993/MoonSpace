@@ -38,26 +38,23 @@ class _CustomNodeState extends State<CustomNode> {
             clipBehavior: Clip.none,
             children: [
               //
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: GestureDetector(
-                  onTapDown: (details) {
-                    editor.updateActiveFunction(
-                      widget.node.id,
-                      ActiveFunction.move,
-                    );
-                  },
-                  onTapUp: (details) {
-                    editor.updateActiveFunction(null, null);
-                  },
-                  child: Container(
-                    color: editor.activeNodeId == widget.node.id
-                        ? cs.surfaceContainerHigh
-                        : cs.surface,
-                    width: size.width,
-                    height: size.height,
-                    child: Center(child: widget.innerWidget),
-                  ),
+              GestureDetector(
+                onTapDown: (details) {
+                  editor.updateActiveFunction(
+                    widget.node.id,
+                    ActiveFunction.move,
+                  );
+                },
+                onTapUp: (details) {
+                  editor.updateActiveFunction(null, null);
+                },
+                child: Container(
+                  color: editor.activeNodeId == widget.node.id
+                      ? cs.surfaceContainerHigh
+                      : cs.surface,
+                  width: size.width,
+                  height: size.height,
+                  child: Center(child: widget.innerWidget),
                 ),
               ),
 
@@ -164,8 +161,6 @@ class PortWidget extends StatelessWidget {
 
   final Port port;
 
-  static const size = Offset(16, 16);
-
   @override
   Widget build(BuildContext context) {
     final editor = EditorNotifier.of(context);
@@ -203,8 +198,8 @@ class PortWidget extends StatelessWidget {
           editor.removeTempLink();
         },
         child: Container(
-          width: size.dx * 2,
-          height: size.dy * 2,
+          width: 16,
+          height: 16,
           padding: EdgeInsets.all(2),
           alignment: Alignment.center,
           decoration: port.input

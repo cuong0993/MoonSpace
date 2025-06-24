@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:moonspace/node_editor/helper.dart';
 import 'package:moonspace/node_editor/links.dart';
-import 'package:moonspace/node_editor/node.dart';
 
 class Port<T> {
   int? index;
@@ -82,7 +81,7 @@ class Node<T> {
   Offset position;
   double rotation;
   Size size;
-  T value;
+  T? value;
   List<Port> ports;
 
   Node({
@@ -91,7 +90,7 @@ class Node<T> {
     required this.position,
     required this.rotation,
     required this.size,
-    required this.value,
+    this.value,
     required this.ports,
   });
 
@@ -305,13 +304,15 @@ class EditorChangeNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addLinksByPort(List<((String, int), (String, int))> linklist) {
+  void addLinksByPort(
+    List<({String nodeId1, int index1, String nodeId2, int index2})> linklist,
+  ) {
     List<Link> l = [];
     for (var e in linklist) {
-      final n1 = getNodeById(e.$1.$1);
-      final n2 = getNodeById(e.$2.$1);
-      final p1 = n1?.getPortById(e.$1.$2);
-      final p2 = n2?.getPortById(e.$2.$2);
+      final n1 = getNodeById(e.nodeId1);
+      final n2 = getNodeById(e.nodeId2);
+      final p1 = n1?.getPortById(e.index1);
+      final p2 = n2?.getPortById(e.index2);
       if (p1 != null && p2 != null) {
         l.add(
           Link(inputPort: p1.input ? p1 : p2, outputPort: p1.input ? p2 : p1),
@@ -420,7 +421,7 @@ class EditorChangeNotifier extends ChangeNotifier {
 
   Offset getPortOffset(Port port) {
     final iPos = getNodeById(port.nodeId!)!.position;
-    final iSize = getNodeById(port.nodeId!)!.size + PortWidget.size;
+    final iSize = getNodeById(port.nodeId!)!.size;
     final iRot = getNodeById(port.nodeId!)!.rotation;
     final iCenter = iPos + iSize.center(Offset.zero);
     final isx = iSize.width * port.offsetRatio.dx;
@@ -428,7 +429,7 @@ class EditorChangeNotifier extends ChangeNotifier {
     final iOffset = Offset(isx, isy) - iSize.center(Offset.zero);
     final loc = rotateAroundCenter(iCenter + iOffset, iCenter, iRot);
     // return loc;
-    return Offset(loc.dx, loc.dy + 12);
+    return Offset(loc.dx, loc.dy + 4);
   }
 }
 
