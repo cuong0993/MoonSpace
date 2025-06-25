@@ -41,8 +41,6 @@ class Port<T> {
   );
 }
 
-enum ActiveFunction { move, rotate, resize }
-
 class Link<T> {
   final Port inputPort;
   final Port outputPort;
@@ -167,7 +165,6 @@ class EditorChangeNotifier extends ChangeNotifier {
   final Map<String, TypeRegistryEntry> typeRegistry;
 
   String? activeNodeId;
-  ActiveFunction? activeFunction;
 
   Port? tempLinkStartPort;
   Offset? tempLinkEndPos;
@@ -383,20 +380,20 @@ class EditorChangeNotifier extends ChangeNotifier {
 
   void updateInteractiveZoom(double z) {
     izoom = z;
-    // print("updateInteractiveZoom");
     // notifyListeners();
   }
 
   void updateInteractiveOffset(Offset off) {
     ioffset = off;
-    // print("updateInteractiveOffset");
     // notifyListeners();
   }
 
-  void updateActiveFunction(String? id, ActiveFunction? function) {
+  void updateActiveNode(String? id) {
     activeNodeId = id;
-    activeFunction = function;
-    print("updateActiveFunction");
+    notifyListeners();
+  }
+
+  void notifyEditor() {
     notifyListeners();
   }
 

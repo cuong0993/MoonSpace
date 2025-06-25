@@ -2,7 +2,10 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:moonspace/helper/extensions/color.dart';
+import 'package:moonspace/node_editor/helper.dart';
 import 'package:moonspace/node_editor/types.dart';
+
+enum ActiveFunction { move, rotate, resize }
 
 class CustomNode extends StatefulWidget {
   final Node node;
@@ -15,7 +18,9 @@ class CustomNode extends StatefulWidget {
 }
 
 class _CustomNodeState extends State<CustomNode> {
-  double rotation = 0;
+  Offset startDiffpos = Offset.zero;
+
+  ActiveFunction? activeFunction;
 
   String debug = "";
 
@@ -23,7 +28,6 @@ class _CustomNodeState extends State<CustomNode> {
   Widget build(BuildContext context) {
     final editor = EditorNotifier.of(context);
     final size = editor.getNodeById(widget.node.id)!.size;
-    // final rotation = editor.getNodeById(widget.node.id)!.rotation;
 
     final cs = Theme.of(context).colorScheme;
 
@@ -31,7 +35,7 @@ class _CustomNodeState extends State<CustomNode> {
       left: widget.node.position.dx,
       top: widget.node.position.dy,
       child: Transform.rotate(
-        angle: rotation,
+        angle: widget.node.rotation,
         child: Card(
           clipBehavior: Clip.hardEdge,
           elevation: 8,
@@ -45,35 +49,133 @@ class _CustomNodeState extends State<CustomNode> {
             children: [
               //
               GestureDetector(
-                onTapDown: (details) {
-                  editor.updateActiveFunction(
-                    widget.node.id,
-                    ActiveFunction.move,
-                  );
-                },
-                onTapUp: (details) {
-                  editor.updateActiveFunction(null, null);
-                },
-                child: Container(
-                  color: editor.activeNodeId == widget.node.id
-                      ? cs.surfaceContainerHigh
-                      : cs.surface,
-                  width: size.width,
-                  height: size.height,
-                  // child: Center(child: widget.innerWidget),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(debug),
-                  ),
-                ),
-              ),
+                onPanStart: (details) {
+                  final globalPos =
+                      (details.globalPosition - editor.editorOffset) /
+                      editor.izoom;
 
-              Transform.rotate(
-                angle: rotation,
-                child: Column(
+                  final center = widget.node.center;
+
+                  startDiffpos = globalPos - widget.node.position;
+
+                  final topcen =
+                      widget.node.position +
+                      Offset(8 + 0.5 * size.width, 8 + 0 * size.height);
+                  final rottop = rotateAroundCenter(
+                    topcen,
+                    center,
+                    widget.node.rotation,
+                  );
+
+                  final disTopCenter = (globalPos - rottop).distance;
+
+                  final bottomRight =
+                      widget.node.position +
+                      Offset(-8 + size.width, -8 + size.height);
+                  final rotBottomRight = rotateAroundCenter(
+                    bottomRight,
+                    center,
+                    widget.node.rotation,
+                  );
+
+                  final disBottomCorner = (globalPos - rotBottomRight).distance;
+
+                  if (disTopCenter < 20 * editor.izoom) {
+                    activeFunction = ActiveFunction.rotate;
+                  } else if (disBottomCorner < 20 * editor.izoom) {
+                    activeFunction = ActiveFunction.resize;
+                  } else {
+                    activeFunction = ActiveFunction.move;
+                  }
+                },
+                onPanUpdate: (details) {
+                  final globalPos =
+                      (details.globalPosition - editor.editorOffset) /
+                      editor.izoom;
+
+                  final center = widget.node.center;
+
+                  if (activeFunction == ActiveFunction.rotate) {
+                    final centerToGlobalPos = globalPos - center;
+                    widget.node.rotation =
+                        math.atan2(centerToGlobalPos.dy, centerToGlobalPos.dx) +
+                        3.14 / 2;
+                  }
+                  if (activeFunction == ActiveFunction.move) {
+                    widget.node.position = globalPos - startDiffpos;
+                  }
+                  if (activeFunction == ActiveFunction.resize) {
+                    final rev = rotateAroundCenter(
+                      globalPos,
+                      center,
+                      -widget.node.rotation,
+                    );
+
+                    widget.node.size = Size(
+                      rev.dx - widget.node.position.dx,
+                      rev.dy - widget.node.position.dy,
+                    );
+                  }
+
+                  setState(() {});
+                },
+                onPanEnd: (details) {
+                  activeFunction = null;
+                  editor.notifyEditor();
+                },
+                child: Stack(
                   children: [
-                    Container(width: 5, height: 30, color: Colors.red),
-                    Container(width: 5, height: 30, color: Colors.blue),
+                    Container(
+                      color: editor.activeNodeId == widget.node.id
+                          ? cs.surfaceContainerHigh
+                          : cs.surface,
+                      width: size.width,
+                      height: size.height,
+                      child: Center(child: widget.innerWidget),
+                      // child: Padding(
+                      //   padding: const EdgeInsets.all(16.0),
+                      //   child: Text(debug),
+                      // ),
+                    ),
+
+                    Positioned(
+                      right: 0,
+                      bottom: 0,
+                      child: Icon(
+                        Icons.drag_handle,
+                        size: 16,
+                        color: Colors.red,
+                      ),
+                    ),
+
+                    Positioned(
+                      left: widget.node.size.width / 2,
+                      top: 0,
+                      child: Icon(
+                        Icons.rotate_right,
+                        size: 16,
+                        color: Colors.red,
+                      ),
+                    ),
+
+                    Positioned(
+                      left: 0,
+                      top: 0,
+                      child: Material(
+                        color: cs.primary,
+                        child: InkWell(
+                          hoverColor: Colors.red,
+                          onTap: () {
+                            editor.removeNodeById(widget.node.id);
+                          },
+                          child: Icon(
+                            Icons.clear,
+                            size: 16,
+                            color: cs.onPrimary,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -104,136 +206,6 @@ class _CustomNodeState extends State<CustomNode> {
               }),
 
               //
-              Positioned(
-                right: 0,
-                bottom: 0,
-                child: Material(
-                  color: Theme.of(context).colorScheme.primary,
-
-                  child: InkWell(
-                    hoverColor: Colors.red,
-                    onTapDown: (_) {
-                      editor.updateActiveFunction(
-                        widget.node.id,
-                        ActiveFunction.resize,
-                      );
-                    },
-                    onTapUp: (_) {
-                      editor.updateActiveFunction(null, null);
-                    },
-                    child: Icon(
-                      Icons.drag_handle,
-                      size: 16,
-                      color: cs.onPrimary,
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                right: (size.width / 2) - 16,
-                top: 0,
-                child: Material(
-                  color: Theme.of(context).colorScheme.primary,
-
-                  child: Builder(
-                    builder: (context) {
-                      return GestureDetector(
-                        onPanUpdate: (details) {
-                          final center = widget.node.center;
-
-                          final off =
-                              (details.globalPosition - editor.editorOffset) /
-                              editor.izoom;
-                          // final off = editor.globalToCanvasOffset(
-                          //   details.localPosition,
-                          //   context,
-                          // );
-                          final vec = off - center;
-                          rotation = math.atan2(vec.dy, vec.dx) + 3.14 / 2;
-                          // if (details.delta.dx > 0) {
-                          //   rotation += .05;
-                          // } else {
-                          //   rotation -= .05;
-                          // }
-
-                          debug =
-                              "loc: ${details.localPosition}\n"
-                              "off: $off\n"
-                              "cen: $center\n"
-                              "rot: ${(rotation * 360 / 6.28).toStringAsFixed(2)}\n"
-                              "vec: $vec\n";
-
-                          editor.updateNodeRotation(widget.node.id, rotation);
-
-                          setState(() {});
-                        },
-
-                        // onPanUpdate: (details) {
-                        //   final center = widget.node.center;
-
-                        //   // final off = details.globalPosition / editor.izoom;
-                        //   final off = editor.localToCanvasOffset(
-                        //     details.localPosition,
-                        //     context,
-                        //   );
-                        //   final vec = off - center;
-                        //   rotation = math.atan2(vec.dy, vec.dx) + 3.14 / 2;
-                        //   // if (details.delta.dx > 0) {
-                        //   //   rotation += .05;
-                        //   // } else {
-                        //   //   rotation -= .05;
-                        //   // }
-
-                        //   debug =
-                        //       "loc: ${details.localPosition}\n"
-                        //       "glo: ${details.globalPosition}\n"
-                        //       "off: $off\n"
-                        //       "cen: $center\n"
-                        //       "rot: ${(rotation * 360 / 6.28).toStringAsFixed(2)}\n"
-                        //       "vec: $vec\n";
-
-                        //   editor.updateNodeRotation(widget.node.id, rotation);
-
-                        //   setState(() {});
-                        // },
-                        onPanEnd: (details) {
-                          editor.updateActiveFunction(null, null);
-                        },
-                        // InkWell(
-                        //   hoverColor: Colors.red,
-                        //   onTapDown: (_) {
-                        //     editor.updateActiveFunction(
-                        //       widget.node.id,
-                        //       ActiveFunction.rotate,
-                        //     );
-                        //   },
-                        //   onTapUp: (_) {
-                        //     editor.updateActiveFunction(null, null);
-                        //   },
-                        child: Icon(
-                          Icons.rotate_right,
-                          size: 16,
-                          color: cs.onPrimary,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 0,
-                top: 0,
-                child: Material(
-                  color: cs.primary,
-                  child: InkWell(
-                    hoverColor: Colors.red,
-                    onTap: () {
-                      editor.removeNodeById(widget.node.id);
-                    },
-                    child: Icon(Icons.clear, size: 16, color: cs.onPrimary),
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -276,7 +248,10 @@ class PortWidget extends StatelessWidget {
         },
         onPanUpdate: (details) {
           if (editor.tempLinkStartPort != null) {
-            editor.updateTempLinkPosition(details.localPosition, context);
+            editor.tempLinkEndPos =
+                (details.globalPosition - editor.editorOffset) / editor.izoom;
+            editor.notifyEditor();
+            // editor.updateTempLinkPosition(details.localPosition, context);
           }
         },
         onPanEnd: (details) {

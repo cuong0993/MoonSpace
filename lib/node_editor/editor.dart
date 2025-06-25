@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -78,11 +76,9 @@ class _NodeEditorState extends State<NodeEditor> {
             transformationController: _controller,
             // boundaryMargin: const EdgeInsets.all(double.infinity),
             onInteractionEnd: (details) {
-              editor.updateActiveFunction(null, null);
+              editor.notifyEditor();
             },
-            onInteractionUpdate: (details) {
-              onInteractionUpdate(editor, details);
-            },
+            // onInteractionUpdate: (details) {},
             minScale: 0.5,
             maxScale: 2.5,
             child: Listener(
@@ -142,7 +138,6 @@ class EditorState extends StatelessWidget {
             'IOffset: ${editor.ioffset.dx.toStringAsFixed(1)},${editor.ioffset.dy.toStringAsFixed(1)}',
           ),
           Text('Active: ${editor.activeNodeId}'),
-          Text('Function: ${editor.activeFunction}'),
           Text('Nodes: ${editor.nodes.length}'),
           Column(children: editor.links.values.map((v) => Text(v.id)).toList()),
           Text('Key: ${editor.activeKey}'),
@@ -157,7 +152,7 @@ class EditorState extends StatelessWidget {
           ...editor.nodes.entries.map((node) {
             return FilledButton(
               onPressed: () {
-                editor.updateActiveFunction(node.value.id, null);
+                editor.updateActiveNode(node.value.id);
                 editor.interactiveAnimateTo(node.value.center, context);
               },
               child: Text("Focus ${node.value.id}"),
@@ -166,43 +161,6 @@ class EditorState extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-void onInteractionUpdate(
-  EditorChangeNotifier editor,
-  ScaleUpdateDetails details,
-) {
-  final activeId = editor.activeNodeId;
-  final activeFunction = editor.activeFunction;
-
-  final control = editor.activeKey == LogicalKeyboardKey.metaLeft;
-
-  if (activeId != null && activeFunction != null) {
-    if (activeFunction == ActiveFunction.move) {
-      final current = editor.getNodeById(activeId)!.position;
-      editor.updateNodePosition(activeId, current + details.focalPointDelta);
-    } else if (activeFunction == ActiveFunction.rotate) {
-      final current = editor.getNodeById(activeId)!.rotation;
-      double rotation =
-          (current +
-          (control ? 0.08 : 0.005) *
-              (details.focalPointDelta.dx + details.focalPointDelta.dy));
-
-      if (control) {
-        final snapStep = math.pi / 12;
-        rotation = (rotation / snapStep).round() * snapStep;
-      }
-
-      editor.updateNodeRotation(activeId, (rotation % (math.pi * 2)));
-    } else if (activeFunction == ActiveFunction.resize) {
-      final current = editor.getNodeById(activeId)!.size;
-      final newSize = Size(
-        (current.width + details.focalPointDelta.dx).clamp(50, 500),
-        (current.height + details.focalPointDelta.dy).clamp(30, 500),
-      );
-      editor.updateNodeSize(activeId, newSize);
-    }
   }
 }
 

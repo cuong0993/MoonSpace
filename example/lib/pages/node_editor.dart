@@ -63,30 +63,30 @@ class NodeEditorScaffold extends StatelessWidget {
             },
           )
           ..addNodes([
-            Node<ColumnText>(
+            Node<double>(
               id: 'nodeA',
-              type: "columntext",
-              position: const Offset(100, 100),
+              type: "slider",
+              position: const Offset(50, 50),
               rotation: 0,
-              size: const Size(250, 250),
+              size: const Size(200, 200),
+              value: .5,
+              ports: [
+                Port<double>(input: false, offsetRatio: Offset(1, 0.3)),
+                Port<double>(input: false, offsetRatio: Offset(1, 0.7)),
+              ],
+            ),
+            Node<ColumnText>(
+              id: 'nodeB',
+              type: "columntext",
+              position: const Offset(300, 100),
+              rotation: 0,
+              size: const Size(150, 150),
               value: ColumnText(title: 'Hello', subtitle: 'World'),
               ports: [
                 Port<double>(input: true, offsetRatio: Offset(0, 0.25)),
                 Port<String>(input: false, offsetRatio: Offset(0, 0.5)),
               ],
             ),
-            // Node<double>(
-            //   id: 'nodeB',
-            //   type: "slider",
-            //   position: const Offset(50, 50),
-            //   rotation: 0,
-            //   size: const Size(200, 200),
-            //   value: .5,
-            //   ports: [
-            //     Port<double>(input: false, offsetRatio: Offset(1, 0.3)),
-            //     Port<double>(input: false, offsetRatio: Offset(1, 0.7)),
-            //   ],
-            // ),
           ])
           ..addLinksByPort([
             (nodeId1: "nodeA", index1: 0, nodeId2: "nodeB", index2: 0),
