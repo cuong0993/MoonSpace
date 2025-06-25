@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:moonspace/node_editor/helper.dart';
 import 'package:moonspace/node_editor/types.dart';
 
 class LinkStyle {
@@ -157,11 +156,10 @@ class _LinkBuilderState extends State<LinkBuilder>
     return RepaintBoundary(
       child: MouseRegion(
         onHover: (event) {
-          mousePosition = (globalToCanvasOffset(
-            event.position -
-                Offset(2 * widget.editor.left, 2 * widget.editor.top),
+          mousePosition = widget.editor.localToCanvasOffset(
+            event.localPosition,
             context,
-          ));
+          );
           setState(() {});
         },
         onExit: (event) {
@@ -252,7 +250,7 @@ void animatedTravelLink(
     final t = (progress + i * spacing) % 1.0;
     final offset = metric.getTangentForOffset(metric.length * t)?.position;
     if (offset != null) {
-      canvas.drawCircle(offset, 4, Paint()..color = Colors.orange);
+      canvas.drawCircle(offset, 4, Paint()..color = Colors.lightGreenAccent);
     }
   }
 }

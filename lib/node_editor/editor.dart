@@ -3,9 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:moonspace/helper/extensions/theme_ext.dart';
 import 'package:moonspace/node_editor/links.dart';
-import 'package:moonspace/node_editor/node.dart';
 import 'package:moonspace/node_editor/types.dart';
 
 class NodeEditor extends StatefulWidget {
@@ -30,6 +28,11 @@ class _NodeEditorState extends State<NodeEditor> {
     final editor = EditorNotifier.of(context);
 
     if (!_listenerAttached) {
+      final matrix = Matrix4.identity()
+        ..translate(-editor.ioffset.dx, -editor.ioffset.dy)
+        ..scale(editor.izoom);
+      _controller.value = matrix;
+
       _controller.addListener(() {
         final matrix = _controller.value;
         final zoom = matrix.getMaxScaleOnAxis();
@@ -43,13 +46,9 @@ class _NodeEditorState extends State<NodeEditor> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final box = _viewerKey.currentContext?.findRenderObject() as RenderBox?;
       if (box != null) {
-        setState(() {
-          final off = box.localToGlobal(Offset.zero);
-          editor.left = off.dx;
-          editor.top = off.dy;
-          editor.width = box.size.width;
-          editor.height = box.size.height;
-        });
+        editor.editorOffset = box.localToGlobal(Offset.zero);
+        editor.editorSize = Offset(box.size.width, box.size.height);
+        setState(() {});
       }
     });
   }
@@ -94,13 +93,13 @@ class _NodeEditorState extends State<NodeEditor> {
                 children: [
                   Container(
                     color: Colors.transparent,
-                    width: editor.divisions * editor.interval,
-                    height: editor.divisions * editor.interval,
+                    width: editor.idivisions * editor.iinterval,
+                    height: editor.idivisions * editor.iinterval,
                     child: GridPaper(
                       color: Theme.of(context).colorScheme.primary,
-                      divisions: editor.divisions,
+                      divisions: editor.idivisions,
                       subdivisions: 1,
-                      interval: editor.interval,
+                      interval: editor.iinterval,
                     ),
                   ),
 
@@ -111,7 +110,7 @@ class _NodeEditorState extends State<NodeEditor> {
                     ),
                   ),
 
-                  ...renderNodes(context, editor),
+                  ...editor.renderNodes(context),
                 ],
               ),
             ),
@@ -137,10 +136,10 @@ class EditorState extends StatelessWidget {
       padding: EdgeInsets.all(4),
       child: ListView(
         children: [
-          Text('Size: ${context.mq.size}'),
-          Text('Zoom: ${editor.zoom.toStringAsFixed(2)}'),
+          Text('Offset: ${editor.editorOffset}'),
+          Text('Zoom: ${editor.izoom.toStringAsFixed(2)}'),
           Text(
-            'Offset: ${editor.offset.dx.toStringAsFixed(1)},${editor.offset.dy.toStringAsFixed(1)}',
+            'IOffset: ${editor.ioffset.dx.toStringAsFixed(1)},${editor.ioffset.dy.toStringAsFixed(1)}',
           ),
           Text('Active: ${editor.activeNodeId}'),
           Text('Function: ${editor.activeFunction}'),
@@ -239,54 +238,4 @@ void editorPointerDown(
       );
     }
   }
-}
-
-List<Widget> renderNodes(BuildContext context, EditorChangeNotifier editor) {
-  List<Widget> visibleNodes = [];
-
-  for (final entry in editor.nodes.entries) {
-    final node = entry.value;
-    final isVisible = checkIfNodeVisible(editor, node);
-    if (isVisible) {
-      visibleNodes.add(
-        CustomNode(
-          node: node,
-          innerWidget: editor.buildNodeWidget(context, node),
-        ),
-      );
-    } else {
-      print("Avoid ${node.id}");
-    }
-  }
-  return visibleNodes;
-}
-
-bool checkIfNodeVisible(
-  EditorChangeNotifier editor,
-  Node node, {
-  double padding = 0,
-}) {
-  // Viewport in scene space
-  final screenWidth = editor.width;
-  final screenHeight = editor.height;
-
-  final sceneTopLeft = (Offset.zero - editor.offset) / editor.zoom;
-  final sceneBottomRight =
-      (Offset(screenWidth, screenHeight) - editor.offset) / editor.zoom;
-
-  // Expand viewport with padding (converted to scene scale)
-  final scenePadding = padding / 1; //zoom;
-  final viewport = Rect.fromPoints(
-    sceneTopLeft,
-    sceneBottomRight,
-  ).inflate(scenePadding);
-
-  final nodeRect = Rect.fromLTWH(
-    node.position.dx,
-    node.position.dy,
-    node.size.width,
-    node.size.height,
-  );
-
-  return nodeRect.overlaps(viewport);
 }

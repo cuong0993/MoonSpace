@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:moonspace/node_editor/helper.dart';
 import 'package:moonspace/node_editor/links.dart';
+import 'package:moonspace/node_editor/node.dart';
 
 class Port<T> {
   int? index;
@@ -145,15 +146,13 @@ class EditorChangeNotifier extends ChangeNotifier {
     required this.typeRegistry,
 
     //
-    this.zoom = 1.0,
-    this.offset = Offset.zero,
-    this.interval = 500,
-    this.divisions = 4,
+    this.izoom = 1.0,
+    this.ioffset = Offset.zero,
+    this.iinterval = 500,
+    this.idivisions = 4,
 
-    this.left = 0,
-    this.top = 0,
-    this.width = 500,
-    this.height = 500,
+    this.editorOffset = Offset.zero,
+    this.editorSize = const Offset(500, 500),
 
     //
     this.linkStyle = const LinkStyle(),
@@ -177,15 +176,13 @@ class EditorChangeNotifier extends ChangeNotifier {
 
   LogicalKeyboardKey? activeKey;
 
-  double zoom;
-  Offset offset;
-  double interval;
-  int divisions;
+  double izoom;
+  Offset ioffset;
+  double iinterval;
+  int idivisions;
 
-  double left;
-  double top;
-  double width;
-  double height;
+  Offset editorOffset;
+  Offset editorSize;
 
   final LinkStyle linkStyle;
 
@@ -195,10 +192,10 @@ class EditorChangeNotifier extends ChangeNotifier {
   //----------------
 
   Map<String, dynamic> toMap() => {
-    'zoom': zoom,
-    'offset': {'dx': offset.dx, 'dy': offset.dy},
-    'interval': interval,
-    'divisions': divisions,
+    'izoom': izoom,
+    'ioffset': {'dx': ioffset.dx, 'dy': ioffset.dy},
+    'iinterval': iinterval,
+    'idivisions': idivisions,
 
     //
     'nodes': nodes.map(
@@ -213,10 +210,10 @@ class EditorChangeNotifier extends ChangeNotifier {
   ) {
     final editor = EditorChangeNotifier(typeRegistry: typeRegistry);
 
-    editor.zoom = json['zoom'];
-    editor.offset = Offset(json['offset']['dx'], json['offset']['dy']);
-    editor.interval = json['interval'];
-    editor.divisions = json['divisions'];
+    editor.izoom = json['izoom'];
+    editor.ioffset = Offset(json['ioffset']['dx'], json['offset']['dy']);
+    editor.iinterval = json['iinterval'];
+    editor.idivisions = json['idivisions'];
 
     final nodeMap = (json['nodes'] as Map<String, dynamic>).map(
       (key, nodedata) => MapEntry(key, Node.fromJson(nodedata, typeRegistry)),
@@ -254,6 +251,7 @@ class EditorChangeNotifier extends ChangeNotifier {
       nodes[node.id] = node;
     }
 
+    print("addNodes");
     notifyListeners();
   }
 
@@ -273,6 +271,7 @@ class EditorChangeNotifier extends ChangeNotifier {
       removeLinkById(id);
     }
 
+    print("removeNodeById");
     notifyListeners();
   }
 
@@ -309,6 +308,7 @@ class EditorChangeNotifier extends ChangeNotifier {
       links[link.id] = link;
     }
 
+    print("addLinks");
     notifyListeners();
   }
 
@@ -335,6 +335,7 @@ class EditorChangeNotifier extends ChangeNotifier {
     if (link != null) {
       link.inputPort.value = value;
       link.outputPort.value = value;
+      print("updateLinkValue");
       notifyListeners();
     }
   }
@@ -344,6 +345,8 @@ class EditorChangeNotifier extends ChangeNotifier {
     for (final link in getLinksForPort(port)) {
       link.inputPort.value = value;
       link.outputPort.value = value;
+
+      print("updatePortValue");
     }
     notifyListeners();
   }
@@ -357,20 +360,21 @@ class EditorChangeNotifier extends ChangeNotifier {
   void updateNodePosition(String id, Offset pos) {
     if (nodes.containsKey(id)) {
       nodes[id]!.position = pos;
+      // print("updateNodePosition");
       notifyListeners();
     }
   }
 
   void updateNodeRotation(String id, double rot) {
-    if (nodes.containsKey(id)) {
-      nodes[id]!.rotation = rot;
-      notifyListeners();
-    }
+    nodes[id]?.rotation = rot;
+    // print("updateNodeRotation");
+    // notifyListeners();
   }
 
   void updateNodeSize(String id, Size size) {
     if (nodes.containsKey(id)) {
       nodes[id]!.size = size;
+      // print("updateNodeSize");
       notifyListeners();
     }
   }
@@ -378,34 +382,40 @@ class EditorChangeNotifier extends ChangeNotifier {
   //----------------
 
   void updateInteractiveZoom(double z) {
-    zoom = z;
-    notifyListeners();
+    izoom = z;
+    // print("updateInteractiveZoom");
+    // notifyListeners();
   }
 
   void updateInteractiveOffset(Offset off) {
-    offset = off;
-    notifyListeners();
+    ioffset = off;
+    // print("updateInteractiveOffset");
+    // notifyListeners();
   }
 
   void updateActiveFunction(String? id, ActiveFunction? function) {
     activeNodeId = id;
     activeFunction = function;
+    print("updateActiveFunction");
     notifyListeners();
   }
 
   void updateKeyboardKey(LogicalKeyboardKey? key) {
     activeKey = key;
+    print("updateKeyboardKey");
     notifyListeners();
   }
 
   void updateTempLinkPosition(Offset pos, BuildContext context) {
-    tempLinkEndPos = globalToCanvasOffset(pos - Offset(left, top), context);
+    tempLinkEndPos = localToCanvasOffset(pos, context);
+    print("updateTempLinkPosition");
     notifyListeners();
   }
 
   void removeTempLink() {
     tempLinkStartPort = null;
     tempLinkEndPos = null;
+    print("removeTempLink");
     notifyListeners();
   }
 
@@ -422,6 +432,8 @@ class EditorChangeNotifier extends ChangeNotifier {
       ..scale(zoom);
   }
 
+  //----------------
+
   Offset getPortOffset(Port port) {
     final iPos = getNodeById(port.nodeId!)!.position;
     final iSize = getNodeById(port.nodeId!)!.size;
@@ -432,7 +444,57 @@ class EditorChangeNotifier extends ChangeNotifier {
     final iOffset = Offset(isx, isy) - iSize.center(Offset.zero);
     final loc = rotateAroundCenter(iCenter + iOffset, iCenter, iRot);
     // return loc;
-    return Offset(loc.dx, loc.dy + 4);
+    return Offset(loc.dx, loc.dy + (port.offsetRatio.dy > .5 ? -8 : 8));
+  }
+
+  Offset localToCanvasOffset(Offset localPos, BuildContext context) {
+    final renderBox = context.findRenderObject() as RenderBox;
+    final global = renderBox.localToGlobal(localPos - editorOffset / izoom);
+    final matrixInverse = interactiveController.value.clone()..invert();
+    return MatrixUtils.transformPoint(matrixInverse, global);
+  }
+
+  bool checkIfNodeVisible(Node node, {double padding = 100}) {
+    // Viewport in scene space
+
+    final sceneTopLeft = (Offset.zero - ioffset) / izoom;
+    final sceneBottomRight = (editorSize - ioffset) / izoom;
+
+    // Expand viewport with padding (converted to scene scale)
+    final scenePadding = padding; // izoom;
+    final viewport = Rect.fromPoints(
+      sceneTopLeft,
+      sceneBottomRight,
+    ).inflate(scenePadding);
+
+    final nodeRect = Rect.fromLTWH(
+      node.position.dx,
+      node.position.dy,
+      node.size.width,
+      node.size.height,
+    );
+
+    return nodeRect.overlaps(viewport);
+  }
+
+  List<Widget> renderNodes(BuildContext context) {
+    List<Widget> visibleNodes = [];
+
+    for (final entry in nodes.entries) {
+      final node = entry.value;
+      final isVisible = checkIfNodeVisible(node);
+      if (isVisible) {
+        visibleNodes.add(
+          CustomNode(
+            key: ValueKey(node.id),
+            node: node,
+            innerWidget: buildNodeWidget(context, node),
+          ),
+        );
+      }
+    }
+    // print("visibility : ${100 * visibleNodes.length / nodes.entries.length}%");
+    return visibleNodes;
   }
 }
 

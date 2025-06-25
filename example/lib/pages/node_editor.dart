@@ -13,13 +13,15 @@ class NodeEditorScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final editor =
         EditorChangeNotifier(
+            ioffset: Offset(0, 0),
+            izoom: 1,
             linkStyle: LinkStyle(
-              linkColor: Colors.yellow,
+              linkColor: Colors.blue,
               linkType: LinkType.bezier,
               weight: 0,
             ),
-            divisions: 4,
-            interval: 400,
+            idivisions: 4,
+            iinterval: 400,
             typeRegistry: {
               //
               //
@@ -61,30 +63,30 @@ class NodeEditorScaffold extends StatelessWidget {
             },
           )
           ..addNodes([
-            // Node<ColumnText>(
-            //   id: 'nodeA',
-            //   type: "columntext",
-            //   position: const Offset(300, 200),
-            //   rotation: 0,
-            //   size: const Size(180, 150),
-            //   value: ColumnText(title: 'Hello', subtitle: 'World'),
-            //   ports: [
-            //     Port<double>(input: true, offsetRatio: Offset(0, 0.25)),
-            //     Port<String>(input: false, offsetRatio: Offset(0, 0.5)),
-            //   ],
-            // ),
-            Node<double>(
-              id: 'nodeB',
-              type: "slider",
+            Node<ColumnText>(
+              id: 'nodeA',
+              type: "columntext",
               position: const Offset(100, 100),
               rotation: 0,
-              size: const Size(200, 200),
-              value: .5,
+              size: const Size(250, 250),
+              value: ColumnText(title: 'Hello', subtitle: 'World'),
               ports: [
-                Port<double>(input: false, offsetRatio: Offset(1, 0.3)),
-                Port<double>(input: false, offsetRatio: Offset(1, 0.7)),
+                Port<double>(input: true, offsetRatio: Offset(0, 0.25)),
+                Port<String>(input: false, offsetRatio: Offset(0, 0.5)),
               ],
             ),
+            // Node<double>(
+            //   id: 'nodeB',
+            //   type: "slider",
+            //   position: const Offset(50, 50),
+            //   rotation: 0,
+            //   size: const Size(200, 200),
+            //   value: .5,
+            //   ports: [
+            //     Port<double>(input: false, offsetRatio: Offset(1, 0.3)),
+            //     Port<double>(input: false, offsetRatio: Offset(1, 0.7)),
+            //   ],
+            // ),
           ])
           ..addLinksByPort([
             (nodeId1: "nodeA", index1: 0, nodeId2: "nodeB", index2: 0),
@@ -101,7 +103,7 @@ class NodeEditorScaffold extends StatelessWidget {
               width: 500,
               height: 500,
               child: Container(
-                color: const Color.fromARGB(255, 39, 39, 39),
+                color: Theme.of(context).colorScheme.surfaceContainerHigh,
                 child: NodeEditor(),
               ),
             ),
