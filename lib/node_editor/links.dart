@@ -60,23 +60,41 @@ class LinkPainter extends CustomPainter {
 
     editor.activeLinkId = null;
 
-    for (final node in editor.nodes.entries) {
-      for (final port in node.value.ports) {
+    for (final nodeentry in editor.nodes.entries) {
+      final node = nodeentry.value;
+      for (final port in nodeentry.value.ports) {
         final pos = editor.getPortOffset(port);
+
+        if (editor.tempLinkEndPos != null) {
+          final isInPort = editor.isInPort(node, port, editor.tempLinkEndPos!);
+
+          if (isInPort) {
+            if (editor.tempLinkStartPort != null &&
+                editor.tempLinkStartPort != port) {
+              final a = editor.tempLinkStartPort!;
+              final inputPort = a.input ? a : port;
+              final outputPort = a.input ? port : a;
+              editor.addLinks([
+                Link(inputPort: inputPort, outputPort: outputPort),
+              ]);
+            }
+          }
+        }
+
         canvas.drawCircle(pos, editor.zoneRadius, paint..color = Colors.red);
       }
       canvas.drawCircle(
-        node.value.bottomright,
+        editor.bottomright(node),
         editor.zoneRadius,
         paint..color = Colors.purple,
       );
       canvas.drawCircle(
-        node.value.topcenter,
+        editor.topcenter(node),
         editor.zoneRadius,
         paint..color = Colors.purple,
       );
       canvas.drawCircle(
-        node.value.topright,
+        editor.topright(node),
         editor.zoneRadius,
         paint..color = Colors.purple,
       );
@@ -122,26 +140,26 @@ class LinkPainter extends CustomPainter {
       }
     }
 
-    if (editor.debugEditGlobalPosition != null) {
-      canvas.drawCircle(
-        editor.debugEditGlobalPosition!,
-        14,
-        Paint()
-          ..color = Colors.green
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 4,
-      );
-    }
-    if (editor.debugMousePosition != null) {
-      canvas.drawCircle(
-        editor.debugMousePosition!,
-        12,
-        Paint()
-          ..color = Colors.blue
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 4,
-      );
-    }
+    // if (editor.debugEditGlobalPosition != null) {
+    //   canvas.drawCircle(
+    //     editor.debugEditGlobalPosition!,
+    //     editor.zoneRadius,
+    //     Paint()
+    //       ..color = Colors.green
+    //       // ..style = PaintingStyle.stroke
+    //       ..strokeWidth = 4,
+    //   );
+    // }
+    // if (editor.debugMousePosition != null) {
+    //   canvas.drawCircle(
+    //     editor.debugMousePosition!,
+    //     editor.zoneRadius,
+    //     Paint()
+    //       ..color = Colors.blue
+    //       ..style = PaintingStyle.stroke
+    //       ..strokeWidth = 4,
+    //   );
+    // }
   }
 
   @override

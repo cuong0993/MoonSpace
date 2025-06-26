@@ -62,12 +62,12 @@ class Link<T> {
   );
 }
 
-class TypeRegistryEntry<T> {
+class TypeBuilderEntry {
   final Widget Function(BuildContext context, Node node) builder;
-  final T Function(dynamic state) deserialize;
-  final dynamic Function(T state) serialize;
+  final dynamic Function(dynamic state) deserialize;
+  final dynamic Function(dynamic state) serialize;
 
-  TypeRegistryEntry({
+  TypeBuilderEntry({
     required this.builder,
     required this.deserialize,
     required this.serialize,
@@ -93,7 +93,7 @@ class Node<T> {
     required this.ports,
   });
 
-  Map<String, dynamic> toJson(Map<String, TypeRegistryEntry> registry) {
+  Map<String, dynamic> toJson(Map<String, TypeBuilderEntry> registry) {
     final entry = registry[type];
 
     return {
@@ -109,16 +109,16 @@ class Node<T> {
 
   factory Node.fromJson(
     Map<String, dynamic> json,
-    Map<String, TypeRegistryEntry> typeRegistry,
+    Map<String, TypeBuilderEntry> registry,
   ) {
     final type = json['type'];
-    final registry = typeRegistry[type];
+    final entry = registry[type];
 
-    final dynamic value = registry?.deserialize(json['value']);
+    final dynamic value = entry?.deserialize(json['value']);
 
     return Node(
       id: json['id'],
-      type: registry != null ? type : '__error__',
+      type: entry != null ? type : '__error__',
       position: Offset(json['position']['dx'], json['position']['dy']),
       rotation: json['rotation'],
       size: Size(json['size']['width'], json['size']['height']),
@@ -135,38 +135,33 @@ class Node<T> {
     return null;
   }
 
-  Offset get topright => localToGlobal(offsetTopRightRatio);
-  Offset get topcenter => localToGlobal(offsetTopCenterRatio);
-  Offset get bottomright => localToGlobal(offsetBottomRightRatio);
-
   Offset get center =>
       Offset(position.dx + size.width / 2, position.dy + size.height / 2);
 
-  Offset localToGlobal(Offset localRatio) {
-    final pos =
+  Offset ratioToGlobal(Offset localRatio, double radius) {
+    final dia = 2 * radius;
+    final xpadr = dia / size.width;
+    final ypadr = dia / size.height;
+
+    final leftside = localRatio.dx < xpadr;
+    final rightside = (1 - localRatio.dx) < xpadr;
+
+    final topside = localRatio.dy < ypadr;
+    final bottomside = (1 - localRatio.dy) < ypadr;
+
+    final push = Offset(
+      leftside ? radius : (rightside ? -radius : 0),
+      topside ? radius : (bottomside ? -radius : 0),
+    );
+
+    final unrotpos =
         position +
-        Offset(localRatio.dx * size.width, localRatio.dy * size.height);
-    final rotpos = rotateAroundCenter(pos, center, rotation);
+        Offset(localRatio.dx * size.width, localRatio.dy * size.height) +
+        push;
+
+    Offset rotpos = rotateAroundCenter(unrotpos, center, rotation);
+
     return rotpos;
-  }
-
-  // bool isInRegion(Offset localRatio, Offset globalPos, double radius) {
-  //   final pos = localToGlobal(localRatio);
-  //   return (globalPos - pos).distance < radius;
-  // }
-
-  bool isInRegion(Offset localRatio, Offset globalPos, double radius) {
-    final center = localToGlobal(localRatio);
-
-    final left = center.dx - radius;
-    final right = center.dx + radius;
-    final top = center.dy - radius;
-    final bottom = center.dy + radius;
-
-    return globalPos.dx >= left &&
-        globalPos.dx < right &&
-        globalPos.dy >= top &&
-        globalPos.dy < bottom;
   }
 }
 
@@ -193,7 +188,7 @@ class EditorChangeNotifier extends ChangeNotifier {
   /// linkId → Link
   final Map<String, Link> links = {};
 
-  final Map<String, TypeRegistryEntry> typeRegistry;
+  final Map<String, TypeBuilderEntry> typeRegistry;
 
   String? activeNodeId;
 
@@ -216,20 +211,16 @@ class EditorChangeNotifier extends ChangeNotifier {
 
   final LinkStyle linkStyle;
 
-  //
-  Offset? debugEditGlobalPosition;
-  Offset? debugMousePosition;
+  // Offset? debugEditGlobalPosition;
+  // Offset? debugMousePosition;
 
-  void updateDebugEditGlobalPosition(Offset off) {
-    debugEditGlobalPosition = off;
-    notifyListeners();
-  }
+  // void updateDebugEditGlobalPosition(Offset off) {
+  //   debugEditGlobalPosition = off;
+  // }
 
-  void updateDebugMousePosition(Offset off) {
-    debugMousePosition = off;
-    notifyListeners();
-  }
-  //
+  // void updateDebugMousePosition(Offset off) {
+  //   debugMousePosition = off;
+  // }
 
   final TransformationController interactiveController =
       TransformationController();
@@ -251,12 +242,12 @@ class EditorChangeNotifier extends ChangeNotifier {
 
   factory EditorChangeNotifier.fromMap(
     Map<String, dynamic> json,
-    Map<String, TypeRegistryEntry> typeRegistry,
+    Map<String, TypeBuilderEntry> typeRegistry,
   ) {
     final editor = EditorChangeNotifier(typeRegistry: typeRegistry);
 
     editor.izoom = json['izoom'];
-    editor.ioffset = Offset(json['ioffset']['dx'], json['offset']['dy']);
+    editor.ioffset = Offset(json['ioffset']['dx'], json['ioffset']['dy']);
     editor.iinterval = json['iinterval'];
     editor.idivisions = json['idivisions'];
 
@@ -273,6 +264,26 @@ class EditorChangeNotifier extends ChangeNotifier {
     editor.addLinks(parsedLinks);
 
     return editor;
+  }
+
+  void overwriteState(EditorChangeNotifier other) {
+    // izoom = other.izoom;
+    // ioffset = other.ioffset;
+    // iinterval = other.iinterval;
+    // idivisions = other.idivisions;
+    nodes
+      ..clear()
+      ..addAll(other.nodes);
+    links
+      ..clear()
+      ..addAll(other.links);
+    notifyListeners();
+  }
+
+  void mergeState(EditorChangeNotifier other) {
+    nodes.addAll(other.nodes);
+    links.addAll(other.links);
+    notifyListeners();
   }
 
   //----------------
@@ -320,6 +331,12 @@ class EditorChangeNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  void clear() {
+    nodes.clear();
+    links.clear();
+    notifyListeners();
+  }
+
   //----------------
 
   Link? getLinkById(String id) => links[id];
@@ -353,12 +370,15 @@ class EditorChangeNotifier extends ChangeNotifier {
       links[link.id] = link;
     }
 
-    print("addLinks");
-    notifyListeners();
+    // print("addLinks");
+    // notifyListeners();
   }
 
   void addLinksByPort(
-    List<({String nodeId1, int index1, String nodeId2, int index2})> linklist,
+    List<
+      ({String nodeId1, int index1, String nodeId2, int index2, dynamic value})
+    >
+    linklist,
   ) {
     List<Link> l = [];
     for (var e in linklist) {
@@ -366,6 +386,10 @@ class EditorChangeNotifier extends ChangeNotifier {
       final n2 = getNodeById(e.nodeId2);
       final p1 = n1?.getPortById(e.index1);
       final p2 = n2?.getPortById(e.index2);
+
+      p1?.value = e.value;
+      p2?.value = e.value;
+
       if (p1 != null && p2 != null) {
         l.add(
           Link(inputPort: p1.input ? p1 : p2, outputPort: p1.input ? p2 : p1),
@@ -405,22 +429,16 @@ class EditorChangeNotifier extends ChangeNotifier {
   void updateNodePosition(String id, Offset pos) {
     if (nodes.containsKey(id)) {
       nodes[id]!.position = pos;
-      // print("updateNodePosition");
-      notifyListeners();
     }
   }
 
   void updateNodeRotation(String id, double rot) {
     nodes[id]?.rotation = rot;
-    // print("updateNodeRotation");
-    // notifyListeners();
   }
 
   void updateNodeSize(String id, Size size) {
     if (nodes.containsKey(id)) {
       nodes[id]!.size = size;
-      // print("updateNodeSize");
-      notifyListeners();
     }
   }
 
@@ -428,33 +446,23 @@ class EditorChangeNotifier extends ChangeNotifier {
 
   void updateInteractiveZoom(double z) {
     izoom = z;
-    notifyListeners();
   }
 
   void updateInteractiveOffset(Offset off) {
     ioffset = off;
-    notifyListeners();
   }
 
   void updateActiveNode(String? id) {
     activeNodeId = id;
-    notifyListeners();
   }
 
   void notifyEditor() {
+    print("notifyEditor");
     notifyListeners();
   }
 
   void updateKeyboardKey(LogicalKeyboardKey? key) {
     activeKey = key;
-    print("updateKeyboardKey");
-    notifyListeners();
-  }
-
-  void updateTempLinkPosition(Offset pos, BuildContext context) {
-    tempLinkEndPos = localToCanvasOffset(pos, context);
-    print("updateTempLinkPosition");
-    notifyListeners();
   }
 
   void removeTempLink() {
@@ -480,16 +488,8 @@ class EditorChangeNotifier extends ChangeNotifier {
   //----------------
 
   Offset getPortOffset(Port port) {
-    final iPos = getNodeById(port.nodeId!)!.position;
-    final iSize = getNodeById(port.nodeId!)!.size;
-    final iRot = getNodeById(port.nodeId!)!.rotation;
-    final iCenter = iPos + iSize.center(Offset.zero);
-    final isx = iSize.width * port.offsetRatio.dx;
-    final isy = iSize.height * port.offsetRatio.dy;
-    final iOffset = Offset(isx, isy) - iSize.center(Offset.zero);
-    final loc = rotateAroundCenter(iCenter + iOffset, iCenter, iRot);
-    return loc;
-    // return Offset(loc.dx, loc.dy + (port.offsetRatio.dy > .5 ? -8 : 8));
+    final node = getNodeById(port.nodeId!)!;
+    return node.ratioToGlobal(port.offsetRatio, zoneRadius);
   }
 
   Offset localToCanvasOffset(Offset localPos, BuildContext context) {
@@ -542,9 +542,40 @@ class EditorChangeNotifier extends ChangeNotifier {
         );
       }
     }
-    // print("visibility : ${100 * visibleNodes.length / nodes.entries.length}%");
+    print("visibility : ${100 * visibleNodes.length / nodes.entries.length}%");
     return visibleNodes;
   }
+
+  //------------
+
+  // bool isInRegion(Offset center, Offset globalPos) {
+  //   return (globalPos - center).distance < zoneRadius;
+  // }
+
+  bool isInRegion(Offset center, Offset globalPos) {
+    final left = center.dx - zoneRadius;
+    final right = center.dx + zoneRadius;
+    final top = center.dy - zoneRadius;
+    final bottom = center.dy + zoneRadius;
+
+    return globalPos.dx >= left &&
+        globalPos.dx < right &&
+        globalPos.dy >= top &&
+        globalPos.dy < bottom;
+  }
+
+  bool isInPort(Node node, Port port, Offset globalPos) {
+    return (globalPos - node.ratioToGlobal(port.offsetRatio, zoneRadius))
+            .distance <
+        zoneRadius;
+  }
+
+  Offset topright(Node node) =>
+      node.ratioToGlobal(offsetTopRightRatio, zoneRadius);
+  Offset topcenter(Node node) =>
+      node.ratioToGlobal(offsetTopCenterRatio, zoneRadius);
+  Offset bottomright(Node node) =>
+      node.ratioToGlobal(offsetBottomRightRatio, zoneRadius);
 }
 
 class EditorNotifier extends InheritedNotifier<EditorChangeNotifier> {

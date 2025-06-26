@@ -122,53 +122,6 @@ class _NodeEditorState extends State<NodeEditor> {
   }
 }
 
-class EditorState extends StatelessWidget {
-  const EditorState({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final editor = EditorNotifier.of(context);
-    return Container(
-      width: 200,
-      height: 200,
-      decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).colorScheme.primary),
-      ),
-      padding: EdgeInsets.all(4),
-      child: ListView(
-        children: [
-          Text('Offset: ${editor.editorOffset}'),
-          Text('Zoom: ${editor.izoom.toStringAsFixed(2)}'),
-          Text(
-            'IOffset: ${editor.ioffset.dx.toStringAsFixed(1)},${editor.ioffset.dy.toStringAsFixed(1)}',
-          ),
-          Text('Active: ${editor.activeNodeId}'),
-          Text('Nodes: ${editor.nodes.length}'),
-          Column(children: editor.links.values.map((v) => Text(v.id)).toList()),
-          Text('Key: ${editor.activeKey}'),
-          Text('Control: ${editor.activeKey == LogicalKeyboardKey.metaLeft}'),
-          FilledButton(
-            onPressed: () {
-              editor.interactiveController.value = Matrix4.identity();
-            },
-            child: Text("Center"),
-          ),
-
-          ...editor.nodes.entries.map((node) {
-            return FilledButton(
-              onPressed: () {
-                editor.updateActiveNode(node.value.id);
-                editor.interactiveAnimateTo(node.value.center, context);
-              },
-              child: Text("Focus ${node.value.id}"),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-}
-
 void editorPointerDown(
   EditorChangeNotifier editor,
   BuildContext context,

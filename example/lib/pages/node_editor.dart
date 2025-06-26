@@ -3,39 +3,45 @@ import 'dart:math';
 
 import 'package:example/pages/recipe.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:moonspace/helper/extensions/string.dart';
 import 'package:moonspace/helper/extensions/theme_ext.dart';
 import 'package:moonspace/node_editor/export.dart';
 import 'package:moonspace/node_editor/links.dart';
 
-class NodeEditorScaffold extends StatelessWidget {
+enum NodeTypes { recipe, slider }
+
+final typeRegistry = {
+  //
+  NodeTypes.recipe.toString(): TypeBuilderEntry(
+    builder: (context, node) => RecipeBox(node: node),
+    deserialize: (json) => Recipe.deserialize(json),
+    serialize: (val) => (val is Recipe) ? val.serialize() : null,
+  ),
+
+  //
+  NodeTypes.slider.toString(): TypeBuilderEntry(
+    builder: (context, node) => SliderBox(node: node),
+    deserialize: (json) => json,
+    serialize: (value) => value,
+  ),
+};
+
+class NodeEditorScaffold extends StatefulWidget {
   const NodeEditorScaffold({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final typeRegistry = {
-      //
-      'columntext': TypeRegistryEntry<ColumnText>(
-        builder: (context, node) {
-          if (node is! Node<ColumnText>) return Text("Undefined");
-          return FloatingRecipe(node: node);
-        },
-        deserialize: (json) => ColumnText.deserialize(json),
-        serialize: (dynamic val) => val.serialize(),
-      ),
+  State<NodeEditorScaffold> createState() => _NodeEditorScaffoldState();
+}
 
-      //
-      'slider': TypeRegistryEntry<double>(
-        builder: (context, node) {
-          if (node is! Node<double>) return Text("Undefined");
-          return SliderBox(node: node);
-        },
-        deserialize: (json) => json,
-        serialize: (dynamic value) => value,
-      ),
-    };
+class _NodeEditorScaffoldState extends State<NodeEditorScaffold> {
+  late final EditorChangeNotifier editor;
 
-    final editor =
+  @override
+  void initState() {
+    super.initState();
+
+    editor =
         EditorChangeNotifier(
             ioffset: Offset(0, 0),
             izoom: 1,
@@ -43,6 +49,7 @@ class NodeEditorScaffold extends StatelessWidget {
               linkColor: Colors.blue,
               linkType: LinkType.bezier,
               weight: 0,
+              linkWidth: 2,
             ),
             idivisions: 8,
             iinterval: 160,
@@ -51,23 +58,23 @@ class NodeEditorScaffold extends StatelessWidget {
           ..addNodes([
             Node<double>(
               id: 'nodeA',
-              type: "slider",
+              type: NodeTypes.slider.toString(),
               position: const Offset(20, 300),
               rotation: 0,
-              size: const Size(100, 100),
+              size: const Size(120, 120),
               value: .5,
               ports: [
                 Port<double>(input: false, offsetRatio: Offset(1, 0.3)),
                 Port<double>(input: false, offsetRatio: Offset(1, 0.7)),
               ],
             ),
-            Node<ColumnText>(
+            Node<Recipe>(
               id: 'nodeB',
-              type: "columntext",
+              type: NodeTypes.recipe.toString(),
               position: const Offset(200, 100),
               rotation: 0,
               size: const Size(240, 200),
-              value: ColumnText(title: 'Hello', subtitle: 'World'),
+              value: Recipe(index: 0),
               ports: [
                 Port<double>(input: true, offsetRatio: Offset(0, 0.3)),
                 Port<String>(input: false, offsetRatio: Offset(0, 0.7)),
@@ -75,22 +82,18 @@ class NodeEditorScaffold extends StatelessWidget {
             ),
           ])
           ..addLinksByPort([
-            (nodeId1: "nodeA", index1: 0, nodeId2: "nodeB", index2: 0),
+            (
+              nodeId1: "nodeA",
+              index1: 0,
+              nodeId2: "nodeB",
+              index2: 0,
+              value: .5,
+            ),
           ]);
+  }
 
-    print("");
-    print(editor.toMap());
-    print("");
-    print(jsonEncode(editor.toMap()));
-    print("");
-    print(jsonDecode(jsonEncode(editor.toMap())));
-    print("");
-
-    // EditorChangeNotifier.fromMap(
-    //   jsonDecode(jsonEncode(editor.toMap())),
-    //   typeRegistry,
-    // );
-
+  @override
+  Widget build(BuildContext context) {
     return EditorNotifier(
       model: editor,
       child: Scaffold(
@@ -106,54 +109,7 @@ class NodeEditorScaffold extends StatelessWidget {
                 child: NodeEditor(),
               ),
             ),
-            Align(alignment: Alignment.bottomLeft, child: EditorState()),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: editor.typeRegistry.entries
-                    .map(
-                      (e) => InkWell(
-                        onTap: () {
-                          editor.addNodes(
-                            List.generate(
-                              50,
-                              (c) => Node<double>(
-                                id: 'node$c',
-                                type: "slider",
-                                position: Offset(
-                                  Random().nextDouble() * 800,
-                                  Random().nextDouble() * 800,
-                                ),
-                                rotation: 0,
-                                size: const Size(150, 100),
-                                value: .5,
-                                ports: [
-                                  Port<double>(
-                                    input: false,
-                                    offsetRatio: Offset(1, 0.3),
-                                  ),
-                                  Port<double>(
-                                    input: false,
-                                    offsetRatio: Offset(1, 0.7),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          width: 80,
-                          height: 80,
-                          margin: EdgeInsets.all(8),
-                          color: Colors.white,
-                          child: Text(e.key),
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
-            ),
+            Align(alignment: Alignment.topLeft, child: EditorState()),
           ],
         ),
       ),
@@ -161,77 +117,75 @@ class NodeEditorScaffold extends StatelessWidget {
   }
 }
 
-class FloatingRecipe extends StatelessWidget {
-  const FloatingRecipe({super.key, required this.node});
+class Recipe {
+  final int index;
 
-  final Node<ColumnText> node;
+  Recipe({required this.index});
 
-  @override
-  Widget build(BuildContext context) {
-    final index = 0;
-    return AbsorbPointer(
-      child: RecipeCard(
-        index: index % RecipesData.dessertMenu.length,
-        delayMs: 0,
-        downScroll: false,
-      ),
-    );
-    final pos = node.position;
-    if (node.value == null) {
-      return Text("Empty");
-    }
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(randomString(5)),
-        Text(node.value!.title),
-        Text(node.value!.subtitle),
-        Text(node.id),
-        Text("Rot ${node.rotation.toStringAsFixed(2)}"),
-        Text("Pos ${pos.dx.toStringAsFixed(0)},${pos.dy.toStringAsFixed(0)}"),
-      ],
-    );
+  static Recipe deserialize(dynamic json) {
+    return Recipe(index: json['index'] ?? 0);
+  }
+
+  Map<String, dynamic> serialize() {
+    return {'index': index};
   }
 }
 
-class ColumnText {
-  final String title;
-  final String subtitle;
+class RecipeBox extends StatelessWidget {
+  const RecipeBox({super.key, required this.node});
 
-  ColumnText({required this.title, required this.subtitle});
+  final Node node;
 
-  static ColumnText deserialize(dynamic json) {
-    return ColumnText(
-      title: json['title'] ?? '',
-      subtitle: json['subtitle'] ?? '',
+  @override
+  Widget build(BuildContext context) {
+    if (node.value is! Recipe) return Text("Undefined");
+    Recipe value = node.value;
+
+    return AbsorbPointer(
+      child: Stack(
+        alignment: Alignment.topCenter,
+        children: [
+          RecipeCard(
+            index: value.index % RecipesData.dessertMenu.length,
+            delayMs: 0,
+            downScroll: false,
+          ),
+          Text(randomString(5)),
+        ],
+      ),
     );
-  }
-
-  Map<String, String> serialize() {
-    return {'title': title, 'subtitle': subtitle};
   }
 }
 
 class SliderBox extends StatefulWidget {
   const SliderBox({super.key, required this.node});
 
-  final Node<double> node;
+  final Node node;
 
   @override
   State<SliderBox> createState() => _SliderBoxState();
 }
 
 class _SliderBoxState extends State<SliderBox> {
+  int buildCount = 0;
+
   @override
   Widget build(BuildContext context) {
+    if (widget.node.value is! double) return Text("Undefined");
+
     final editor = EditorNotifier.of(context);
 
-    return Padding(
-      padding: EdgeInsetsGeometry.all(8),
+    buildCount++;
+
+    return Card(
+      elevation: 8,
+      shape: BeveledRectangleBorder(
+        borderRadius: BorderRadiusGeometry.circular(8),
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(randomString(5)),
+          Text(buildCount.toString()),
           Text(widget.node.id),
 
           Text(widget.node.value!.toStringAsFixed(2)),
@@ -259,6 +213,158 @@ class _SliderBoxState extends State<SliderBox> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class EditorState extends StatefulWidget {
+  const EditorState({super.key});
+
+  @override
+  State<EditorState> createState() => _EditorStateState();
+}
+
+class _EditorStateState extends State<EditorState> {
+  bool showDrawer = false;
+
+  String savedState = "";
+  late final EditorChangeNotifier editor;
+
+  bool _initialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (!_initialized) {
+      editor = EditorNotifier.of(context);
+      savedState = jsonEncode(editor.toMap());
+      _initialized = true;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        if (showDrawer)
+          Container(
+            width: 200,
+            decoration: BoxDecoration(
+              border: Border.all(color: Theme.of(context).colorScheme.primary),
+              color: Theme.of(context).canvasColor,
+            ),
+            padding: EdgeInsets.all(4),
+            child: ListView(
+              children: [
+                Text('Offset: ${editor.editorOffset}'),
+                Text('Zoom: ${editor.izoom.toStringAsFixed(2)}'),
+                Text(
+                  'IOffset: ${editor.ioffset.dx.toStringAsFixed(1)},${editor.ioffset.dy.toStringAsFixed(1)}',
+                ),
+                Text('Active: ${editor.activeNodeId}'),
+                Text('Nodes: ${editor.nodes.length}'),
+                Column(
+                  children: editor.links.values.map((v) => Text(v.id)).toList(),
+                ),
+                Text('Key: ${editor.activeKey}'),
+                Text(
+                  'Control: ${editor.activeKey == LogicalKeyboardKey.metaLeft}',
+                ),
+                FilledButton(
+                  onPressed: () {
+                    savedState = jsonEncode(editor.toMap());
+                  },
+                  child: Text("Serialize state"),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    editor.clear();
+                  },
+                  child: Text("Clear state"),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    final deserializedState = EditorChangeNotifier.fromMap(
+                      jsonDecode(savedState),
+                      typeRegistry,
+                    );
+                    editor.overwriteState(deserializedState);
+                  },
+                  child: Text("Reset state"),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    editor.interactiveController.value = Matrix4.identity();
+                  },
+                  child: Text("Center"),
+                ),
+
+                ...editor.nodes.entries.map((node) {
+                  return FilledButton(
+                    onPressed: () {
+                      editor.updateActiveNode(node.value.id);
+                      editor.interactiveAnimateTo(node.value.center, context);
+                    },
+                    child: Text("Focus ${node.value.id}"),
+                  );
+                }),
+
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: editor.typeRegistry.entries
+                      .map(
+                        (e) => InkWell(
+                          onTap: () {
+                            editor.addNodes(
+                              List.generate(
+                                50,
+                                (c) => Node<double>(
+                                  id: 'node$c',
+                                  type: NodeTypes.slider.toString(),
+                                  position: Offset(
+                                    Random().nextDouble() * 800,
+                                    Random().nextDouble() * 800,
+                                  ),
+                                  rotation: 0,
+                                  size: const Size(150, 100),
+                                  value: .5,
+                                  ports: [
+                                    Port<double>(
+                                      input: false,
+                                      offsetRatio: Offset(1, 0.3),
+                                    ),
+                                    Port<double>(
+                                      input: false,
+                                      offsetRatio: Offset(1, 0.7),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            width: 80,
+                            height: 80,
+                            margin: EdgeInsets.all(8),
+                            color: Colors.red,
+                            child: Text(e.key),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ],
+            ),
+          ),
+        IconButton.filled(
+          onPressed: () {
+            showDrawer = !showDrawer;
+            setState(() {});
+          },
+          icon: Icon(Icons.keyboard_arrow_right),
+        ),
+      ],
     );
   }
 }
