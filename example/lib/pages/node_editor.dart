@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:math';
 
+import 'package:example/pages/recipe.dart';
 import 'package:flutter/material.dart';
 import 'package:moonspace/helper/extensions/string.dart';
 import 'package:moonspace/helper/extensions/theme_ext.dart';
@@ -11,6 +13,28 @@ class NodeEditorScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final typeRegistry = {
+      //
+      'columntext': TypeRegistryEntry<ColumnText>(
+        builder: (context, node) {
+          if (node is! Node<ColumnText>) return Text("Undefined");
+          return FloatingRecipe(node: node);
+        },
+        deserialize: (json) => ColumnText.deserialize(json),
+        serialize: (dynamic val) => val.serialize(),
+      ),
+
+      //
+      'slider': TypeRegistryEntry<double>(
+        builder: (context, node) {
+          if (node is! Node<double>) return Text("Undefined");
+          return SliderBox(node: node);
+        },
+        deserialize: (json) => json,
+        serialize: (dynamic value) => value,
+      ),
+    };
+
     final editor =
         EditorChangeNotifier(
             ioffset: Offset(0, 0),
@@ -20,55 +44,17 @@ class NodeEditorScaffold extends StatelessWidget {
               linkType: LinkType.bezier,
               weight: 0,
             ),
-            idivisions: 4,
-            iinterval: 400,
-            typeRegistry: {
-              //
-              //
-              'columntext': TypeRegistryEntry<ColumnText>(
-                builder: (context, node) {
-                  if (node.value is! ColumnText) return Text("Undefined");
-                  final pos = node.position;
-                  if (node.value == null) {
-                    return Text("Empty");
-                  }
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(randomString(5)),
-                      Text(node.value!.title),
-                      Text(node.value!.subtitle),
-                      Text(node.id),
-                      Text("Rot ${node.rotation.toStringAsFixed(2)}"),
-                      Text(
-                        "Pos ${pos.dx.toStringAsFixed(0)},${pos.dy.toStringAsFixed(0)}",
-                      ),
-                    ],
-                  );
-                },
-                deserialize: (json) => ColumnText.deserialize(json),
-                serialize: (val) => val.serialize(),
-              ),
-
-              //
-              //
-              'slider': TypeRegistryEntry<double>(
-                builder: (context, node) {
-                  if (node.value is! double) return Text("Undefined");
-                  return SliderBox(node: node);
-                },
-                deserialize: (json) => json,
-                serialize: (value) => value,
-              ),
-            },
+            idivisions: 8,
+            iinterval: 160,
+            typeRegistry: typeRegistry,
           )
           ..addNodes([
             Node<double>(
               id: 'nodeA',
               type: "slider",
-              position: const Offset(50, 50),
+              position: const Offset(20, 300),
               rotation: 0,
-              size: const Size(200, 200),
+              size: const Size(100, 100),
               value: .5,
               ports: [
                 Port<double>(input: false, offsetRatio: Offset(1, 0.3)),
@@ -78,19 +64,32 @@ class NodeEditorScaffold extends StatelessWidget {
             Node<ColumnText>(
               id: 'nodeB',
               type: "columntext",
-              position: const Offset(300, 100),
+              position: const Offset(200, 100),
               rotation: 0,
-              size: const Size(150, 150),
+              size: const Size(240, 200),
               value: ColumnText(title: 'Hello', subtitle: 'World'),
               ports: [
-                Port<double>(input: true, offsetRatio: Offset(0, 0.25)),
-                Port<String>(input: false, offsetRatio: Offset(0, 0.5)),
+                Port<double>(input: true, offsetRatio: Offset(0, 0.3)),
+                Port<String>(input: false, offsetRatio: Offset(0, 0.7)),
               ],
             ),
           ])
           ..addLinksByPort([
             (nodeId1: "nodeA", index1: 0, nodeId2: "nodeB", index2: 0),
           ]);
+
+    print("");
+    print(editor.toMap());
+    print("");
+    print(jsonEncode(editor.toMap()));
+    print("");
+    print(jsonDecode(jsonEncode(editor.toMap())));
+    print("");
+
+    // EditorChangeNotifier.fromMap(
+    //   jsonDecode(jsonEncode(editor.toMap())),
+    //   typeRegistry,
+    // );
 
     return EditorNotifier(
       model: editor,
@@ -162,6 +161,39 @@ class NodeEditorScaffold extends StatelessWidget {
   }
 }
 
+class FloatingRecipe extends StatelessWidget {
+  const FloatingRecipe({super.key, required this.node});
+
+  final Node<ColumnText> node;
+
+  @override
+  Widget build(BuildContext context) {
+    final index = 0;
+    return AbsorbPointer(
+      child: RecipeCard(
+        index: index % RecipesData.dessertMenu.length,
+        delayMs: 0,
+        downScroll: false,
+      ),
+    );
+    final pos = node.position;
+    if (node.value == null) {
+      return Text("Empty");
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(randomString(5)),
+        Text(node.value!.title),
+        Text(node.value!.subtitle),
+        Text(node.id),
+        Text("Rot ${node.rotation.toStringAsFixed(2)}"),
+        Text("Pos ${pos.dx.toStringAsFixed(0)},${pos.dy.toStringAsFixed(0)}"),
+      ],
+    );
+  }
+}
+
 class ColumnText {
   final String title;
   final String subtitle;
@@ -183,7 +215,7 @@ class ColumnText {
 class SliderBox extends StatefulWidget {
   const SliderBox({super.key, required this.node});
 
-  final Node node;
+  final Node<double> node;
 
   @override
   State<SliderBox> createState() => _SliderBoxState();
@@ -202,9 +234,9 @@ class _SliderBoxState extends State<SliderBox> {
           Text(randomString(5)),
           Text(widget.node.id),
 
-          Text(widget.node.value.toStringAsFixed(2)),
+          Text(widget.node.value!.toStringAsFixed(2)),
           Slider(
-            value: widget.node.value,
+            value: widget.node.value!,
             onChanged: (value) {
               final p1 = widget.node.ports.isNotEmpty
                   ? widget.node.ports.first

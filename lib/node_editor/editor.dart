@@ -38,6 +38,11 @@ class _NodeEditorState extends State<NodeEditor> {
         editor.updateInteractiveZoom(zoom);
         editor.updateInteractiveOffset(offset);
       });
+
+      Future.delayed(Duration(milliseconds: 100), () {
+        editor.notifyEditor();
+      });
+
       _listenerAttached = true;
     }
 

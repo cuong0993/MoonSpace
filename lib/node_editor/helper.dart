@@ -14,3 +14,7 @@ Offset rotateAroundCenter(Offset point, Offset center, double angle) {
 
   return Offset(rotatedDx + center.dx, rotatedDy + center.dy);
 }
+
+const Offset offsetTopCenterRatio = Offset(0.5, 0);
+const Offset offsetTopRightRatio = Offset(1, 0);
+const Offset offsetBottomRightRatio = Offset(1, 1);

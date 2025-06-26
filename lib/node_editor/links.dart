@@ -12,7 +12,7 @@ class LinkStyle {
     this.linkType = LinkType.bezier,
     this.linkWidth = 4,
     this.weight = .2,
-    this.linkColor = Colors.blue,
+    this.linkColor = Colors.yellow,
     this.tempLinkColor = Colors.red,
   });
 
@@ -60,6 +60,28 @@ class LinkPainter extends CustomPainter {
 
     editor.activeLinkId = null;
 
+    for (final node in editor.nodes.entries) {
+      for (final port in node.value.ports) {
+        final pos = editor.getPortOffset(port);
+        canvas.drawCircle(pos, editor.zoneRadius, paint..color = Colors.red);
+      }
+      canvas.drawCircle(
+        node.value.bottomright,
+        editor.zoneRadius,
+        paint..color = Colors.purple,
+      );
+      canvas.drawCircle(
+        node.value.topcenter,
+        editor.zoneRadius,
+        paint..color = Colors.purple,
+      );
+      canvas.drawCircle(
+        node.value.topright,
+        editor.zoneRadius,
+        paint..color = Colors.purple,
+      );
+    }
+
     for (final link in editor.links.entries) {
       Offset start = editor.getPortOffset(link.value.outputPort);
       Offset end = editor.getPortOffset(link.value.inputPort);
@@ -74,7 +96,7 @@ class LinkPainter extends CustomPainter {
         editor.activeLinkId = link.value.id;
       }
 
-      paint.color = isHovered ? Colors.blue : linkStyle.linkColor;
+      paint.color = isHovered ? Colors.orange : linkStyle.linkColor;
       canvas.drawPath(path, paint);
 
       animatedTravelLink(start, end, linkStyle, canvas, paint, progress);
@@ -98,6 +120,27 @@ class LinkPainter extends CustomPainter {
 
         canvas.drawPath(approximateLinkPath(start, end, linkStyle), tempPaint);
       }
+    }
+
+    if (editor.debugEditGlobalPosition != null) {
+      canvas.drawCircle(
+        editor.debugEditGlobalPosition!,
+        14,
+        Paint()
+          ..color = Colors.green
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 4,
+      );
+    }
+    if (editor.debugMousePosition != null) {
+      canvas.drawCircle(
+        editor.debugMousePosition!,
+        12,
+        Paint()
+          ..color = Colors.blue
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 4,
+      );
     }
   }
 

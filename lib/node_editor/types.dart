@@ -93,9 +93,6 @@ class Node<T> {
     required this.ports,
   });
 
-  Offset get center =>
-      Offset(position.dx + size.width / 2, position.dy + size.height / 2);
-
   Map<String, dynamic> toJson(Map<String, TypeRegistryEntry> registry) {
     final entry = registry[type];
 
@@ -136,6 +133,40 @@ class Node<T> {
       return ports[index];
     }
     return null;
+  }
+
+  Offset get topright => localToGlobal(offsetTopRightRatio);
+  Offset get topcenter => localToGlobal(offsetTopCenterRatio);
+  Offset get bottomright => localToGlobal(offsetBottomRightRatio);
+
+  Offset get center =>
+      Offset(position.dx + size.width / 2, position.dy + size.height / 2);
+
+  Offset localToGlobal(Offset localRatio) {
+    final pos =
+        position +
+        Offset(localRatio.dx * size.width, localRatio.dy * size.height);
+    final rotpos = rotateAroundCenter(pos, center, rotation);
+    return rotpos;
+  }
+
+  // bool isInRegion(Offset localRatio, Offset globalPos, double radius) {
+  //   final pos = localToGlobal(localRatio);
+  //   return (globalPos - pos).distance < radius;
+  // }
+
+  bool isInRegion(Offset localRatio, Offset globalPos, double radius) {
+    final center = localToGlobal(localRatio);
+
+    final left = center.dx - radius;
+    final right = center.dx + radius;
+    final top = center.dy - radius;
+    final bottom = center.dy + radius;
+
+    return globalPos.dx >= left &&
+        globalPos.dx < right &&
+        globalPos.dy >= top &&
+        globalPos.dy < bottom;
   }
 }
 
@@ -178,10 +209,27 @@ class EditorChangeNotifier extends ChangeNotifier {
   double iinterval;
   int idivisions;
 
+  double zoneRadius = 12;
+
   Offset editorOffset;
   Offset editorSize;
 
   final LinkStyle linkStyle;
+
+  //
+  Offset? debugEditGlobalPosition;
+  Offset? debugMousePosition;
+
+  void updateDebugEditGlobalPosition(Offset off) {
+    debugEditGlobalPosition = off;
+    notifyListeners();
+  }
+
+  void updateDebugMousePosition(Offset off) {
+    debugMousePosition = off;
+    notifyListeners();
+  }
+  //
 
   final TransformationController interactiveController =
       TransformationController();
@@ -380,12 +428,12 @@ class EditorChangeNotifier extends ChangeNotifier {
 
   void updateInteractiveZoom(double z) {
     izoom = z;
-    // notifyListeners();
+    notifyListeners();
   }
 
   void updateInteractiveOffset(Offset off) {
     ioffset = off;
-    // notifyListeners();
+    notifyListeners();
   }
 
   void updateActiveNode(String? id) {
@@ -440,8 +488,8 @@ class EditorChangeNotifier extends ChangeNotifier {
     final isy = iSize.height * port.offsetRatio.dy;
     final iOffset = Offset(isx, isy) - iSize.center(Offset.zero);
     final loc = rotateAroundCenter(iCenter + iOffset, iCenter, iRot);
-    // return loc;
-    return Offset(loc.dx, loc.dy + (port.offsetRatio.dy > .5 ? -8 : 8));
+    return loc;
+    // return Offset(loc.dx, loc.dy + (port.offsetRatio.dy > .5 ? -8 : 8));
   }
 
   Offset localToCanvasOffset(Offset localPos, BuildContext context) {
@@ -449,6 +497,10 @@ class EditorChangeNotifier extends ChangeNotifier {
     final global = renderBox.localToGlobal(localPos - editorOffset / izoom);
     final matrixInverse = interactiveController.value.clone()..invert();
     return MatrixUtils.transformPoint(matrixInverse, global);
+  }
+
+  Offset globalToCanvas(Offset global) {
+    return (global - editorOffset - ioffset) / izoom;
   }
 
   bool checkIfNodeVisible(Node node, {double padding = 100}) {
