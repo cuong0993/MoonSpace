@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:moonspace/node_editor/helper.dart';
 import 'package:moonspace/node_editor/types.dart';
 
 class LinkStyle {
@@ -63,8 +64,6 @@ class LinkPainter extends CustomPainter {
     for (final nodeentry in editor.nodes.entries) {
       final node = nodeentry.value;
       for (final port in nodeentry.value.ports) {
-        final pos = editor.getPortOffset(port);
-
         if (editor.tempLinkEndPos != null) {
           final isInPort = editor.isInPort(node, port, editor.tempLinkEndPos!);
 
@@ -81,23 +80,46 @@ class LinkPainter extends CustomPainter {
           }
         }
 
-        canvas.drawCircle(pos, editor.zoneRadius, paint..color = Colors.red);
+        // {
+        //   final pos = editor.getPortOffset(port);
+        //   final triangle = rotatedTriangle(
+        //     pos,
+        //     node.rotation,
+        //     editor.zoneRadius,
+        //   );
+        //   final path = Path()..addPolygon(triangle, true);
+
+        //   // if (port.input) {
+        //   //   canvas.drawPath(
+        //   //     path,
+        //   //     Paint()
+        //   //       ..color = port.color
+        //   //       ..style = PaintingStyle.fill,
+        //   //   );
+        //   // } else {}
+        //   canvas.drawCircle(pos, editor.zoneRadius, paint..color = port.color);
+        // }
       }
-      canvas.drawCircle(
-        editor.bottomright(node),
-        editor.zoneRadius,
-        paint..color = Colors.purple,
-      );
-      canvas.drawCircle(
-        editor.topcenter(node),
-        editor.zoneRadius,
-        paint..color = Colors.purple,
-      );
-      canvas.drawCircle(
-        editor.topright(node),
-        editor.zoneRadius,
-        paint..color = Colors.purple,
-      );
+      // canvas.drawCircle(
+      //   editor.bottomright(node),
+      //   editor.zoneRadius,
+      //   paint..color = Colors.purple,
+      // );
+      // canvas.drawCircle(
+      //   editor.bottomleft(node),
+      //   editor.zoneRadius,
+      //   paint..color = Colors.purple,
+      // );
+      // canvas.drawCircle(
+      //   editor.topcenter(node),
+      //   editor.zoneRadius,
+      //   paint..color = Colors.purple,
+      // );
+      // canvas.drawCircle(
+      //   editor.topright(node),
+      //   editor.zoneRadius,
+      //   paint..color = Colors.purple,
+      // );
     }
 
     for (final link in editor.links.entries) {
@@ -214,29 +236,34 @@ class _LinkBuilderState extends State<LinkBuilder>
 
   @override
   Widget build(BuildContext context) {
-    return RepaintBoundary(
-      child: MouseRegion(
-        onHover: (event) {
-          mousePosition = widget.editor.localToCanvasOffset(
-            event.localPosition,
-            context,
-          );
-          setState(() {});
-        },
-        onExit: (event) {
-          mousePosition = null;
-          setState(() {});
-        },
-        child: CustomPaint(
-          painter: LinkPainter(
-            editor: widget.editor,
-            mousePosition: mousePosition,
-            repaint: _controller,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        print("linkbuilder ${constraints.smallest}");
+        return RepaintBoundary(
+          child: MouseRegion(
+            onHover: (event) {
+              mousePosition = widget.editor.localToCanvasOffset(
+                event.localPosition,
+                context,
+              );
+              setState(() {});
+            },
+            onExit: (event) {
+              mousePosition = null;
+              setState(() {});
+            },
+            child: CustomPaint(
+              painter: LinkPainter(
+                editor: widget.editor,
+                mousePosition: mousePosition,
+                repaint: _controller,
+              ),
+              isComplex: true,
+              willChange: true,
+            ),
           ),
-          isComplex: true,
-          willChange: true,
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -314,4 +341,15 @@ void animatedTravelLink(
       canvas.drawCircle(offset, 4, Paint()..color = Colors.lightGreenAccent);
     }
   }
+}
+
+List<Offset> rotatedTriangle(Offset center, double angle, double radius) {
+  // Define triangle points relative to `pos` (unrotated)
+  final points = [
+    center + Offset(radius, -radius), // bottom left
+    center + Offset(-radius, 0), // center
+    center + Offset(radius, radius), // top left
+  ];
+
+  return points.map((p) => rotateAroundCenter(p, center, angle)).toList();
 }

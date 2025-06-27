@@ -8,8 +8,6 @@ class Port<T> {
   int? index;
   String? nodeId;
   final bool input;
-
-  /// (x : 0 to 1, y : 0 to 1)
   final Offset offsetRatio;
 
   T? value;
@@ -20,7 +18,12 @@ class Port<T> {
     this.input = false,
     required this.offsetRatio,
     this.value,
-  });
+  }) : assert(
+         offsetRatio.dx >= 0.0 &&
+             offsetRatio.dx <= 1.0 &&
+             offsetRatio.dy >= 0.0 &&
+             offsetRatio.dy <= 1.0,
+       );
 
   Map<String, dynamic> toMap() => {
     'index': index,
@@ -31,6 +34,13 @@ class Port<T> {
   };
 
   String get id => '${nodeId}_$index';
+
+  Color get color => HSLColor.fromAHSL(
+    1,
+    (value.runtimeType.hashCode + 50) % 360,
+    .5,
+    .6,
+  ).toColor();
 
   factory Port.fromMap(Map<String, dynamic> json) => Port(
     index: json['index'],
@@ -79,7 +89,7 @@ class Node<T> {
   final String type;
   Offset position;
   double rotation;
-  Size size;
+  Offset size;
   T? value;
   List<Port> ports;
 
@@ -101,7 +111,7 @@ class Node<T> {
       'type': entry != null ? type : null,
       'position': {'dx': position.dx, 'dy': position.dy},
       'rotation': rotation,
-      'size': {'width': size.width, 'height': size.height},
+      'size': {'dx': size.dx, 'dy': size.dy},
       'value': entry?.serialize(value),
       'ports': ports.map((p) => p.toMap()).toList(),
     };
@@ -121,7 +131,7 @@ class Node<T> {
       type: entry != null ? type : '__error__',
       position: Offset(json['position']['dx'], json['position']['dy']),
       rotation: json['rotation'],
-      size: Size(json['size']['width'], json['size']['height']),
+      size: Offset(json['size']['dx'], json['size']['dy']),
       value: value,
       ports:
           (json['ports'] as List?)?.map((p) => Port.fromMap(p)).toList() ?? [],
@@ -136,12 +146,31 @@ class Node<T> {
   }
 
   Offset get center =>
-      Offset(position.dx + size.width / 2, position.dy + size.height / 2);
+      Offset(position.dx + size.dx / 2, position.dy + size.dy / 2);
+
+  Offset ratioToLocal(Offset localRatio, double radius) {
+    final dia = 2 * radius;
+    final xpadr = dia / size.dx;
+    final ypadr = dia / size.dy;
+
+    final leftside = localRatio.dx < xpadr;
+    final rightside = (1 - localRatio.dx) < xpadr;
+
+    final topside = localRatio.dy < ypadr;
+    final bottomside = (1 - localRatio.dy) < ypadr;
+
+    final push = Offset(
+      (topside || bottomside) ? -radius : (rightside ? -2 * radius : 0),
+      topside ? 0 : (bottomside ? -2 * radius : -radius),
+    );
+
+    return Offset(localRatio.dx * size.dx, localRatio.dy * size.dy) + push;
+  }
 
   Offset ratioToGlobal(Offset localRatio, double radius) {
     final dia = 2 * radius;
-    final xpadr = dia / size.width;
-    final ypadr = dia / size.height;
+    final xpadr = dia / size.dx;
+    final ypadr = dia / size.dy;
 
     final leftside = localRatio.dx < xpadr;
     final rightside = (1 - localRatio.dx) < xpadr;
@@ -156,7 +185,7 @@ class Node<T> {
 
     final unrotpos =
         position +
-        Offset(localRatio.dx * size.width, localRatio.dy * size.height) +
+        Offset(localRatio.dx * size.dx, localRatio.dy * size.dy) +
         push;
 
     Offset rotpos = rotateAroundCenter(unrotpos, center, rotation);
@@ -204,7 +233,7 @@ class EditorChangeNotifier extends ChangeNotifier {
   double iinterval;
   int idivisions;
 
-  double zoneRadius = 12;
+  double zoneRadius = 10;
 
   Offset editorOffset;
   Offset editorSize;
@@ -436,7 +465,7 @@ class EditorChangeNotifier extends ChangeNotifier {
     nodes[id]?.rotation = rot;
   }
 
-  void updateNodeSize(String id, Size size) {
+  void updateNodeSize(String id, Offset size) {
     if (nodes.containsKey(id)) {
       nodes[id]!.size = size;
     }
@@ -476,9 +505,8 @@ class EditorChangeNotifier extends ChangeNotifier {
     final zoom = interactiveController.value.getMaxScaleOnAxis();
 
     final size = MediaQuery.of(context).size;
-    final screenCenter = size.center(Offset.zero);
-    final dx = screenCenter.dx - sceneTarget.dx * zoom;
-    final dy = screenCenter.dy - sceneTarget.dy * zoom;
+    final dx = size.width / 2 - sceneTarget.dx * zoom;
+    final dy = size.height / 2 - sceneTarget.dy * zoom;
 
     interactiveController.value = Matrix4.identity()
       ..translate(dx, dy)
@@ -519,8 +547,8 @@ class EditorChangeNotifier extends ChangeNotifier {
     final nodeRect = Rect.fromLTWH(
       node.position.dx,
       node.position.dy,
-      node.size.width,
-      node.size.height,
+      node.size.dx,
+      node.size.dy,
     );
 
     return nodeRect.overlaps(viewport);
@@ -528,6 +556,11 @@ class EditorChangeNotifier extends ChangeNotifier {
 
   List<Widget> renderNodes(BuildContext context) {
     List<Widget> visibleNodes = [];
+    print("render");
+
+    // if (visibleNodes.isNotEmpty) {
+    //   return visibleNodes;
+    // }
 
     for (final entry in nodes.entries) {
       final node = entry.value;
@@ -546,28 +579,15 @@ class EditorChangeNotifier extends ChangeNotifier {
     return visibleNodes;
   }
 
-  //------------
-
-  // bool isInRegion(Offset center, Offset globalPos) {
-  //   return (globalPos - center).distance < zoneRadius;
-  // }
-
   bool isInRegion(Offset center, Offset globalPos) {
-    final left = center.dx - zoneRadius;
-    final right = center.dx + zoneRadius;
-    final top = center.dy - zoneRadius;
-    final bottom = center.dy + zoneRadius;
-
-    return globalPos.dx >= left &&
-        globalPos.dx < right &&
-        globalPos.dy >= top &&
-        globalPos.dy < bottom;
+    return (globalPos - center).distance < zoneRadius;
   }
 
   bool isInPort(Node node, Port port, Offset globalPos) {
-    return (globalPos - node.ratioToGlobal(port.offsetRatio, zoneRadius))
-            .distance <
-        zoneRadius;
+    return isInRegion(
+      node.ratioToGlobal(port.offsetRatio, zoneRadius),
+      globalPos,
+    );
   }
 
   Offset topright(Node node) =>
@@ -576,6 +596,8 @@ class EditorChangeNotifier extends ChangeNotifier {
       node.ratioToGlobal(offsetTopCenterRatio, zoneRadius);
   Offset bottomright(Node node) =>
       node.ratioToGlobal(offsetBottomRightRatio, zoneRadius);
+  Offset bottomleft(Node node) =>
+      node.ratioToGlobal(offsetBottomLeftRatio, zoneRadius);
 }
 
 class EditorNotifier extends InheritedNotifier<EditorChangeNotifier> {

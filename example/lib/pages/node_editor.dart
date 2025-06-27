@@ -1,15 +1,15 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
 import 'package:example/pages/recipe.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:moonspace/helper/extensions/string.dart';
 import 'package:moonspace/helper/extensions/theme_ext.dart';
 import 'package:moonspace/node_editor/export.dart';
 import 'package:moonspace/node_editor/links.dart';
 
-enum NodeTypes { recipe, slider }
+enum NodeTypes { recipe, slider, timer }
 
 final typeRegistry = {
   //
@@ -22,6 +22,13 @@ final typeRegistry = {
   //
   NodeTypes.slider.toString(): TypeBuilderEntry(
     builder: (context, node) => SliderBox(node: node),
+    deserialize: (json) => json,
+    serialize: (value) => value,
+  ),
+
+  //
+  NodeTypes.timer.toString(): TypeBuilderEntry(
+    builder: (context, node) => TimerBox(node: node),
     deserialize: (json) => json,
     serialize: (value) => value,
   ),
@@ -49,7 +56,7 @@ class _NodeEditorScaffoldState extends State<NodeEditorScaffold> {
               linkColor: Colors.blue,
               linkType: LinkType.bezier,
               weight: 0,
-              linkWidth: 2,
+              linkWidth: 4,
             ),
             idivisions: 8,
             iinterval: 160,
@@ -57,11 +64,57 @@ class _NodeEditorScaffoldState extends State<NodeEditorScaffold> {
           )
           ..addNodes([
             Node<double>(
-              id: 'nodeA',
+              id: 'nodeTimer1',
+              type: NodeTypes.timer.toString(),
+              position: const Offset(20, 100),
+              rotation: 0,
+              size: Offset(120, 120),
+              value: .5,
+              ports: [
+                Port<double>(
+                  input: false,
+                  offsetRatio: Offset(1, 0.3),
+                  value: 0.5,
+                ),
+                Port<String>(
+                  input: false,
+                  offsetRatio: Offset(1, 0.7),
+                  value: "Hello",
+                ),
+                Port<int>(input: false, offsetRatio: Offset(0, 0.3), value: 1),
+                // Port<DateTime>(
+                //   input: false,
+                //   offsetRatio: Offset(0, 0.7),
+                //   value: DateTime.now(),
+                // ),
+                Port<Map<String, String>>(
+                  input: false,
+                  offsetRatio: Offset(0.3, 1),
+                  value: {"hello": "Hello"},
+                ),
+                // Port<Recipe>(
+                //   input: false,
+                //   offsetRatio: Offset(0.7, 1),
+                //   value: Recipe(index: 1),
+                // ),
+                // Port<(double, double)>(
+                //   input: false,
+                //   offsetRatio: Offset(0.3, 0),
+                //   value: (2, 3),
+                // ),
+                // Port<({String title, String subtitle})>(
+                //   input: false,
+                //   offsetRatio: Offset(0.7, 0),
+                //   value: (title: "Hello", subtitle: "hello"),
+                // ),
+              ],
+            ),
+            Node<double>(
+              id: 'nodeSlider1',
               type: NodeTypes.slider.toString(),
               position: const Offset(20, 300),
               rotation: 0,
-              size: const Size(120, 120),
+              size: Offset(120, 120),
               value: .5,
               ports: [
                 Port<double>(input: false, offsetRatio: Offset(1, 0.3)),
@@ -69,23 +122,27 @@ class _NodeEditorScaffoldState extends State<NodeEditorScaffold> {
               ],
             ),
             Node<Recipe>(
-              id: 'nodeB',
+              id: 'nodeRecipe1',
               type: NodeTypes.recipe.toString(),
               position: const Offset(200, 100),
               rotation: 0,
-              size: const Size(240, 200),
-              value: Recipe(index: 0),
+              size: const Offset(250, 250),
+              value: Recipe(index: 2),
               ports: [
                 Port<double>(input: true, offsetRatio: Offset(0, 0.3)),
-                Port<String>(input: false, offsetRatio: Offset(0, 0.7)),
+                Port<String>(
+                  input: false,
+                  offsetRatio: Offset(0, 0.7),
+                  value: "Hello",
+                ),
               ],
             ),
           ])
           ..addLinksByPort([
             (
-              nodeId1: "nodeA",
+              nodeId1: "nodeSlider1",
               index1: 0,
-              nodeId2: "nodeB",
+              nodeId2: "nodeRecipe1",
               index2: 0,
               value: .5,
             ),
@@ -141,18 +198,44 @@ class RecipeBox extends StatelessWidget {
     if (node.value is! Recipe) return Text("Undefined");
     Recipe value = node.value;
 
-    return AbsorbPointer(
-      child: Stack(
-        alignment: Alignment.topCenter,
-        children: [
-          RecipeCard(
-            index: value.index % RecipesData.dessertMenu.length,
-            delayMs: 0,
-            downScroll: false,
-          ),
-          Text(randomString(5)),
-        ],
-      ),
+    return RecipeCard(
+      index: value.index % RecipesData.dessertMenu.length,
+      delayMs: 0,
+      downScroll: false,
+    );
+  }
+}
+
+class TimerBox extends StatefulWidget {
+  const TimerBox({super.key, required this.node});
+
+  final Node node;
+
+  @override
+  State<TimerBox> createState() => _TimerBoxState();
+}
+
+class _TimerBoxState extends State<TimerBox> {
+  int time = 0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    Timer.periodic(Duration(seconds: 1), (t) {
+      if (mounted) {
+        time++;
+        setState(() {});
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.white,
+      padding: EdgeInsets.all(8),
+      child: Text(time.toString()),
     );
   }
 }
@@ -186,7 +269,6 @@ class _SliderBoxState extends State<SliderBox> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(buildCount.toString()),
-          Text(widget.node.id),
 
           Text(widget.node.value!.toStringAsFixed(2)),
           Slider(
@@ -327,7 +409,7 @@ class _EditorStateState extends State<EditorState> {
                                     Random().nextDouble() * 800,
                                   ),
                                   rotation: 0,
-                                  size: const Size(150, 100),
+                                  size: const Offset(150, 100),
                                   value: .5,
                                   ports: [
                                     Port<double>(

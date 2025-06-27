@@ -43,15 +43,15 @@ class _CustomNodeState extends State<CustomNode> {
                       details.globalPosition,
                     );
 
-                    final isInTopRight = editor.isInRegion(
-                      editor.topright(node),
-                      globalPos,
-                    );
-                    if (isInTopRight) {
+                    if (editor.isInRegion(editor.topright(node), globalPos)) {
                       editor.removeNodeById(node.id);
+                    } else if (editor.isInRegion(
+                      editor.bottomleft(node),
+                      globalPos,
+                    )) {
+                      editor.nodes.remove(node.id);
+                      editor.addNodes([node]);
                     }
-
-                    // editor.updateDebugMousePosition(globalPos);
                   },
 
                   onPanStart: (details) {
@@ -63,7 +63,7 @@ class _CustomNodeState extends State<CustomNode> {
                     editor.notifyEditor();
 
                     startDiffpos = globalPos - node.position;
-                    resizeAspectRatio = node.size.width / node.size.height;
+                    resizeAspectRatio = node.size.dx / node.size.dy;
 
                     for (var port in node.ports) {
                       final isInPort = editor.isInPort(node, port, globalPos);
@@ -74,18 +74,12 @@ class _CustomNodeState extends State<CustomNode> {
                       }
                     }
 
-                    final isInTopCenter = editor.isInRegion(
-                      editor.topcenter(node),
-                      globalPos,
-                    );
-                    final isInBottomRight = editor.isInRegion(
+                    if (editor.isInRegion(editor.topcenter(node), globalPos)) {
+                      activeFunction = ActiveFunction.rotate;
+                    } else if (editor.isInRegion(
                       editor.bottomright(node),
                       globalPos,
-                    );
-
-                    if (isInTopCenter) {
-                      activeFunction = ActiveFunction.rotate;
-                    } else if (isInBottomRight) {
+                    )) {
                       activeFunction = ActiveFunction.resize;
                     } else {
                       activeFunction = ActiveFunction.move;
@@ -102,17 +96,15 @@ class _CustomNodeState extends State<CustomNode> {
 
                     editor.tempLinkEndPos = globalPos;
 
-                    // editor.updateDebugEditGlobalPosition(globalPos);
-
                     if (activeFunction == ActiveFunction.rotate) {
-                      const snapStep = math.pi / 12; // 15 degrees in radians
-
                       final cenpos = globalPos - node.center;
                       double rawAngle =
-                          math.atan2(cenpos.dy, cenpos.dx) + math.pi / 2;
+                          math.atan2(cenpos.dy, cenpos.dx) + degree90;
 
                       if (controlPressed) {
-                        rawAngle = (rawAngle / snapStep).round() * snapStep;
+                        rawAngle =
+                            (rawAngle / rotationSnapStep).round() *
+                            rotationSnapStep;
                       }
 
                       node.rotation = rawAngle;
@@ -146,9 +138,9 @@ class _CustomNodeState extends State<CustomNode> {
                         height = width / resizeAspectRatio;
                       }
 
-                      node.size = Size(
-                        math.max(100, width),
-                        math.max(100, height),
+                      node.size = Offset(
+                        math.max(120, width),
+                        math.max(120, height),
                       );
                     }
 
@@ -158,23 +150,97 @@ class _CustomNodeState extends State<CustomNode> {
                   onPanEnd: (details) {
                     activeFunction = null;
                     editor.removeTempLink();
-                    setState(() {});
+                    // setState(() {});
                   },
 
                   //
-                  child: Container(
-                    padding: EdgeInsets.all(2 * editor.zoneRadius),
-                    decoration: BoxDecoration(
-                      color: activeFunction != null
-                          ? const Color.fromARGB(10, 0, 0, 0)
-                          : const Color.fromARGB(37, 255, 144, 144),
-                    ),
-                    width: node.size.width,
-                    height: node.size.height,
-                    child: Container(
-                      decoration: BoxDecoration(border: Border.all()),
-                    ),
-                    // child: widget.innerWidget,
+                  child: Stack(
+                    //
+                    //
+                    //
+                    clipBehavior: Clip.none,
+                    //
+                    //
+                    //
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(2 * editor.zoneRadius),
+                        // decoration: BoxDecoration(
+                        //   color: activeFunction != null
+                        //       ? const Color.fromARGB(10, 0, 0, 0)
+                        //       : const Color.fromARGB(37, 255, 144, 144),
+                        // ),
+                        width: node.size.dx,
+                        height: node.size.dy,
+                        child: Container(
+                          decoration: BoxDecoration(border: Border.all()),
+                          alignment: Alignment.center,
+                          child: Column(
+                            children: [
+                              Text(node.type),
+                              Text(node.runtimeType.toString()),
+                            ],
+                          ),
+                        ),
+                        // child: widget.innerWidget,
+                      ),
+
+                      ...node.ports.map((port) {
+                        final pos = node.ratioToLocal(
+                          port.offsetRatio,
+                          editor.zoneRadius,
+                        );
+                        return Positioned(
+                          left: pos.dx,
+                          top: pos.dy,
+                          // child: Icon(Icons.arrow_back_ios_new, size: 20),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.stop_circle_outlined,
+                                size: 20,
+                                color: port.color,
+                              ),
+                              Text(
+                                ((port.runtimeType.hashCode + 50) % 360)
+                                    .toString(),
+                              ),
+                            ],
+                          ),
+                          // child: Icon(Icons.arrow_circle_up_rounded, size: 20),
+                          // child: Icon(
+                          //   Icons.arrow_circle_right_outlined,
+                          //   size: 20,
+                          // ),
+                          // child: Icon(Icons.arrow_circle_down_sharp, size: 20),
+                          // child: Icon(Icons.arrow_back_rounded, size: 20),
+                          // child: Icon(Icons.arrow_forward_ios, size: 20),
+                        );
+                      }),
+                      Positioned(
+                        left: 0,
+                        top: node.size.dy - editor.zoneRadius * 2,
+                        child: Icon(Icons.workspaces_outlined, size: 20),
+                      ),
+
+                      Positioned(
+                        left: node.size.dx - editor.zoneRadius * 2,
+                        top: 0,
+                        child: Icon(Icons.clear, size: 20),
+                      ),
+
+                      Positioned(
+                        left: node.size.dx / 2 - editor.zoneRadius,
+                        top: 0,
+                        child: Icon(Icons.circle_outlined, size: 20),
+                      ),
+
+                      Positioned(
+                        left: node.size.dx - editor.zoneRadius * 2,
+                        top: node.size.dy - editor.zoneRadius * 2,
+                        child: Icon(Icons.zoom_out_map_outlined, size: 20),
+                      ),
+                    ],
                   ),
                 ),
           ),
