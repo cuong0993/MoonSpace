@@ -9,9 +9,16 @@ enum ActiveFunction { move, rotate, resize }
 
 class CustomNode extends StatefulWidget {
   final Node node;
-  final Widget innerWidget;
 
-  const CustomNode({super.key, required this.node, required this.innerWidget});
+  final Map<String, NodeBuilderEntry> nodeBuilderRegistry;
+  final Map<String, PortBuilderEntry> portBuilderRegistry;
+
+  const CustomNode({
+    super.key,
+    required this.node,
+    required this.nodeBuilderRegistry,
+    required this.portBuilderRegistry,
+  });
 
   @override
   State<CustomNode> createState() => _CustomNodeState();
@@ -23,10 +30,35 @@ class _CustomNodeState extends State<CustomNode> {
 
   ActiveFunction? activeFunction;
 
+  Widget buildNodeWidget(BuildContext context) {
+    final entry = widget.nodeBuilderRegistry[widget.node.type];
+    if (entry == null) return Text('Unknown type: ${widget.node.type}');
+
+    return entry.builder(context, widget.node);
+
+    // return Container(
+    //   decoration: BoxDecoration(border: Border.all()),
+    //   alignment: Alignment.center,
+    //   child: Column(
+    //     children: [Text(node.type), Text(node.runtimeType.toString())],
+    //   ),
+    // );
+  }
+
+  Widget buildPortWidget(BuildContext context, Port port) {
+    final entry = widget.portBuilderRegistry[port.type];
+    final portWidget =
+        entry?.builder?.call(context, port) ??
+        Icon(Icons.stop_circle_outlined, size: 20, color: port.color);
+    return portWidget;
+    // return Row(children: [portWidget, Text(port.runtimeType.toString())]);
+  }
+
   @override
   Widget build(BuildContext context) {
     final editor = EditorNotifier.of(context);
     final node = widget.node;
+    final cs = Theme.of(context).colorScheme;
 
     return Positioned(
       left: node.position.dx,
@@ -156,33 +188,19 @@ class _CustomNodeState extends State<CustomNode> {
                   //
                   child: Stack(
                     //
-                    //
-                    //
                     clipBehavior: Clip.none,
-                    //
-                    //
                     //
                     children: [
                       Container(
                         padding: EdgeInsets.all(2 * editor.zoneRadius),
-                        // decoration: BoxDecoration(
-                        //   color: activeFunction != null
-                        //       ? const Color.fromARGB(10, 0, 0, 0)
-                        //       : const Color.fromARGB(37, 255, 144, 144),
-                        // ),
+                        decoration: BoxDecoration(
+                          color: activeFunction != null
+                              ? cs.surfaceContainer
+                              : Colors.transparent,
+                        ),
                         width: node.size.dx,
                         height: node.size.dy,
-                        child: Container(
-                          decoration: BoxDecoration(border: Border.all()),
-                          alignment: Alignment.center,
-                          child: Column(
-                            children: [
-                              Text(node.type),
-                              Text(node.runtimeType.toString()),
-                            ],
-                          ),
-                        ),
-                        // child: widget.innerWidget,
+                        child: buildNodeWidget(context),
                       ),
 
                       ...node.ports.map((port) {
@@ -193,30 +211,10 @@ class _CustomNodeState extends State<CustomNode> {
                         return Positioned(
                           left: pos.dx,
                           top: pos.dy,
-                          // child: Icon(Icons.arrow_back_ios_new, size: 20),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.stop_circle_outlined,
-                                size: 20,
-                                color: port.color,
-                              ),
-                              Text(
-                                ((port.runtimeType.hashCode + 50) % 360)
-                                    .toString(),
-                              ),
-                            ],
-                          ),
-                          // child: Icon(Icons.arrow_circle_up_rounded, size: 20),
-                          // child: Icon(
-                          //   Icons.arrow_circle_right_outlined,
-                          //   size: 20,
-                          // ),
-                          // child: Icon(Icons.arrow_circle_down_sharp, size: 20),
-                          // child: Icon(Icons.arrow_back_rounded, size: 20),
-                          // child: Icon(Icons.arrow_forward_ios, size: 20),
+                          child: buildPortWidget(context, port),
                         );
                       }),
+
                       Positioned(
                         left: 0,
                         top: node.size.dy - editor.zoneRadius * 2,

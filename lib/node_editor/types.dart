@@ -4,9 +4,22 @@ import 'package:moonspace/node_editor/helper.dart';
 import 'package:moonspace/node_editor/links.dart';
 import 'package:moonspace/node_editor/node.dart';
 
+class PortBuilderEntry<T> {
+  final Widget Function(BuildContext context, Port port)? builder;
+  final Port<T>? Function(Port port, dynamic json) deserialize;
+  final dynamic Function(dynamic state) serialize;
+
+  PortBuilderEntry({
+    this.builder,
+    required this.deserialize,
+    required this.serialize,
+  });
+}
+
 class Port<T> {
   int? index;
   String? nodeId;
+  final String type;
   final bool input;
   final Offset offsetRatio;
 
@@ -15,6 +28,7 @@ class Port<T> {
   Port({
     this.index,
     this.nodeId,
+    required this.type,
     this.input = false,
     required this.offsetRatio,
     this.value,
@@ -25,33 +39,62 @@ class Port<T> {
              offsetRatio.dy <= 1.0,
        );
 
-  Map<String, dynamic> toMap() => {
-    'index': index,
-    'nodeId': nodeId,
-    'input': input,
-    'offsetRatio': {'dx': offsetRatio.dx, 'dy': offsetRatio.dy},
-    'value': value,
-  };
-
   String get id => '${nodeId}_$index';
+
+  Map<String, dynamic> toMap(
+    Map<String, PortBuilderEntry> portBuilderRegistry,
+  ) {
+    final entry = portBuilderRegistry[type];
+
+    return {
+      'index': index,
+      'nodeId': nodeId,
+      'type': type,
+      'input': input,
+      'offsetRatio': {'dx': offsetRatio.dx, 'dy': offsetRatio.dy},
+      'value': entry?.serialize(value),
+    };
+  }
+
+  static Port? fromMap(
+    Map<String, dynamic> json,
+    Map<String, PortBuilderEntry> portBuilderRegistry,
+  ) {
+    final type = json['type'];
+    final entry = portBuilderRegistry[type];
+
+    final dynamicPort = Port(
+      index: json['index'],
+      nodeId: json['nodeId'],
+      type: json['type'],
+      input: json['input'],
+      offsetRatio: Offset(json['offsetRatio']['dx'], json['offsetRatio']['dy']),
+      value: json['value'],
+    );
+
+    return entry?.deserialize(dynamicPort, json['value']);
+  }
+
+  factory Port.merge(Port port, T? value) {
+    return Port<T>(
+      nodeId: port.nodeId,
+      index: port.index,
+      type: port.type,
+      offsetRatio: port.offsetRatio,
+      input: port.input,
+      value: value,
+    );
+  }
 
   Color get color => HSLColor.fromAHSL(
     1,
-    (value.runtimeType.hashCode + 50) % 360,
+    (runtimeType.hashCode + 160) % 360,
     .5,
     .6,
   ).toColor();
-
-  factory Port.fromMap(Map<String, dynamic> json) => Port(
-    index: json['index'],
-    nodeId: json['nodeId'],
-    input: json['input'],
-    offsetRatio: Offset(json['offsetRatio']['dx'], json['offsetRatio']['dy']),
-    value: json['value'],
-  );
 }
 
-class Link<T> {
+class Link {
   final Port inputPort;
   final Port outputPort;
 
@@ -61,23 +104,28 @@ class Link<T> {
 
   Link({required this.inputPort, required this.outputPort});
 
-  Map<String, dynamic> toMap() => {
-    'inputPort': inputPort.toMap(),
-    'outputPort': outputPort.toMap(),
+  Map<String, dynamic> toMap(Map<String, PortBuilderEntry> registry) => {
+    'inputPort': inputPort.toMap(registry),
+    'outputPort': outputPort.toMap(registry),
   };
 
-  factory Link.fromMap(Map<String, dynamic> json) => Link(
-    inputPort: Port.fromMap(json['inputPort']),
-    outputPort: Port.fromMap(json['outputPort']),
-  );
+  static Link? fromMap(
+    Map<String, dynamic> json,
+    Map<String, PortBuilderEntry> registry,
+  ) {
+    final input = Port.fromMap(json['inputPort'], registry);
+    final output = Port.fromMap(json['outputPort'], registry);
+    if (input == null || output == null) return null;
+    return Link(inputPort: input, outputPort: output);
+  }
 }
 
-class TypeBuilderEntry {
+class NodeBuilderEntry<T> {
   final Widget Function(BuildContext context, Node node) builder;
-  final dynamic Function(dynamic state) deserialize;
+  final Node<T>? Function(Node node, dynamic state) deserialize;
   final dynamic Function(dynamic state) serialize;
 
-  TypeBuilderEntry({
+  NodeBuilderEntry({
     required this.builder,
     required this.deserialize,
     required this.serialize,
@@ -103,8 +151,11 @@ class Node<T> {
     required this.ports,
   });
 
-  Map<String, dynamic> toJson(Map<String, TypeBuilderEntry> registry) {
-    final entry = registry[type];
+  Map<String, dynamic> toMap(
+    Map<String, NodeBuilderEntry> nodeBuilderRegistry,
+    Map<String, PortBuilderEntry> portBuilderRegistry,
+  ) {
+    final entry = nodeBuilderRegistry[type];
 
     return {
       'id': id,
@@ -113,28 +164,47 @@ class Node<T> {
       'rotation': rotation,
       'size': {'dx': size.dx, 'dy': size.dy},
       'value': entry?.serialize(value),
-      'ports': ports.map((p) => p.toMap()).toList(),
+      'ports': ports.map((p) => p.toMap(portBuilderRegistry)).toList(),
     };
   }
 
-  factory Node.fromJson(
+  static Node? fromMap(
     Map<String, dynamic> json,
-    Map<String, TypeBuilderEntry> registry,
+    Map<String, NodeBuilderEntry> nodeBuilderRegistry,
+    Map<String, PortBuilderEntry> portBuilderRegistry,
   ) {
     final type = json['type'];
-    final entry = registry[type];
+    final entry = nodeBuilderRegistry[type];
 
-    final dynamic value = entry?.deserialize(json['value']);
+    final List<Port> ports = [];
+    for (final p in (json['ports'] as List? ?? [])) {
+      final port = Port.fromMap(p, portBuilderRegistry);
+      if (port != null) {
+        ports.add(port);
+      }
+    }
 
-    return Node(
+    final dynamicNode = Node(
       id: json['id'],
       type: entry != null ? type : '__error__',
       position: Offset(json['position']['dx'], json['position']['dy']),
       rotation: json['rotation'],
       size: Offset(json['size']['dx'], json['size']['dy']),
+      ports: ports,
+    );
+
+    return entry?.deserialize(dynamicNode, json['value']);
+  }
+
+  factory Node.merge(Node n, T? value) {
+    return Node<T>(
+      id: n.id,
+      type: n.type,
+      position: n.position,
+      rotation: n.rotation,
+      size: n.size,
+      ports: n.ports,
       value: value,
-      ports:
-          (json['ports'] as List?)?.map((p) => Port.fromMap(p)).toList() ?? [],
     );
   }
 
@@ -153,7 +223,7 @@ class Node<T> {
     final xpadr = dia / size.dx;
     final ypadr = dia / size.dy;
 
-    final leftside = localRatio.dx < xpadr;
+    // final leftside = localRatio.dx < xpadr;
     final rightside = (1 - localRatio.dx) < xpadr;
 
     final topside = localRatio.dy < ypadr;
@@ -196,7 +266,8 @@ class Node<T> {
 
 class EditorChangeNotifier extends ChangeNotifier {
   EditorChangeNotifier({
-    required this.typeRegistry,
+    required this.nodeBuilderRegistry,
+    required this.portBuilderRegistry,
 
     //
     this.izoom = 1.0,
@@ -217,7 +288,8 @@ class EditorChangeNotifier extends ChangeNotifier {
   /// linkId → Link
   final Map<String, Link> links = {};
 
-  final Map<String, TypeBuilderEntry> typeRegistry;
+  final Map<String, NodeBuilderEntry> nodeBuilderRegistry;
+  final Map<String, PortBuilderEntry> portBuilderRegistry;
 
   String? activeNodeId;
 
@@ -264,32 +336,49 @@ class EditorChangeNotifier extends ChangeNotifier {
 
     //
     'nodes': nodes.map(
-      (key, value) => MapEntry(key, value.toJson(typeRegistry)),
+      (key, value) =>
+          MapEntry(key, value.toMap(nodeBuilderRegistry, portBuilderRegistry)),
     ),
-    'links': links.values.map((link) => link.toMap()).toList(),
+    'links': links.values
+        .map((link) => link.toMap(portBuilderRegistry))
+        .toList(),
   };
 
   factory EditorChangeNotifier.fromMap(
     Map<String, dynamic> json,
-    Map<String, TypeBuilderEntry> typeRegistry,
+    Map<String, NodeBuilderEntry> nodeBuilderRegistry,
+    Map<String, PortBuilderEntry> portBuilderRegistry,
   ) {
-    final editor = EditorChangeNotifier(typeRegistry: typeRegistry);
+    final editor = EditorChangeNotifier(
+      nodeBuilderRegistry: nodeBuilderRegistry,
+      portBuilderRegistry: portBuilderRegistry,
+    );
 
     editor.izoom = json['izoom'];
     editor.ioffset = Offset(json['ioffset']['dx'], json['ioffset']['dy']);
     editor.iinterval = json['iinterval'];
     editor.idivisions = json['idivisions'];
 
-    final nodeMap = (json['nodes'] as Map<String, dynamic>).map(
-      (key, nodedata) => MapEntry(key, Node.fromJson(nodedata, typeRegistry)),
-    );
-    editor.nodes.addAll(nodeMap);
+    List<MapEntry<String, Node<dynamic>>> parsedNodesNodes = [];
+    (json['nodes'] as Map<String, dynamic>).forEach((key, nodedata) {
+      final n = Node.fromMap(
+        nodedata,
+        nodeBuilderRegistry,
+        portBuilderRegistry,
+      );
+      if (n != null) {
+        parsedNodesNodes.add(MapEntry(key, n));
+      }
+    });
+    editor.nodes.addEntries(parsedNodesNodes);
 
-    final linkList = (json['links'] as List<dynamic>?) ?? [];
-    final parsedLinks = linkList
-        .map((linkJson) => Link.fromMap(linkJson))
-        .toList();
-
+    final List<Link> parsedLinks = [];
+    for (final linkJson in (json['links'] as List? ?? [])) {
+      final link = Link.fromMap(linkJson, portBuilderRegistry);
+      if (link != null) {
+        parsedLinks.add(link);
+      }
+    }
     editor.addLinks(parsedLinks);
 
     return editor;
@@ -313,14 +402,6 @@ class EditorChangeNotifier extends ChangeNotifier {
     nodes.addAll(other.nodes);
     links.addAll(other.links);
     notifyListeners();
-  }
-
-  //----------------
-
-  Widget buildNodeWidget(BuildContext context, Node node) {
-    final entry = typeRegistry[node.type];
-    if (entry == null) return Text('Unknown type: ${node.type}');
-    return entry.builder(context, node);
   }
 
   //----------------
@@ -554,7 +635,7 @@ class EditorChangeNotifier extends ChangeNotifier {
     return nodeRect.overlaps(viewport);
   }
 
-  List<Widget> renderNodes(BuildContext context) {
+  List<Widget> renderNodes() {
     List<Widget> visibleNodes = [];
     print("render");
 
@@ -570,7 +651,8 @@ class EditorChangeNotifier extends ChangeNotifier {
           CustomNode(
             key: ValueKey(node.id),
             node: node,
-            innerWidget: buildNodeWidget(context, node),
+            portBuilderRegistry: portBuilderRegistry,
+            nodeBuilderRegistry: nodeBuilderRegistry,
           ),
         );
       }

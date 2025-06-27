@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:example/pages/recipe.dart';
 import 'package:flutter/material.dart';
@@ -11,25 +10,52 @@ import 'package:moonspace/node_editor/links.dart';
 
 enum NodeTypes { recipe, slider, timer }
 
-final typeRegistry = {
+enum PortTypes { int, double, string, datetime }
+
+final portBuilderRegistry = {
   //
-  NodeTypes.recipe.toString(): TypeBuilderEntry(
+  PortTypes.int.toString(): PortBuilderEntry<int>(
+    deserialize: (p, value) => Port.merge(p, value as int),
+    serialize: (value) => value,
+  ),
+  //
+  PortTypes.double.toString(): PortBuilderEntry<double>(
+    deserialize: (p, value) => Port.merge(p, value as double),
+    serialize: (value) => value,
+  ),
+  //
+  PortTypes.string.toString(): PortBuilderEntry<String>(
+    deserialize: (p, value) =>
+        Port.merge(p, value != null ? value as String : null),
+    serialize: (value) => value,
+  ),
+  //
+  PortTypes.datetime.toString(): PortBuilderEntry<DateTime>(
+    deserialize: (p, value) =>
+        Port.merge(p, value is String ? DateTime.tryParse(value) : null),
+    serialize: (value) => value != null ? (value as DateTime).toString() : null,
+  ),
+};
+
+final nodeBuilderRegistry = {
+  //
+  NodeTypes.recipe.toString(): NodeBuilderEntry<Recipe>(
     builder: (context, node) => RecipeBox(node: node),
-    deserialize: (json) => Recipe.deserialize(json),
-    serialize: (val) => (val is Recipe) ? val.serialize() : null,
+    deserialize: (n, value) => Node.merge(n, Recipe.deserialize(value)),
+    serialize: (value) => (value is Recipe) ? value.serialize() : null,
   ),
 
   //
-  NodeTypes.slider.toString(): TypeBuilderEntry(
+  NodeTypes.slider.toString(): NodeBuilderEntry<double>(
     builder: (context, node) => SliderBox(node: node),
-    deserialize: (json) => json,
+    deserialize: (n, value) => Node.merge(n, value as double),
     serialize: (value) => value,
   ),
 
   //
-  NodeTypes.timer.toString(): TypeBuilderEntry(
+  NodeTypes.timer.toString(): NodeBuilderEntry<double>(
     builder: (context, node) => TimerBox(node: node),
-    deserialize: (json) => json,
+    deserialize: (n, value) => Node.merge(n, value as double),
     serialize: (value) => value,
   ),
 };
@@ -60,7 +86,8 @@ class _NodeEditorScaffoldState extends State<NodeEditorScaffold> {
             ),
             idivisions: 8,
             iinterval: 160,
-            typeRegistry: typeRegistry,
+            nodeBuilderRegistry: nodeBuilderRegistry,
+            portBuilderRegistry: portBuilderRegistry,
           )
           ..addNodes([
             Node<double>(
@@ -72,26 +99,33 @@ class _NodeEditorScaffoldState extends State<NodeEditorScaffold> {
               value: .5,
               ports: [
                 Port<double>(
+                  type: PortTypes.double.toString(),
                   input: false,
                   offsetRatio: Offset(1, 0.3),
                   value: 0.5,
                 ),
                 Port<String>(
+                  type: PortTypes.string.toString(),
                   input: false,
                   offsetRatio: Offset(1, 0.7),
                   value: "Hello",
                 ),
-                Port<int>(input: false, offsetRatio: Offset(0, 0.3), value: 1),
+                Port<int>(
+                  type: PortTypes.int.toString(),
+                  input: false,
+                  offsetRatio: Offset(0, 0.3),
+                  value: 1,
+                ),
                 // Port<DateTime>(
                 //   input: false,
                 //   offsetRatio: Offset(0, 0.7),
                 //   value: DateTime.now(),
                 // ),
-                Port<Map<String, String>>(
-                  input: false,
-                  offsetRatio: Offset(0.3, 1),
-                  value: {"hello": "Hello"},
-                ),
+                // Port<Map<String, String>>(
+                //   input: false,
+                //   offsetRatio: Offset(0.3, 1),
+                //   value: {"hello": "Hello"},
+                // ),
                 // Port<Recipe>(
                 //   input: false,
                 //   offsetRatio: Offset(0.7, 1),
@@ -117,8 +151,16 @@ class _NodeEditorScaffoldState extends State<NodeEditorScaffold> {
               size: Offset(120, 120),
               value: .5,
               ports: [
-                Port<double>(input: false, offsetRatio: Offset(1, 0.3)),
-                Port<double>(input: false, offsetRatio: Offset(1, 0.7)),
+                Port<double>(
+                  type: PortTypes.double.toString(),
+                  input: false,
+                  offsetRatio: Offset(1, 0.3),
+                ),
+                Port<String>(
+                  type: PortTypes.string.toString(),
+                  input: false,
+                  offsetRatio: Offset(1, 0.7),
+                ),
               ],
             ),
             Node<Recipe>(
@@ -129,8 +171,13 @@ class _NodeEditorScaffoldState extends State<NodeEditorScaffold> {
               size: const Offset(250, 250),
               value: Recipe(index: 2),
               ports: [
-                Port<double>(input: true, offsetRatio: Offset(0, 0.3)),
+                Port<double>(
+                  type: PortTypes.double.toString(),
+                  input: true,
+                  offsetRatio: Offset(0, 0.3),
+                ),
                 Port<String>(
+                  type: PortTypes.string.toString(),
                   input: false,
                   offsetRatio: Offset(0, 0.7),
                   value: "Hello",
@@ -195,7 +242,7 @@ class RecipeBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (node.value is! Recipe) return Text("Undefined");
+    if (node is! Node<Recipe>) return Text("Undefined");
     Recipe value = node.value;
 
     return RecipeCard(
@@ -216,7 +263,7 @@ class TimerBox extends StatefulWidget {
 }
 
 class _TimerBoxState extends State<TimerBox> {
-  int time = 0;
+  DateTime time = DateTime.now();
 
   @override
   void initState() {
@@ -224,7 +271,7 @@ class _TimerBoxState extends State<TimerBox> {
 
     Timer.periodic(Duration(seconds: 1), (t) {
       if (mounted) {
-        time++;
+        time = DateTime.now();
         setState(() {});
       }
     });
@@ -233,9 +280,12 @@ class _TimerBoxState extends State<TimerBox> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
-      padding: EdgeInsets.all(8),
-      child: Text(time.toString()),
+      color: Colors.purple,
+      alignment: Alignment.center,
+      child: Text(
+        "${time.hour}:${time.minute}:${time.second}",
+        style: TextStyle(fontSize: 16, color: Colors.white),
+      ),
     );
   }
 }
@@ -369,7 +419,8 @@ class _EditorStateState extends State<EditorState> {
                   onPressed: () {
                     final deserializedState = EditorChangeNotifier.fromMap(
                       jsonDecode(savedState),
-                      typeRegistry,
+                      nodeBuilderRegistry,
+                      portBuilderRegistry,
                     );
                     editor.overwriteState(deserializedState);
                   },
@@ -392,50 +443,50 @@ class _EditorStateState extends State<EditorState> {
                   );
                 }),
 
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: editor.typeRegistry.entries
-                      .map(
-                        (e) => InkWell(
-                          onTap: () {
-                            editor.addNodes(
-                              List.generate(
-                                50,
-                                (c) => Node<double>(
-                                  id: 'node$c',
-                                  type: NodeTypes.slider.toString(),
-                                  position: Offset(
-                                    Random().nextDouble() * 800,
-                                    Random().nextDouble() * 800,
-                                  ),
-                                  rotation: 0,
-                                  size: const Offset(150, 100),
-                                  value: .5,
-                                  ports: [
-                                    Port<double>(
-                                      input: false,
-                                      offsetRatio: Offset(1, 0.3),
-                                    ),
-                                    Port<double>(
-                                      input: false,
-                                      offsetRatio: Offset(1, 0.7),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                          child: Container(
-                            width: 80,
-                            height: 80,
-                            margin: EdgeInsets.all(8),
-                            color: Colors.red,
-                            child: Text(e.key),
-                          ),
-                        ),
-                      )
-                      .toList(),
-                ),
+                // Column(
+                //   mainAxisSize: MainAxisSize.min,
+                //   children: editor.typeRegistry.entries
+                //       .map(
+                //         (e) => InkWell(
+                //           onTap: () {
+                //             editor.addNodes(
+                //               List.generate(
+                //                 50,
+                //                 (c) => Node<double>(
+                //                   id: 'node$c',
+                //                   type: NodeTypes.slider.toString(),
+                //                   position: Offset(
+                //                     Random().nextDouble() * 800,
+                //                     Random().nextDouble() * 800,
+                //                   ),
+                //                   rotation: 0,
+                //                   size: const Offset(150, 100),
+                //                   value: .5,
+                //                   ports: [
+                //                     Port<double>(
+                //                       input: false,
+                //                       offsetRatio: Offset(1, 0.3),
+                //                     ),
+                //                     Port<double>(
+                //                       input: false,
+                //                       offsetRatio: Offset(1, 0.7),
+                //                     ),
+                //                   ],
+                //                 ),
+                //               ),
+                //             );
+                //           },
+                //           child: Container(
+                //             width: 80,
+                //             height: 80,
+                //             margin: EdgeInsets.all(8),
+                //             color: Colors.red,
+                //             child: Text(e.key),
+                //           ),
+                //         ),
+                //       )
+                //       .toList(),
+                // ),
               ],
             ),
           ),

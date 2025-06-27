@@ -51,7 +51,13 @@ class _NodeEditorState extends State<NodeEditor> {
       if (box != null) {
         editor.editorOffset = box.localToGlobal(Offset.zero);
         editor.editorSize = Offset(box.size.width, box.size.height);
+        //
+        //
+        //
         setState(() {});
+        //
+        //
+        //
       }
     });
   }
@@ -111,7 +117,7 @@ class _NodeEditorState extends State<NodeEditor> {
                     ),
                   ),
 
-                  ...editor.renderNodes(context),
+                  ...editor.renderNodes(),
                 ],
               ),
             ),
