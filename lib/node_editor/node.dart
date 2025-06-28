@@ -5,8 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:moonspace/node_editor/helper.dart';
 import 'package:moonspace/node_editor/types.dart';
 
-enum ActiveFunction { move, rotate, resize }
-
 class CustomNode extends StatefulWidget {
   final Node node;
 
@@ -26,9 +24,11 @@ class CustomNode extends StatefulWidget {
 
 class _CustomNodeState extends State<CustomNode> {
   Offset startDiffpos = Offset.zero;
+  final Map<String, Offset> initialNodeOffsets = {};
+
   double resizeAspectRatio = 1;
 
-  ActiveFunction? activeFunction;
+  NodeFunction? activeFunction;
 
   Widget buildNodeWidget(BuildContext context) {
     final entry = widget.nodeBuilderRegistry[widget.node.type];
@@ -70,19 +70,25 @@ class _CustomNodeState extends State<CustomNode> {
             child:
                 //
                 GestureDetector(
-                  onTapDown: (details) {
+                  onTapUp: (details) {
                     final globalPos = editor.globalToCanvas(
                       details.globalPosition,
                     );
 
-                    if (editor.isInRegion(editor.topright(node), globalPos)) {
+                    if (node.functions.contains(NodeFunction.remove) &&
+                        editor.isInRegion(editor.topright(node), globalPos)) {
                       editor.removeNodeById(node.id);
-                    } else if (editor.isInRegion(
-                      editor.bottomleft(node),
-                      globalPos,
-                    )) {
+                      return;
+                    } else if (node.functions.contains(NodeFunction.ztop) &&
+                        editor.isInRegion(editor.bottomleft(node), globalPos)) {
                       editor.nodes.remove(node.id);
                       editor.addNodes([node]);
+                      return;
+                    }
+
+                    if (editor.activeKey == LogicalKeyboardKey.shiftLeft) {
+                      node.active = !node.active;
+                      editor.notifyEditor();
                     }
                   },
 
@@ -97,6 +103,14 @@ class _CustomNodeState extends State<CustomNode> {
                     editor.toggleLinkRebuild(true);
 
                     startDiffpos = globalPos - node.position;
+                    initialNodeOffsets.clear();
+                    for (var other in editor.visibleNodes) {
+                      if (other.active) {
+                        initialNodeOffsets[other.id] =
+                            other.position - node.position;
+                      }
+                    }
+
                     resizeAspectRatio = node.size.dx / node.size.dy;
 
                     for (var port in node.ports) {
@@ -108,15 +122,19 @@ class _CustomNodeState extends State<CustomNode> {
                       }
                     }
 
-                    if (editor.isInRegion(editor.topcenter(node), globalPos)) {
-                      activeFunction = ActiveFunction.rotate;
-                    } else if (editor.isInRegion(
-                      editor.bottomright(node),
-                      globalPos,
-                    )) {
-                      activeFunction = ActiveFunction.resize;
-                    } else {
-                      activeFunction = ActiveFunction.move;
+                    if (node.functions.contains(NodeFunction.rotate) &&
+                        editor.isInRegion(editor.topcenter(node), globalPos)) {
+                      activeFunction = NodeFunction.rotate;
+                    } else
+                    //
+                    if (node.functions.contains(NodeFunction.resize) &&
+                        editor.isInRegion(
+                          editor.bottomright(node),
+                          globalPos,
+                        )) {
+                      activeFunction = NodeFunction.resize;
+                    } else if (node.functions.contains(NodeFunction.move)) {
+                      activeFunction = NodeFunction.move;
                     }
                   },
 
@@ -133,7 +151,7 @@ class _CustomNodeState extends State<CustomNode> {
                       return;
                     }
 
-                    if (activeFunction == ActiveFunction.rotate) {
+                    if (activeFunction == NodeFunction.rotate) {
                       final cenpos = globalPos - node.center;
                       double rawAngle =
                           math.atan2(cenpos.dy, cenpos.dx) + degree90;
@@ -146,20 +164,31 @@ class _CustomNodeState extends State<CustomNode> {
 
                       node.rotation = rawAngle;
                     }
-                    if (activeFunction == ActiveFunction.move) {
-                      Offset newPos = globalPos - startDiffpos;
+                    if (activeFunction == NodeFunction.move) {
+                      if (node.active) {
+                        Offset basePos = globalPos - startDiffpos;
+                        for (var key in initialNodeOffsets.keys) {
+                          Offset offset =
+                              initialNodeOffsets[key] ?? Offset.zero;
+                          Offset newPos = basePos + offset;
 
-                      if (controlPressed) {
-                        const snapSize = 10.0; // Snap every 10 pixels
-                        newPos = Offset(
-                          (newPos.dx / snapSize).round() * snapSize,
-                          (newPos.dy / snapSize).round() * snapSize,
-                        );
+                          if (controlPressed) {
+                            newPos = Offset(
+                              (newPos.dx / snapSize).round() * snapSize,
+                              (newPos.dy / snapSize).round() * snapSize,
+                            );
+                          }
+
+                          editor.getNodeById(key)?.position = newPos;
+                        }
+                        editor.notifyEditor();
+                        return;
+                      } else {
+                        Offset newPos = globalPos - startDiffpos;
+                        node.position = newPos;
                       }
-
-                      node.position = newPos;
                     }
-                    if (activeFunction == ActiveFunction.resize) {
+                    if (activeFunction == NodeFunction.resize) {
                       final rev =
                           rotateAroundCenter(
                             globalPos,
@@ -198,6 +227,9 @@ class _CustomNodeState extends State<CustomNode> {
                       Container(
                         padding: EdgeInsets.all(2 * editor.zoneRadius),
                         decoration: BoxDecoration(
+                          border: node.active
+                              ? Border.all()
+                              : Border.all(color: Colors.transparent),
                           color: activeFunction != null
                               ? cs.surfaceContainer
                               : Colors.transparent,
@@ -219,29 +251,33 @@ class _CustomNodeState extends State<CustomNode> {
                         );
                       }),
 
-                      Positioned(
-                        left: 0,
-                        top: node.size.dy - editor.zoneRadius * 2,
-                        child: Icon(Icons.workspaces_outlined, size: 20),
-                      ),
+                      if (node.functions.contains(NodeFunction.ztop))
+                        Positioned(
+                          left: 0,
+                          top: node.size.dy - editor.zoneRadius * 2,
+                          child: Icon(Icons.workspaces_outlined, size: 20),
+                        ),
 
-                      Positioned(
-                        left: node.size.dx - editor.zoneRadius * 2,
-                        top: 0,
-                        child: Icon(Icons.clear, size: 20),
-                      ),
+                      if (node.functions.contains(NodeFunction.remove))
+                        Positioned(
+                          left: node.size.dx - editor.zoneRadius * 2,
+                          top: 0,
+                          child: Icon(Icons.clear, size: 20),
+                        ),
 
-                      Positioned(
-                        left: node.size.dx / 2 - editor.zoneRadius,
-                        top: 0,
-                        child: Icon(Icons.circle_outlined, size: 20),
-                      ),
+                      if (node.functions.contains(NodeFunction.rotate))
+                        Positioned(
+                          left: node.size.dx / 2 - editor.zoneRadius,
+                          top: 0,
+                          child: Icon(Icons.circle_outlined, size: 20),
+                        ),
 
-                      Positioned(
-                        left: node.size.dx - editor.zoneRadius * 2,
-                        top: node.size.dy - editor.zoneRadius * 2,
-                        child: Icon(Icons.zoom_out_map_outlined, size: 20),
-                      ),
+                      if (node.functions.contains(NodeFunction.resize))
+                        Positioned(
+                          left: node.size.dx - editor.zoneRadius * 2,
+                          top: node.size.dy - editor.zoneRadius * 2,
+                          child: Icon(Icons.zoom_out_map_outlined, size: 20),
+                        ),
                     ],
                   ),
                 ),

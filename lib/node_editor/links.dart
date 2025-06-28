@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:moonspace/node_editor/helper.dart';
 import 'package:moonspace/node_editor/types.dart';
 
 class LinkStyle {
@@ -127,6 +126,7 @@ class LinkPainter extends CustomPainter {
     for (final link in editor.links.entries) {
       final start = editor.getPortOffset(link.value.outputPort);
       final end = editor.getPortOffset(link.value.inputPort);
+      final color = link.value.outputPort.color;
       if (!start.node.visible && !end.node.visible) {
         return;
       }
@@ -141,7 +141,7 @@ class LinkPainter extends CustomPainter {
         editor.activeLinkId = link.value.id;
       }
 
-      paint.color = isHovered ? Colors.orange : linkStyle.linkColor;
+      paint.color = isHovered ? linkStyle.linkColor : color;
       canvas.drawPath(path, paint);
 
       animatedTravelLink(
@@ -353,13 +353,13 @@ void animatedTravelLink(
   }
 }
 
-List<Offset> rotatedTriangle(Offset center, double angle, double radius) {
-  // Define triangle points relative to `pos` (unrotated)
-  final points = [
-    center + Offset(radius, -radius), // bottom left
-    center + Offset(-radius, 0), // center
-    center + Offset(radius, radius), // top left
-  ];
+// List<Offset> rotatedTriangle(Offset center, double angle, double radius) {
+//   // Define triangle points relative to `pos` (unrotated)
+//   final points = [
+//     center + Offset(radius, -radius), // bottom left
+//     center + Offset(-radius, 0), // center
+//     center + Offset(radius, radius), // top left
+//   ];
 
-  return points.map((p) => rotateAroundCenter(p, center, angle)).toList();
-}
+//   return points.map((p) => rotateAroundCenter(p, center, angle)).toList();
+// }

@@ -20,5 +20,6 @@ const Offset offsetTopRightRatio = Offset(1, 0);
 const Offset offsetBottomRightRatio = Offset(1, 1);
 const Offset offsetBottomLeftRatio = Offset(0, 1);
 
+const snapSize = 10.0;
 const rotationSnapStep = math.pi / 12;
 const degree90 = math.pi / 2;

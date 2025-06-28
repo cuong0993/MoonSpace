@@ -9,6 +9,12 @@ import 'package:moonspace/helper/extensions/theme_ext.dart';
 import 'package:moonspace/node_editor/export.dart';
 import 'package:moonspace/node_editor/links.dart';
 
+// TODO: Drag and drop
+// TODO: Performance Group Inherited widget, grouped node rebuild
+// TODO: Trello list
+// TODO: Excalidraw draw
+// TODO: Layering
+
 enum NodeTypes { recipe, slider, timer }
 
 enum PortTypes { int, double, string, datetime, map }
@@ -211,6 +217,7 @@ class TimerBox extends StatefulWidget {
       rotation: 0,
       size: Offset(120, 120),
       value: .5,
+      functions: {},
       ports: [
         Port<double>(
           type: PortTypes.double.toString(),
@@ -417,7 +424,6 @@ class _EditorStateState extends State<EditorState> {
                 Text(
                   'IOffset: ${editor.ioffset.dx.toStringAsFixed(1)},${editor.ioffset.dy.toStringAsFixed(1)}',
                 ),
-                Text('Active: ${editor.activeNodeId}'),
                 Text('Nodes: ${editor.nodes.length}'),
                 Column(
                   children: editor.links.values.map((v) => Text(v.id)).toList(),
@@ -463,7 +469,6 @@ class _EditorStateState extends State<EditorState> {
                 ...editor.nodes.entries.map((node) {
                   return FilledButton(
                     onPressed: () {
-                      editor.updateActiveNode(node.value.id);
                       editor.interactiveAnimateTo(node.value.center, context);
                     },
                     child: Text("Focus ${node.value.id}"),
@@ -477,7 +482,7 @@ class _EditorStateState extends State<EditorState> {
                         (e) => InkWell(
                           onTap: () {
                             editor.addNodes(
-                              List.generate(50, (c) {
+                              List.generate(2000, (c) {
                                 return SliderBox.newSliderNode(
                                   'NewSliderNode$c',
                                   Offset(
@@ -509,6 +514,7 @@ class _EditorStateState extends State<EditorState> {
           },
           icon: Icon(Icons.keyboard_arrow_right),
         ),
+        Text(editor.debug),
       ],
     );
   }

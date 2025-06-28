@@ -28,7 +28,7 @@ class _NodeEditorState extends State<NodeEditor> {
 
     if (!_listenerAttached) {
       editor.editorRebuildStream = createThrottleDebounceFunc(200, (d) {
-        setState(() {});
+        editor.notifyEditor();
       }, leading: false);
 
       final matrix = Matrix4.identity()
@@ -57,11 +57,7 @@ class _NodeEditorState extends State<NodeEditor> {
         editor.editorOffset = box.localToGlobal(Offset.zero);
         editor.editorSize = Offset(box.size.width, box.size.height);
         //
-        //
-        //
         // setState(() {});
-        //
-        //
         //
       }
     });
@@ -88,14 +84,10 @@ class _NodeEditorState extends State<NodeEditor> {
           autofocus: true,
           child: InteractiveViewer(
             constrained: false,
-            panEnabled: editor.activeNodeId == null,
+            panEnabled: true,
             transformationController: _controller,
             // boundaryMargin: const EdgeInsets.all(double.infinity),
-            onInteractionEnd: (details) {
-              // editor.notifyEditor();
-              // editor.editorRebuildStream.add(true);
-              // setState(() {});
-            },
+            onInteractionEnd: (details) {},
             onInteractionUpdate: (details) {
               editor.editorRebuildStream.add(true);
             },

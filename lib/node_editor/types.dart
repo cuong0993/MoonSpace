@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -26,6 +25,7 @@ class Port<T> {
   final String type;
   final bool input;
   final Offset offsetRatio;
+  final bool quickUpdate;
 
   T? value;
 
@@ -36,6 +36,7 @@ class Port<T> {
     this.input = false,
     required this.offsetRatio,
     this.value,
+    this.quickUpdate = true,
   }) : assert(
          offsetRatio.dx >= 0.0 &&
              offsetRatio.dx <= 1.0 &&
@@ -136,6 +137,8 @@ class NodeBuilderEntry<T> {
   });
 }
 
+enum NodeFunction { move, rotate, resize, remove, ztop }
+
 class Node<T> {
   final String id;
   final String type;
@@ -145,7 +148,10 @@ class Node<T> {
   T? value;
   List<Port> ports;
 
+  final Set<NodeFunction> functions;
+
   bool visible = false;
+  bool active = false;
 
   Node({
     required this.id,
@@ -155,6 +161,13 @@ class Node<T> {
     required this.size,
     this.value,
     required this.ports,
+    this.functions = const {
+      NodeFunction.move,
+      NodeFunction.resize,
+      NodeFunction.rotate,
+      NodeFunction.remove,
+      NodeFunction.ztop,
+    },
   });
 
   Map<String, dynamic> toMap(
@@ -270,6 +283,14 @@ class Node<T> {
   }
 }
 
+class CachedNode {
+  final Widget widget;
+  final Node node;
+  int renderCount = 0;
+
+  CachedNode(this.widget, this.node);
+}
+
 class EditorChangeNotifier extends ChangeNotifier {
   EditorChangeNotifier({
     required this.nodeBuilderRegistry,
@@ -297,14 +318,11 @@ class EditorChangeNotifier extends ChangeNotifier {
   final Map<String, NodeBuilderEntry> nodeBuilderRegistry;
   final Map<String, PortBuilderEntry> portBuilderRegistry;
 
-  String? activeNodeId;
-
   late final StreamController<Object?> editorRebuildStream;
 
   bool rebuildLink = false;
   void toggleLinkRebuild(bool rebuild) {
     rebuildLink = rebuild;
-    log("toggleLinkRebuild");
     notifyListeners();
   }
 
@@ -321,11 +339,14 @@ class EditorChangeNotifier extends ChangeNotifier {
   int idivisions;
 
   double zoneRadius = 10;
+  double scenePadding = 200;
 
   Offset editorOffset;
   Offset editorSize;
 
   final LinkStyle linkStyle;
+
+  String debug = "";
 
   // Offset? debugEditGlobalPosition;
   // Offset? debugMousePosition;
@@ -410,14 +431,12 @@ class EditorChangeNotifier extends ChangeNotifier {
     links
       ..clear()
       ..addAll(other.links);
-    log("overwriteState");
     notifyListeners();
   }
 
   void mergeState(EditorChangeNotifier other) {
     nodes.addAll(other.nodes);
     links.addAll(other.links);
-    log("mergeState");
     notifyListeners();
   }
 
@@ -434,7 +453,6 @@ class EditorChangeNotifier extends ChangeNotifier {
       nodes[node.id] = node;
     }
 
-    log("addNodes");
     notifyListeners();
   }
 
@@ -454,14 +472,12 @@ class EditorChangeNotifier extends ChangeNotifier {
       removeLinkById(id);
     }
 
-    log("removeNodeById $nodeId");
     notifyListeners();
   }
 
   void clear() {
     nodes.clear();
     links.clear();
-    log("clear");
     notifyListeners();
   }
 
@@ -497,9 +513,6 @@ class EditorChangeNotifier extends ChangeNotifier {
 
       links[link.id] = link;
     }
-
-    // print("addLinks");
-    // notifyListeners();
   }
 
   void addLinksByPort(
@@ -527,15 +540,15 @@ class EditorChangeNotifier extends ChangeNotifier {
     addLinks(l);
   }
 
-  void updateLinkValue(String linkId, dynamic value) {
-    final link = links[linkId];
-    if (link != null) {
-      link.inputPort.value = value;
-      link.outputPort.value = value;
-      // print("updateLinkValue");
-      // notifyListeners();
-    }
-  }
+  // void updateLinkValue(String linkId, dynamic value) {
+  //   final link = links[linkId];
+  //   if (link != null) {
+  //     link.inputPort.value = value;
+  //     link.outputPort.value = value;
+  //     // print("updateLinkValue");
+  //     // notifyListeners();
+  //   }
+  // }
 
   void updatePortValue(Port port, dynamic value) {
     port.value = value;
@@ -543,8 +556,15 @@ class EditorChangeNotifier extends ChangeNotifier {
       link.inputPort.value = value;
       link.outputPort.value = value;
     }
-    // print("updatePortValue");
-    // notifyListeners();
+    if (port.quickUpdate) {
+      notifyListeners();
+    } else {
+      editorRebuildStream.add(true);
+    }
+  }
+
+  void notifyEditor() {
+    notifyListeners();
   }
 
   void removeLinkById(String id) {
@@ -579,15 +599,6 @@ class EditorChangeNotifier extends ChangeNotifier {
     ioffset = off;
   }
 
-  void updateActiveNode(String? id) {
-    activeNodeId = id;
-  }
-
-  void notifyEditor() {
-    // print("notifyEditor");
-    // notifyListeners();
-  }
-
   void updateKeyboardKey(LogicalKeyboardKey? key) {
     activeKey = key;
   }
@@ -596,7 +607,6 @@ class EditorChangeNotifier extends ChangeNotifier {
     tempLinkStartPort = null;
     tempLinkEndPos = null;
     rebuildLink = false;
-    log("removeTempLink");
     notifyListeners();
   }
 
@@ -633,14 +643,13 @@ class EditorChangeNotifier extends ChangeNotifier {
     return (global - editorOffset - ioffset) / izoom;
   }
 
-  bool checkIfNodeVisible(Node node, {double padding = 100}) {
+  bool checkIfNodeVisible(Node node) {
     // Viewport in scene space
 
     final sceneTopLeft = (Offset.zero - ioffset) / izoom;
     final sceneBottomRight = (editorSize - ioffset) / izoom;
 
     // Expand viewport with padding (converted to scene scale)
-    final scenePadding = padding; // izoom;
     final viewport = Rect.fromPoints(
       sceneTopLeft,
       sceneBottomRight,
@@ -659,12 +668,18 @@ class EditorChangeNotifier extends ChangeNotifier {
   List<Node> visibleNodes = [];
   List<Widget> visibleWidgets = [];
   final LinkedHashMap<String, CachedNode> _visibleNodeCache = LinkedHashMap();
+  int _cacheClearCount = 0;
+  final int _cacheClearThreshold = 10;
   int _rebuildCount = 0;
-  final int _resetThreshold = 100;
+  final int _rebuildResetThreshold = 100;
+  final int _maxCacheItemCount = 200;
+
   List<Widget> renderNodes() {
     //
     visibleNodes.clear();
     visibleWidgets.clear();
+
+    int cachedCount = 0;
 
     for (final entry in nodes.entries) {
       final node = entry.value;
@@ -675,6 +690,8 @@ class EditorChangeNotifier extends ChangeNotifier {
 
         visibleNodes.add(node);
         node.visible = true;
+
+        cachedCount++;
 
         if (cached != null) {
           cached.renderCount += 1;
@@ -692,18 +709,45 @@ class EditorChangeNotifier extends ChangeNotifier {
         }
       } else {
         node.visible = false;
+        node.active = false;
+      }
+    }
+
+    int deleted = 0;
+
+    _cacheClearCount++;
+    if (_visibleNodeCache.length > _maxCacheItemCount &&
+        _cacheClearCount >= _cacheClearThreshold) {
+      _cacheClearCount = 0;
+      final targetSize = (_maxCacheItemCount * 0.7).floor();
+
+      // Collect non-visible entries
+      final nonVisible = _visibleNodeCache.entries
+          .where((e) => !e.value.node.visible)
+          .toList();
+
+      // Sort by least used first
+      nonVisible.sort(
+        (a, b) => a.value.renderCount.compareTo(b.value.renderCount),
+      );
+
+      for (final entry in nonVisible) {
+        if (_visibleNodeCache.length <= targetSize) break;
+        _visibleNodeCache.remove(entry.key);
+        deleted++;
       }
     }
 
     _rebuildCount++;
-    if (_rebuildCount >= _resetThreshold) {
+    if (_rebuildCount >= _rebuildResetThreshold) {
       _rebuildCount = 0;
       for (final entry in _visibleNodeCache.entries) {
         entry.value.renderCount = 0;
       }
     }
 
-    print("Visible: ${visibleWidgets.length}/${nodes.length}");
+    debug =
+        "Visible: ($cachedCount ${visibleWidgets.length - cachedCount})/${nodes.length}, deleted: $deleted, active: ${visibleNodes.where((n) => n.active).length}";
 
     return visibleWidgets;
   }
@@ -738,12 +782,4 @@ class EditorNotifier extends InheritedNotifier<EditorChangeNotifier> {
 
   static EditorChangeNotifier of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<EditorNotifier>()!.notifier!;
-}
-
-class CachedNode {
-  final Widget widget;
-  final Node node;
-  int renderCount = 0;
-
-  CachedNode(this.widget, this.node);
 }
