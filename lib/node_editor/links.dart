@@ -61,9 +61,11 @@ class LinkPainter extends CustomPainter {
 
     editor.activeLinkId = null;
 
-    for (final nodeentry in editor.nodes.entries) {
-      final node = nodeentry.value;
-      for (final port in nodeentry.value.ports) {
+    for (final nodeentry in editor.visibleNodes) {
+      // for (final nodeentry in editor.nodes.entries) {
+      final node = nodeentry;
+      // final node = nodeentry.value;
+      for (final port in node.ports) {
         if (editor.tempLinkEndPos != null) {
           final isInPort = editor.isInPort(node, port, editor.tempLinkEndPos!);
 
@@ -123,10 +125,13 @@ class LinkPainter extends CustomPainter {
     }
 
     for (final link in editor.links.entries) {
-      Offset start = editor.getPortOffset(link.value.outputPort);
-      Offset end = editor.getPortOffset(link.value.inputPort);
+      final start = editor.getPortOffset(link.value.outputPort);
+      final end = editor.getPortOffset(link.value.inputPort);
+      if (!start.node.visible && !end.node.visible) {
+        return;
+      }
 
-      final path = approximateLinkPath(start, end, linkStyle);
+      final path = approximateLinkPath(start.offset, end.offset, linkStyle);
 
       bool isHovered = mousePosition == null
           ? false
@@ -139,7 +144,14 @@ class LinkPainter extends CustomPainter {
       paint.color = isHovered ? Colors.orange : linkStyle.linkColor;
       canvas.drawPath(path, paint);
 
-      animatedTravelLink(start, end, linkStyle, canvas, paint, progress);
+      animatedTravelLink(
+        start.offset,
+        end.offset,
+        linkStyle,
+        canvas,
+        paint,
+        progress,
+      );
     }
 
     if (mousePosition != null) {
@@ -158,7 +170,10 @@ class LinkPainter extends CustomPainter {
       if (end != null) {
         canvas.drawCircle(end, 4, tempPaint);
 
-        canvas.drawPath(approximateLinkPath(start, end, linkStyle), tempPaint);
+        canvas.drawPath(
+          approximateLinkPath(start.offset, end, linkStyle),
+          tempPaint,
+        );
       }
     }
 
@@ -236,34 +251,29 @@ class _LinkBuilderState extends State<LinkBuilder>
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        print("linkbuilder ${constraints.smallest}");
-        return RepaintBoundary(
-          child: MouseRegion(
-            onHover: (event) {
-              mousePosition = widget.editor.localToCanvasOffset(
-                event.localPosition,
-                context,
-              );
-              setState(() {});
-            },
-            onExit: (event) {
-              mousePosition = null;
-              setState(() {});
-            },
-            child: CustomPaint(
-              painter: LinkPainter(
-                editor: widget.editor,
-                mousePosition: mousePosition,
-                repaint: _controller,
-              ),
-              isComplex: true,
-              willChange: true,
-            ),
+    return RepaintBoundary(
+      child: MouseRegion(
+        onHover: (event) {
+          mousePosition = widget.editor.localToCanvasOffset(
+            event.localPosition,
+            context,
+          );
+          setState(() {});
+        },
+        onExit: (event) {
+          mousePosition = null;
+          setState(() {});
+        },
+        child: CustomPaint(
+          painter: LinkPainter(
+            editor: widget.editor,
+            mousePosition: mousePosition,
+            repaint: _controller,
           ),
-        );
-      },
+          isComplex: true,
+          willChange: true,
+        ),
+      ),
     );
   }
 }

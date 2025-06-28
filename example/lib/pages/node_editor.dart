@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:example/pages/recipe.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +11,7 @@ import 'package:moonspace/node_editor/links.dart';
 
 enum NodeTypes { recipe, slider, timer }
 
-enum PortTypes { int, double, string, datetime }
+enum PortTypes { int, double, string, datetime, map }
 
 final portBuilderRegistry = {
   //
@@ -20,7 +21,8 @@ final portBuilderRegistry = {
   ),
   //
   PortTypes.double.toString(): PortBuilderEntry<double>(
-    deserialize: (p, value) => Port.merge(p, value as double),
+    deserialize: (p, value) =>
+        Port.merge(p, value != null ? value as double : null),
     serialize: (value) => value,
   ),
   //
@@ -34,6 +36,12 @@ final portBuilderRegistry = {
     deserialize: (p, value) =>
         Port.merge(p, value is String ? DateTime.tryParse(value) : null),
     serialize: (value) => value != null ? (value as DateTime).toString() : null,
+  ),
+  //
+  PortTypes.map.toString(): PortBuilderEntry<Map<String, dynamic>>(
+    deserialize: (p, value) =>
+        Port.merge(p, value.runtimeType == String ? jsonDecode(value) : null),
+    serialize: (value) => jsonEncode(value),
   ),
 };
 
@@ -90,106 +98,16 @@ class _NodeEditorScaffoldState extends State<NodeEditorScaffold> {
             portBuilderRegistry: portBuilderRegistry,
           )
           ..addNodes([
-            Node<double>(
-              id: 'nodeTimer1',
-              type: NodeTypes.timer.toString(),
-              position: const Offset(20, 100),
-              rotation: 0,
-              size: Offset(120, 120),
-              value: .5,
-              ports: [
-                Port<double>(
-                  type: PortTypes.double.toString(),
-                  input: false,
-                  offsetRatio: Offset(1, 0.3),
-                  value: 0.5,
-                ),
-                Port<String>(
-                  type: PortTypes.string.toString(),
-                  input: false,
-                  offsetRatio: Offset(1, 0.7),
-                  value: "Hello",
-                ),
-                Port<int>(
-                  type: PortTypes.int.toString(),
-                  input: false,
-                  offsetRatio: Offset(0, 0.3),
-                  value: 1,
-                ),
-                // Port<DateTime>(
-                //   input: false,
-                //   offsetRatio: Offset(0, 0.7),
-                //   value: DateTime.now(),
-                // ),
-                // Port<Map<String, String>>(
-                //   input: false,
-                //   offsetRatio: Offset(0.3, 1),
-                //   value: {"hello": "Hello"},
-                // ),
-                // Port<Recipe>(
-                //   input: false,
-                //   offsetRatio: Offset(0.7, 1),
-                //   value: Recipe(index: 1),
-                // ),
-                // Port<(double, double)>(
-                //   input: false,
-                //   offsetRatio: Offset(0.3, 0),
-                //   value: (2, 3),
-                // ),
-                // Port<({String title, String subtitle})>(
-                //   input: false,
-                //   offsetRatio: Offset(0.7, 0),
-                //   value: (title: "Hello", subtitle: "hello"),
-                // ),
-              ],
-            ),
-            Node<double>(
-              id: 'nodeSlider1',
-              type: NodeTypes.slider.toString(),
-              position: const Offset(20, 300),
-              rotation: 0,
-              size: Offset(120, 120),
-              value: .5,
-              ports: [
-                Port<double>(
-                  type: PortTypes.double.toString(),
-                  input: false,
-                  offsetRatio: Offset(1, 0.3),
-                ),
-                Port<String>(
-                  type: PortTypes.string.toString(),
-                  input: false,
-                  offsetRatio: Offset(1, 0.7),
-                ),
-              ],
-            ),
-            Node<Recipe>(
-              id: 'nodeRecipe1',
-              type: NodeTypes.recipe.toString(),
-              position: const Offset(200, 100),
-              rotation: 0,
-              size: const Offset(250, 250),
-              value: Recipe(index: 2),
-              ports: [
-                Port<double>(
-                  type: PortTypes.double.toString(),
-                  input: true,
-                  offsetRatio: Offset(0, 0.3),
-                ),
-                Port<String>(
-                  type: PortTypes.string.toString(),
-                  input: false,
-                  offsetRatio: Offset(0, 0.7),
-                  value: "Hello",
-                ),
-              ],
-            ),
+            TimerBox.newTimerNode('TimerNode1'),
+            SliderBox.newSliderNode('SliderNode1', const Offset(20, 340)),
+            SliderBox.newSliderNode('SliderNode2', const Offset(180, 340)),
+            RecipeBox.newRecipeNode('RecipeNode1'),
           ])
           ..addLinksByPort([
             (
-              nodeId1: "nodeSlider1",
+              nodeId1: "SliderNode1",
               index1: 0,
-              nodeId2: "nodeRecipe1",
+              nodeId2: "RecipeNode1",
               index2: 0,
               value: .5,
             ),
@@ -251,6 +169,30 @@ class RecipeBox extends StatelessWidget {
       downScroll: false,
     );
   }
+
+  static Node<Recipe> newRecipeNode(String id) {
+    return Node<Recipe>(
+      id: id,
+      type: NodeTypes.recipe.toString(),
+      position: const Offset(220, 40),
+      rotation: 0,
+      size: const Offset(250, 250),
+      value: Recipe(index: 2),
+      ports: [
+        Port<double>(
+          type: PortTypes.double.toString(),
+          input: true,
+          offsetRatio: Offset(0, 0.3),
+        ),
+        Port<String>(
+          type: PortTypes.string.toString(),
+          input: false,
+          offsetRatio: Offset(0, 0.7),
+          value: "Hello",
+        ),
+      ],
+    );
+  }
 }
 
 class TimerBox extends StatefulWidget {
@@ -260,6 +202,64 @@ class TimerBox extends StatefulWidget {
 
   @override
   State<TimerBox> createState() => _TimerBoxState();
+
+  static Node<double> newTimerNode(String id) {
+    return Node<double>(
+      id: id,
+      type: NodeTypes.timer.toString(),
+      position: const Offset(20, 100),
+      rotation: 0,
+      size: Offset(120, 120),
+      value: .5,
+      ports: [
+        Port<double>(
+          type: PortTypes.double.toString(),
+          input: false,
+          offsetRatio: Offset(1, 0.3),
+          value: 0.5,
+        ),
+        Port<String>(
+          type: PortTypes.string.toString(),
+          input: false,
+          offsetRatio: Offset(1, 0.7),
+          value: "Hello",
+        ),
+        Port<int>(
+          type: PortTypes.int.toString(),
+          input: false,
+          offsetRatio: Offset(0, 0.3),
+          value: 1,
+        ),
+        Port<DateTime>(
+          type: PortTypes.datetime.toString(),
+          input: false,
+          offsetRatio: Offset(0, 0.7),
+          value: DateTime.now(),
+        ),
+        Port<Map<String, dynamic>>(
+          type: PortTypes.map.toString(),
+          input: false,
+          offsetRatio: Offset(0.3, 1),
+          value: {"hello": "Hello"},
+        ),
+        // Port<Recipe>(
+        //   input: false,
+        //   offsetRatio: Offset(0.7, 1),
+        //   value: Recipe(index: 1),
+        // ),
+        // Port<(double, double)>(
+        //   input: false,
+        //   offsetRatio: Offset(0.3, 0),
+        //   value: (2, 3),
+        // ),
+        // Port<({String title, String subtitle})>(
+        //   input: false,
+        //   offsetRatio: Offset(0.7, 0),
+        //   value: (title: "Hello", subtitle: "hello"),
+        // ),
+      ],
+    );
+  }
 }
 
 class _TimerBoxState extends State<TimerBox> {
@@ -280,7 +280,7 @@ class _TimerBoxState extends State<TimerBox> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.purple,
+      decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.purple),
       alignment: Alignment.center,
       child: Text(
         "${time.hour}:${time.minute}:${time.second}",
@@ -297,6 +297,29 @@ class SliderBox extends StatefulWidget {
 
   @override
   State<SliderBox> createState() => _SliderBoxState();
+
+  static Node<double> newSliderNode(String id, Offset position) {
+    return Node<double>(
+      id: id,
+      type: NodeTypes.slider.toString(),
+      position: position,
+      rotation: 0,
+      size: Offset(120, 120),
+      value: .5,
+      ports: [
+        Port<double>(
+          type: PortTypes.double.toString(),
+          input: false,
+          offsetRatio: Offset(1, 0.3),
+        ),
+        Port<String>(
+          type: PortTypes.string.toString(),
+          input: false,
+          offsetRatio: Offset(1, 0.7),
+        ),
+      ],
+    );
+  }
 }
 
 class _SliderBoxState extends State<SliderBox> {
@@ -370,7 +393,7 @@ class _EditorStateState extends State<EditorState> {
 
     if (!_initialized) {
       editor = EditorNotifier.of(context);
-      savedState = jsonEncode(editor.toMap());
+      savedState = JsonEncoder.withIndent(" ").convert(editor.toMap());
       _initialized = true;
     }
   }
@@ -405,10 +428,14 @@ class _EditorStateState extends State<EditorState> {
                 ),
                 FilledButton(
                   onPressed: () {
-                    savedState = jsonEncode(editor.toMap());
+                    savedState = JsonEncoder.withIndent(
+                      " ",
+                    ).convert(editor.toMap());
                   },
                   child: Text("Serialize state"),
                 ),
+                if (savedState.isNotEmpty)
+                  TextFormField(initialValue: savedState, maxLines: 12),
                 FilledButton(
                   onPressed: () {
                     editor.clear();
@@ -443,50 +470,35 @@ class _EditorStateState extends State<EditorState> {
                   );
                 }),
 
-                // Column(
-                //   mainAxisSize: MainAxisSize.min,
-                //   children: editor.typeRegistry.entries
-                //       .map(
-                //         (e) => InkWell(
-                //           onTap: () {
-                //             editor.addNodes(
-                //               List.generate(
-                //                 50,
-                //                 (c) => Node<double>(
-                //                   id: 'node$c',
-                //                   type: NodeTypes.slider.toString(),
-                //                   position: Offset(
-                //                     Random().nextDouble() * 800,
-                //                     Random().nextDouble() * 800,
-                //                   ),
-                //                   rotation: 0,
-                //                   size: const Offset(150, 100),
-                //                   value: .5,
-                //                   ports: [
-                //                     Port<double>(
-                //                       input: false,
-                //                       offsetRatio: Offset(1, 0.3),
-                //                     ),
-                //                     Port<double>(
-                //                       input: false,
-                //                       offsetRatio: Offset(1, 0.7),
-                //                     ),
-                //                   ],
-                //                 ),
-                //               ),
-                //             );
-                //           },
-                //           child: Container(
-                //             width: 80,
-                //             height: 80,
-                //             margin: EdgeInsets.all(8),
-                //             color: Colors.red,
-                //             child: Text(e.key),
-                //           ),
-                //         ),
-                //       )
-                //       .toList(),
-                // ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: editor.nodeBuilderRegistry.entries
+                      .map(
+                        (e) => InkWell(
+                          onTap: () {
+                            editor.addNodes(
+                              List.generate(50, (c) {
+                                return SliderBox.newSliderNode(
+                                  'NewSliderNode$c',
+                                  Offset(
+                                    Random().nextDouble() * 800,
+                                    Random().nextDouble() * 800,
+                                  ),
+                                );
+                              }),
+                            );
+                          },
+                          child: Container(
+                            width: 80,
+                            height: 80,
+                            margin: EdgeInsets.all(8),
+                            color: Colors.red,
+                            child: Text(e.key),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
               ],
             ),
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:moonspace/helper/stream/debounce.dart';
 import 'package:moonspace/node_editor/links.dart';
 import 'package:moonspace/node_editor/types.dart';
 
@@ -26,6 +27,10 @@ class _NodeEditorState extends State<NodeEditor> {
     final editor = EditorNotifier.of(context);
 
     if (!_listenerAttached) {
+      editor.editorRebuildStream = createThrottleDebounceFunc(200, (d) {
+        setState(() {});
+      }, leading: false);
+
       final matrix = Matrix4.identity()
         ..translate(-editor.ioffset.dx, -editor.ioffset.dy)
         ..scale(editor.izoom);
@@ -39,9 +44,9 @@ class _NodeEditorState extends State<NodeEditor> {
         editor.updateInteractiveOffset(offset);
       });
 
-      Future.delayed(Duration(milliseconds: 100), () {
-        editor.notifyEditor();
-      });
+      // Future.delayed(Duration(milliseconds: 100), () {
+      //   editor.notifyEditor();
+      // });
 
       _listenerAttached = true;
     }
@@ -54,7 +59,7 @@ class _NodeEditorState extends State<NodeEditor> {
         //
         //
         //
-        setState(() {});
+        // setState(() {});
         //
         //
         //
@@ -87,9 +92,13 @@ class _NodeEditorState extends State<NodeEditor> {
             transformationController: _controller,
             // boundaryMargin: const EdgeInsets.all(double.infinity),
             onInteractionEnd: (details) {
-              editor.notifyEditor();
+              // editor.notifyEditor();
+              // editor.editorRebuildStream.add(true);
+              // setState(() {});
             },
-            // onInteractionUpdate: (details) {},
+            onInteractionUpdate: (details) {
+              editor.editorRebuildStream.add(true);
+            },
             minScale: 0.5,
             maxScale: 2.5,
             child: Listener(
@@ -113,10 +122,9 @@ class _NodeEditorState extends State<NodeEditor> {
                   Positioned.fill(
                     child: LinkBuilder(
                       editor: editor,
-                      animate: editor.tempLinkEndPos != null,
+                      animate: editor.rebuildLink,
                     ),
                   ),
-
                   ...editor.renderNodes(),
                 ],
               ),

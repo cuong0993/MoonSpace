@@ -91,8 +91,10 @@ class _CustomNodeState extends State<CustomNode> {
                       details.globalPosition,
                     );
 
-                    editor.tempLinkEndPos = globalPos;
-                    editor.notifyEditor();
+                    // editor.tempLinkEndPos = globalPos;
+                    // editor.notifyEditor();
+
+                    editor.toggleLinkRebuild(true);
 
                     startDiffpos = globalPos - node.position;
                     resizeAspectRatio = node.size.dx / node.size.dy;
@@ -126,7 +128,10 @@ class _CustomNodeState extends State<CustomNode> {
                       details.globalPosition,
                     );
 
-                    editor.tempLinkEndPos = globalPos;
+                    if (editor.tempLinkStartPort != null) {
+                      editor.tempLinkEndPos = globalPos;
+                      return;
+                    }
 
                     if (activeFunction == ActiveFunction.rotate) {
                       final cenpos = globalPos - node.center;
@@ -182,7 +187,6 @@ class _CustomNodeState extends State<CustomNode> {
                   onPanEnd: (details) {
                     activeFunction = null;
                     editor.removeTempLink();
-                    // setState(() {});
                   },
 
                   //

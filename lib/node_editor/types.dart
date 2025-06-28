@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'dart:collection';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:moonspace/node_editor/helper.dart';
@@ -140,6 +144,8 @@ class Node<T> {
   Offset size;
   T? value;
   List<Port> ports;
+
+  bool visible = false;
 
   Node({
     required this.id,
@@ -293,6 +299,15 @@ class EditorChangeNotifier extends ChangeNotifier {
 
   String? activeNodeId;
 
+  late final StreamController<Object?> editorRebuildStream;
+
+  bool rebuildLink = false;
+  void toggleLinkRebuild(bool rebuild) {
+    rebuildLink = rebuild;
+    log("toggleLinkRebuild");
+    notifyListeners();
+  }
+
   Port? tempLinkStartPort;
   Offset? tempLinkEndPos;
 
@@ -395,12 +410,14 @@ class EditorChangeNotifier extends ChangeNotifier {
     links
       ..clear()
       ..addAll(other.links);
+    log("overwriteState");
     notifyListeners();
   }
 
   void mergeState(EditorChangeNotifier other) {
     nodes.addAll(other.nodes);
     links.addAll(other.links);
+    log("mergeState");
     notifyListeners();
   }
 
@@ -417,7 +434,7 @@ class EditorChangeNotifier extends ChangeNotifier {
       nodes[node.id] = node;
     }
 
-    print("addNodes");
+    log("addNodes");
     notifyListeners();
   }
 
@@ -437,13 +454,14 @@ class EditorChangeNotifier extends ChangeNotifier {
       removeLinkById(id);
     }
 
-    print("removeNodeById");
+    log("removeNodeById $nodeId");
     notifyListeners();
   }
 
   void clear() {
     nodes.clear();
     links.clear();
+    log("clear");
     notifyListeners();
   }
 
@@ -514,8 +532,8 @@ class EditorChangeNotifier extends ChangeNotifier {
     if (link != null) {
       link.inputPort.value = value;
       link.outputPort.value = value;
-      print("updateLinkValue");
-      notifyListeners();
+      // print("updateLinkValue");
+      // notifyListeners();
     }
   }
 
@@ -524,10 +542,9 @@ class EditorChangeNotifier extends ChangeNotifier {
     for (final link in getLinksForPort(port)) {
       link.inputPort.value = value;
       link.outputPort.value = value;
-
-      print("updatePortValue");
     }
-    notifyListeners();
+    // print("updatePortValue");
+    // notifyListeners();
   }
 
   void removeLinkById(String id) {
@@ -567,8 +584,8 @@ class EditorChangeNotifier extends ChangeNotifier {
   }
 
   void notifyEditor() {
-    print("notifyEditor");
-    notifyListeners();
+    // print("notifyEditor");
+    // notifyListeners();
   }
 
   void updateKeyboardKey(LogicalKeyboardKey? key) {
@@ -578,7 +595,8 @@ class EditorChangeNotifier extends ChangeNotifier {
   void removeTempLink() {
     tempLinkStartPort = null;
     tempLinkEndPos = null;
-    print("removeTempLink");
+    rebuildLink = false;
+    log("removeTempLink");
     notifyListeners();
   }
 
@@ -596,9 +614,12 @@ class EditorChangeNotifier extends ChangeNotifier {
 
   //----------------
 
-  Offset getPortOffset(Port port) {
+  ({Node node, Offset offset}) getPortOffset(Port port) {
     final node = getNodeById(port.nodeId!)!;
-    return node.ratioToGlobal(port.offsetRatio, zoneRadius);
+    return (
+      node: node,
+      offset: node.ratioToGlobal(port.offsetRatio, zoneRadius),
+    );
   }
 
   Offset localToCanvasOffset(Offset localPos, BuildContext context) {
@@ -635,30 +656,56 @@ class EditorChangeNotifier extends ChangeNotifier {
     return nodeRect.overlaps(viewport);
   }
 
+  List<Node> visibleNodes = [];
+  List<Widget> visibleWidgets = [];
+  final LinkedHashMap<String, CachedNode> _visibleNodeCache = LinkedHashMap();
+  int _rebuildCount = 0;
+  final int _resetThreshold = 100;
   List<Widget> renderNodes() {
-    List<Widget> visibleNodes = [];
-    print("render");
-
-    // if (visibleNodes.isNotEmpty) {
-    //   return visibleNodes;
-    // }
+    //
+    visibleNodes.clear();
+    visibleWidgets.clear();
 
     for (final entry in nodes.entries) {
       final node = entry.value;
-      final isVisible = checkIfNodeVisible(node);
-      if (isVisible) {
-        visibleNodes.add(
-          CustomNode(
-            key: ValueKey(node.id),
+      final id = node.id;
+
+      if (checkIfNodeVisible(node)) {
+        final cached = _visibleNodeCache[id];
+
+        visibleNodes.add(node);
+        node.visible = true;
+
+        if (cached != null) {
+          cached.renderCount += 1;
+          visibleWidgets.add(cached.widget);
+        } else {
+          final widget = CustomNode(
+            key: ValueKey(id),
             node: node,
             portBuilderRegistry: portBuilderRegistry,
             nodeBuilderRegistry: nodeBuilderRegistry,
-          ),
-        );
+          );
+
+          _visibleNodeCache[id] = CachedNode(widget, node)..renderCount = 1;
+          visibleWidgets.add(widget);
+        }
+      } else {
+        node.visible = false;
       }
     }
-    print("visibility : ${100 * visibleNodes.length / nodes.entries.length}%");
-    return visibleNodes;
+
+    _rebuildCount++;
+    if (_rebuildCount >= _resetThreshold) {
+      _rebuildCount = 0;
+      for (final entry in _visibleNodeCache.entries) {
+        entry.value.renderCount = 0;
+      }
+    }
+
+    print("Visible: ${visibleWidgets.length}/${nodes.length}");
+
+    return visibleWidgets;
   }
 
   bool isInRegion(Offset center, Offset globalPos) {
@@ -691,4 +738,12 @@ class EditorNotifier extends InheritedNotifier<EditorChangeNotifier> {
 
   static EditorChangeNotifier of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<EditorNotifier>()!.notifier!;
+}
+
+class CachedNode {
+  final Widget widget;
+  final Node node;
+  int renderCount = 0;
+
+  CachedNode(this.widget, this.node);
 }
