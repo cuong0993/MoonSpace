@@ -738,184 +738,177 @@ class _CheckoutCartPageState extends State<CheckoutCartPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          centerTitle: false,
-          title: Row(
-            children: [
-              Text('Cart,', style: GoogleFonts.alice(textStyle: context.h2)),
-              Text(
-                ' 3 items',
-                style: GoogleFonts.alice(
-                  textStyle: context.h2,
-                ).c(context.cSur9),
-              ),
-            ],
-          ),
-          actions: [
-            IconButton(
-              onPressed: () {
-                context.nav.pop();
-              },
-              icon: Icon(CupertinoIcons.clear, size: 16),
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        centerTitle: false,
+        title: Row(
+          children: [
+            Text('Cart,', style: GoogleFonts.alice(textStyle: context.h2)),
+            Text(
+              ' 3 items',
+              style: GoogleFonts.alice(textStyle: context.h2).c(context.cSur9),
             ),
           ],
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(60),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Search desserts...',
-                        prefixIcon: const Icon(Icons.search),
-                        filled: true,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              context.nav.pop();
+            },
+            icon: Icon(CupertinoIcons.clear, size: 16),
+          ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(60),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Search desserts...',
+                      prefixIcon: const Icon(Icons.search),
+                      filled: true,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  IconButton(
-                    icon: const Icon(Icons.filter_list),
-                    onPressed: () {
-                      // Open filter modal/sheet
-                    },
-                  ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 12),
+                IconButton(
+                  icon: const Icon(Icons.filter_list),
+                  onPressed: () {
+                    // Open filter modal/sheet
+                  },
+                ),
+              ],
             ),
           ),
         ),
-        bottomNavigationBar: BottomAppBar(
-          height: 125,
-          child: Column(
-            children: [
-              TextField(
-                decoration: InputDecoration(
-                  labelText: 'Promo Code',
-                  suffixIcon: TextButton(
-                    onPressed: () {},
-                    child: const Text('Apply'),
-                  ),
-                  border: const OutlineInputBorder(),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        height: 125,
+        child: Column(
+          children: [
+            TextField(
+              decoration: InputDecoration(
+                labelText: 'Promo Code',
+                suffixIcon: TextButton(
+                  onPressed: () {},
+                  child: const Text('Apply'),
                 ),
+                border: const OutlineInputBorder(),
               ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(child: Text('\$355.00', style: context.h5.w5)),
-                  SizedBox(
-                    width: 150,
-                    height: 40,
-                    child: FilledButton.tonal(
-                      onPressed: () {},
-                      child: const Text('Checkout'),
-                    ),
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(child: Text('\$355.00', style: context.h5.w5)),
+                SizedBox(
+                  width: 150,
+                  height: 40,
+                  child: FilledButton.tonal(
+                    onPressed: () {},
+                    child: const Text('Checkout'),
                   ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+          ],
         ),
-        body: CustomScrollView(
-          slivers: [
-            SliverList(
-              delegate: SliverChildBuilderDelegate((context, index) {
-                final item = RecipesData.dessertMenu[index];
+      ),
+      body: CustomScrollView(
+        slivers: [
+          SliverList(
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final item = RecipesData.dessertMenu[index];
 
-                return Container(
-                  height: 100,
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        height: 80,
-                        width: 80,
-                        child: RecipeImage(
-                          delay: 1.ms,
-                          index: index,
-                          sliver: false,
-                        ),
+              return Container(
+                height: 100,
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      height: 80,
+                      width: 80,
+                      child: RecipeImage(
+                        delay: 1.ms,
+                        index: index,
+                        sliver: false,
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(item.title, style: context.h7),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(item.title, style: context.h7),
+                              ),
+                              IconButton.outlined(
+                                iconSize: 14,
+                                constraints: BoxConstraints(
+                                  maxHeight: 32,
+                                  maxWidth: 32,
                                 ),
-                                IconButton.outlined(
-                                  iconSize: 14,
-                                  constraints: BoxConstraints(
-                                    maxHeight: 32,
-                                    maxWidth: 32,
+                                padding: EdgeInsets.all(6),
+                                icon: const Icon(CupertinoIcons.clear),
+                                onPressed: () {},
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '\$95.00',
+                                    style: context.p.line.c(context.cSur8),
                                   ),
-                                  padding: EdgeInsets.all(6),
-                                  icon: const Icon(CupertinoIcons.clear),
-                                  onPressed: () {},
+                                  Text('\$85.00', style: context.h7.w6),
+                                ],
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: context.cSur2,
+                                  borderRadius: 32.br,
                                 ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                child: Row(
                                   children: [
-                                    Text(
-                                      '\$95.00',
-                                      style: context.p.line.c(context.cSur8),
+                                    IconButton(
+                                      icon: const Icon(Icons.remove),
+                                      onPressed: () {},
                                     ),
-                                    Text('\$85.00', style: context.h7.w6),
+                                    Text('1'),
+                                    IconButton(
+                                      icon: const Icon(Icons.add),
+                                      onPressed: () {},
+                                    ),
                                   ],
                                 ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: context.cSur2,
-                                    borderRadius: 32.br,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      IconButton(
-                                        icon: const Icon(Icons.remove),
-                                        onPressed: () {},
-                                      ),
-                                      Text('1'),
-                                      IconButton(
-                                        icon: const Icon(Icons.add),
-                                        onPressed: () {},
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                );
-              }, childCount: RecipesData.dessertMenu.length),
-            ),
-          ],
-        ),
+                    ),
+                  ],
+                ),
+              );
+            }, childCount: RecipesData.dessertMenu.length),
+          ),
+        ],
       ),
     );
   }

@@ -11,6 +11,7 @@ import 'package:example/pages/recipe.dart';
 import 'package:example/router/router.dart';
 import 'package:example/smooth_sheets/main.dart';
 import 'package:example/pages/travel.dart';
+import 'package:example/widgetbook.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -26,13 +27,17 @@ import 'package:moonspace/widgets/functions.dart';
 
 import 'package:moonspace/widgets/animated/neon_button.dart';
 
+import 'package:device_frame_plus/device_frame_plus.dart';
+
 void main() {
   // runApp(const GoRouterApp());
   // runApp(const SmoothSheetApp());
 
+  // runApp(ScreenshotApp());
+
   // return;
 
-  final initialLocation = '/node_editor';
+  final initialLocation = '/';
 
   electrify(
     title: "Home",
@@ -169,18 +174,6 @@ void main() {
           },
         ),
         GoRoute(
-          path: "/typography",
-          builder: (context, state) {
-            return TypographyScreen();
-          },
-        ),
-        GoRoute(
-          path: "/colors",
-          builder: (context, state) {
-            return ColorSchemeExample();
-          },
-        ),
-        GoRoute(
           path: "/carousel",
           builder: (context, state) {
             return Carouselmain();
@@ -235,6 +228,12 @@ void main() {
             return NodeEditorScaffold();
           },
         ),
+        GoRoute(
+          path: "/widget_book",
+          builder: (context, state) {
+            return MyWidgetbook();
+          },
+        ),
       ],
     ),
     init: (c) async {},
@@ -257,453 +256,444 @@ class _HomeState extends ConsumerState<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: scaffoldKey,
-      appBar: AppBar(
-        title: Text('${AppTheme.currentTheme.size.width}'),
-        actions: [
-          ThemeBrightnessButton(),
-          if (!context.width6)
-            IconButton(
-              onPressed: () {
-                context.showFormDialog(
-                  builder: (context) {
-                    return ThemeSettings();
-                  },
-                );
-              },
-              icon: Icon(Icons.settings),
-            ),
-        ],
-      ),
+    return DeviceFrame(
+      device: Devices.ios.iPhone13Mini,
+      screen: Scaffold(
+        key: scaffoldKey,
+        appBar: AppBar(
+          title: Text('${AppTheme.currentTheme.size.width}'),
+          actions: [
+            ThemeBrightnessButton(),
+            if (!context.width6)
+              IconButton(
+                onPressed: () {
+                  context.showFormDialog(
+                    builder: (context) {
+                      return ThemeSettings();
+                    },
+                  );
+                },
+                icon: Icon(Icons.settings),
+              ),
+          ],
+        ),
 
-      endDrawer: IntrinsicWidth(
-        child: SizedBox(height: 420, child: NavigationRailSection()),
-      ),
+        endDrawer: IntrinsicWidth(
+          child: SizedBox(height: 420, child: NavigationRailSection()),
+        ),
 
-      // endDrawer: SizedBox(height: 520, child: NavigationDrawerSection()),
-      body: context.width6
-          ? Row(
-              children: [
-                ThemeSettings(),
-                Expanded(child: ListView(children: first(context))),
-                Expanded(child: ListView(children: second(context))),
-                Expanded(child: ListView(children: third(context))),
-              ],
-            )
-          : ListView(
-              children: [
-                ...first(context),
-                ...second(context),
-                ...third(context),
-              ],
-            ),
+        // endDrawer: SizedBox(height: 520, child: NavigationDrawerSection()),
+        body: context.width6
+            ? Row(
+                children: [
+                  ThemeSettings(),
+                  Expanded(child: ListView(children: first(context))),
+                  Expanded(child: ListView(children: second(context))),
+                  Expanded(child: ListView(children: third(context))),
+                ],
+              )
+            : ListView(
+                children: [
+                  ...first(context),
+                  ...second(context),
+                  ...third(context),
+                ],
+              ),
 
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: const Icon(Icons.add),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {},
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
-
-  List<Widget> first(BuildContext context) => [
-    Wrap(
-      children: <Widget>[
-        Buttons(isDisabled: false, hasIcon: false),
-        Buttons(isDisabled: false, hasIcon: true),
-        Buttons(isDisabled: true, hasIcon: false),
-      ],
-    ),
-    Wrap(
-      children: [
-        IconButton.filled(
-          icon: const Icon(Icons.settings_outlined),
-          selectedIcon: const Icon(Icons.settings),
-          onPressed: () {},
-        ),
-        IconButton.filledTonal(
-          icon: const Icon(Icons.settings_outlined),
-          selectedIcon: const Icon(Icons.settings),
-          onPressed: () {},
-        ),
-        IconButton.outlined(
-          icon: const Icon(Icons.settings_outlined),
-          selectedIcon: const Icon(Icons.settings),
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: const Icon(Icons.settings_outlined),
-          selectedIcon: const Icon(Icons.settings),
-          onPressed: () {},
-        ),
-        IconButton.filled(
-          isSelected: true,
-          icon: const Icon(Icons.settings_outlined),
-          selectedIcon: const Icon(Icons.settings),
-          onPressed: () {},
-        ),
-        IconButton.filledTonal(
-          isSelected: true,
-          icon: const Icon(Icons.settings_outlined),
-          selectedIcon: const Icon(Icons.settings),
-          onPressed: () {},
-        ),
-        IconButton.outlined(
-          isSelected: true,
-          icon: const Icon(Icons.settings_outlined),
-          selectedIcon: const Icon(Icons.settings),
-          onPressed: () {},
-        ),
-        IconButton(
-          isSelected: true,
-          icon: const Icon(Icons.settings_outlined),
-          selectedIcon: const Icon(Icons.settings),
-          onPressed: () {},
-        ),
-      ],
-    ),
-    Wrap(
-      children: [
-        ActionChip(
-          label: const Text('Assist'),
-          avatar: const Icon(Icons.event),
-          onPressed: () {},
-        ),
-        FilterChip(
-          label: const Text('Filter'),
-          selected: true,
-          onSelected: (selected) {},
-        ),
-        InputChip(
-          label: const Text('Input'),
-          onPressed: () {},
-          onDeleted: () {},
-        ),
-      ],
-    ),
-    Dropdown(),
-
-    SegmentedButton<String>(
-      segments: const <ButtonSegment<String>>[
-        ButtonSegment(value: "Sizes.extraSmall", label: Text('XS')),
-        ButtonSegment(value: "Sizes.small", label: Text('S')),
-        ButtonSegment(value: "Sizes.medium", label: Text('M')),
-        ButtonSegment(value: "Sizes.large", label: Text('L')),
-        ButtonSegment(value: "Sizes.extraLarge", label: Text('XL')),
-      ],
-      selected: {"Sizes.small"},
-      onSelectionChanged: (newSelection) {},
-      multiSelectionEnabled: true,
-    ),
-
-    Row(
-      children: [
-        Flexible(
-          child: OptionBox(
-            options: [
-              Option(value: "Witch", subtitle: Text("witch"), selected: true),
-              Option(value: "Wizard"),
-              Option(value: "Sorceror"),
-            ],
-          ),
-        ),
-        Flexible(
-          child: OptionBox(
-            options: [
-              Option(value: "Witch", selected: true),
-              Option(value: "Wizard"),
-              Option(value: "Sorceror"),
-            ],
-            multi: true,
-          ),
-        ),
-      ],
-    ),
-
-    Row(
-      children: [
-        Flexible(
-          child: OptionBox(
-            options: [
-              Option(value: "Witch", selected: true),
-              Option(value: "Wizard"),
-              Option(value: "Sorceror"),
-            ],
-            multi: false,
-            display: OptionDisplay.switchTile,
-          ),
-        ),
-
-        Flexible(
-          child: OptionBox(
-            options: [
-              Option(value: "Witch", selected: true),
-              Option(value: "Wizard"),
-              Option(value: "Sorceror"),
-            ],
-            display: OptionDisplay.chip,
-          ),
-        ),
-      ],
-    ),
-  ];
-
-  List<Widget> second(BuildContext context) => [
-    Slider(
-      max: 100,
-      divisions: 5,
-      value: 30,
-      label: "30",
-      onChanged: (value) {},
-    ),
-    SizedBox(height: 8),
-    LinearProgressIndicator(
-      value: .5,
-      minHeight: 10,
-      // color: purple,
-      borderRadius: BorderRadius.circular(8),
-    ),
-
-    NavigationBar(
-      labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-      selectedIndex: 1,
-      onDestinationSelected: (int index) {},
-      destinations: const <Widget>[
-        NavigationDestination(icon: Icon(Icons.explore), label: 'Explore'),
-        NavigationDestination(icon: Icon(Icons.commute), label: 'Commute'),
-        NavigationDestination(
-          selectedIcon: Icon(Icons.bookmark),
-          icon: Icon(Icons.bookmark_border),
-          label: 'Saved',
-        ),
-      ],
-    ),
-
-    DefaultTabController(
-      length: 3,
-      child: TabBar(
-        tabs: const <Widget>[
-          Tab(
-            icon: Icon(Icons.videocam_outlined),
-            text: 'Video',
-            iconMargin: EdgeInsets.only(bottom: 0.0),
-          ),
-          Tab(
-            icon: Icon(Icons.photo_outlined),
-            text: 'Photos',
-            iconMargin: EdgeInsets.only(bottom: 0.0),
-          ),
-          Tab(
-            icon: Icon(Icons.audiotrack_sharp),
-            text: 'Audio',
-            iconMargin: EdgeInsets.only(bottom: 0.0),
-          ),
-        ],
-      ),
-    ),
-
-    AlertDialog(
-      title: const Text('What is a dialog?'),
-      content: const Text(
-        'A dialog is a type of modal window that appears in front of app content to provide critical information, or prompt for a decision to be made.',
-      ),
-      actions: <Widget>[
-        TextButton(
-          child: const Text('Dismiss'),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        FilledButton(
-          child: const Text('Okay'),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ],
-    ),
-
-    MaterialBanner(
-      content: const Text(
-        'A dialog is a type of modal window that appears in front of app content to provide critical information, or prompt for a decision to be made.',
-      ),
-      actions: <Widget>[
-        TextButton(
-          child: const Text('Dismiss'),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        FilledButton(
-          child: const Text('Okay'),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ],
-    ),
-  ];
-
-  List<Widget> third(BuildContext context) => [
-    Wrap(
-      children: [
-        SizedBox(height: 360, child: NavigationDrawerSection()),
-
-        SizedBox(
-          height: 320,
-          child: IntrinsicWidth(child: NavigationRailSection()),
-        ),
-      ],
-    ),
-
-    BottomAppBar(
-      child: Row(
-        children: <Widget>[
-          const IconButtonAnchorExample(),
-          IconButton(
-            tooltip: 'Search',
-            icon: const Icon(Icons.search),
-            onPressed: () {},
-          ),
-          IconButton(
-            tooltip: 'Favorite',
-            icon: const Icon(Icons.favorite),
-            onPressed: () {},
-          ),
-        ],
-      ),
-    ),
-
-    ExpansionPanelList(
-      materialGapSize: 0,
-      children: [
-        ExpansionPanel(
-          canTapOnHeader: true,
-          isExpanded: true,
-          headerBuilder: (context, isExpanded) => Text("Header"),
-          body: Text("Body"),
-        ),
-        ExpansionPanel(
-          canTapOnHeader: true,
-          headerBuilder: (context, isExpanded) => Text("Header"),
-          body: Text("Body"),
-        ),
-      ],
-    ),
-
-    // SizedBox(width: 40, height: 40, child: GradientLoader()),
-
-    // CircularProgress(
-    //   size: 50,
-    //   secondaryColor: Colors.red,
-    //   primaryColor: Colors.yellow,
-    // ),
-    NeonButton(
-      color: context.cs.tertiary,
-      builder: (completed) => Text(
-        "Hello",
-        style: GoogleFonts.agbalumo(
-          textStyle: context.h6.c(
-            completed ? context.cs.onTertiary : context.cs.tertiary,
-          ),
-        ),
-      ),
-    ),
-
-    DataTable(
-      columns: const <DataColumn>[
-        DataColumn(
-          label: Expanded(
-            child: Text('Name', style: TextStyle(fontStyle: FontStyle.italic)),
-          ),
-        ),
-        DataColumn(
-          label: Expanded(
-            child: Text('Age', style: TextStyle(fontStyle: FontStyle.italic)),
-          ),
-        ),
-        DataColumn(
-          label: Expanded(
-            child: Text('Role', style: TextStyle(fontStyle: FontStyle.italic)),
-          ),
-        ),
-      ],
-      rows: const <DataRow>[
-        DataRow(
-          cells: <DataCell>[
-            DataCell(Text('Sarah')),
-            DataCell(Text('19')),
-            DataCell(Text('Student')),
-          ],
-        ),
-        DataRow(
-          cells: <DataCell>[
-            DataCell(Text('Janine')),
-            DataCell(Text('43')),
-            DataCell(Text('Professor')),
-          ],
-        ),
-        DataRow(
-          cells: <DataCell>[
-            DataCell(Text('William')),
-            DataCell(Text('27')),
-            DataCell(Text('Associate Professor')),
-          ],
-        ),
-      ],
-    ),
-
-    Wrap(
-      alignment: WrapAlignment.spaceEvenly,
-      children: [
-        TextButton(
-          child: const Text('Show modal navigation drawer'),
-          onPressed: () {
-            scaffoldKey.currentState!.openEndDrawer();
-          },
-        ),
-        TextButton(
-          child: const Text('Show modal bottom sheet'),
-          onPressed: () {
-            showModalBottomSheet<void>(
-              showDragHandle: true,
-              context: context,
-              constraints: const BoxConstraints(maxWidth: 640),
-              builder: (context) {
-                return SizedBox(
-                  height: 150,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                    child: ListView(
-                      shrinkWrap: true,
-                      scrollDirection: Axis.horizontal,
-                      children: [Text("Hello")],
-                    ),
-                  ),
-                );
-              },
-            );
-          },
-        ),
-        TextButton(
-          child: Text('Show bottom sheet'),
-          onPressed: () {
-            showBottomSheet(
-              elevation: 8.0,
-              context: context,
-              constraints: const BoxConstraints(maxWidth: 640),
-              builder: (context) {
-                return SizedBox(
-                  height: 150,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                    child: ListView(
-                      shrinkWrap: true,
-                      scrollDirection: Axis.horizontal,
-                      children: [Text("Hello")],
-                    ),
-                  ),
-                );
-              },
-            );
-          },
-        ),
-      ],
-    ),
-  ];
 }
+
+List<Widget> first(BuildContext context) => [
+  Wrap(
+    children: <Widget>[
+      Buttons(isDisabled: false, hasIcon: false),
+      Buttons(isDisabled: false, hasIcon: true),
+      Buttons(isDisabled: true, hasIcon: false),
+    ],
+  ),
+  Wrap(
+    children: [
+      IconButton.filled(
+        icon: const Icon(Icons.settings_outlined),
+        selectedIcon: const Icon(Icons.settings),
+        onPressed: () {},
+      ),
+      IconButton.filledTonal(
+        icon: const Icon(Icons.settings_outlined),
+        selectedIcon: const Icon(Icons.settings),
+        onPressed: () {},
+      ),
+      IconButton.outlined(
+        icon: const Icon(Icons.settings_outlined),
+        selectedIcon: const Icon(Icons.settings),
+        onPressed: () {},
+      ),
+      IconButton(
+        icon: const Icon(Icons.settings_outlined),
+        selectedIcon: const Icon(Icons.settings),
+        onPressed: () {},
+      ),
+      IconButton.filled(
+        isSelected: true,
+        icon: const Icon(Icons.settings_outlined),
+        selectedIcon: const Icon(Icons.settings),
+        onPressed: () {},
+      ),
+      IconButton.filledTonal(
+        isSelected: true,
+        icon: const Icon(Icons.settings_outlined),
+        selectedIcon: const Icon(Icons.settings),
+        onPressed: () {},
+      ),
+      IconButton.outlined(
+        isSelected: true,
+        icon: const Icon(Icons.settings_outlined),
+        selectedIcon: const Icon(Icons.settings),
+        onPressed: () {},
+      ),
+      IconButton(
+        isSelected: true,
+        icon: const Icon(Icons.settings_outlined),
+        selectedIcon: const Icon(Icons.settings),
+        onPressed: () {},
+      ),
+    ],
+  ),
+  Wrap(
+    children: [
+      ActionChip(
+        label: const Text('Assist'),
+        avatar: const Icon(Icons.event),
+        onPressed: () {},
+      ),
+      FilterChip(
+        label: const Text('Filter'),
+        selected: true,
+        onSelected: (selected) {},
+      ),
+      InputChip(label: const Text('Input'), onPressed: () {}, onDeleted: () {}),
+    ],
+  ),
+  Dropdown(),
+
+  SegmentedButton<String>(
+    segments: const <ButtonSegment<String>>[
+      ButtonSegment(value: "Sizes.extraSmall", label: Text('XS')),
+      ButtonSegment(value: "Sizes.small", label: Text('S')),
+      ButtonSegment(value: "Sizes.medium", label: Text('M')),
+      ButtonSegment(value: "Sizes.large", label: Text('L')),
+      ButtonSegment(value: "Sizes.extraLarge", label: Text('XL')),
+    ],
+    selected: {"Sizes.small"},
+    onSelectionChanged: (newSelection) {},
+    multiSelectionEnabled: true,
+  ),
+
+  Row(
+    children: [
+      Flexible(
+        child: OptionBox(
+          options: [
+            Option(value: "Witch", subtitle: Text("witch"), selected: true),
+            Option(value: "Wizard"),
+            Option(value: "Sorceror"),
+          ],
+        ),
+      ),
+      Flexible(
+        child: OptionBox(
+          options: [
+            Option(value: "Witch", selected: true),
+            Option(value: "Wizard"),
+            Option(value: "Sorceror"),
+          ],
+          multi: true,
+        ),
+      ),
+    ],
+  ),
+
+  Row(
+    children: [
+      Flexible(
+        child: OptionBox(
+          options: [
+            Option(value: "Witch", selected: true),
+            Option(value: "Wizard"),
+            Option(value: "Sorceror"),
+          ],
+          multi: false,
+          display: OptionDisplay.switchTile,
+        ),
+      ),
+
+      Flexible(
+        child: OptionBox(
+          options: [
+            Option(value: "Witch", selected: true),
+            Option(value: "Wizard"),
+            Option(value: "Sorceror"),
+          ],
+          display: OptionDisplay.chip,
+        ),
+      ),
+    ],
+  ),
+];
+
+List<Widget> second(BuildContext context) => [
+  Slider(max: 100, divisions: 5, value: 30, label: "30", onChanged: (value) {}),
+  SizedBox(height: 8),
+  LinearProgressIndicator(
+    value: .5,
+    minHeight: 10,
+    // color: purple,
+    borderRadius: BorderRadius.circular(8),
+  ),
+
+  NavigationBar(
+    labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+    selectedIndex: 1,
+    onDestinationSelected: (int index) {},
+    destinations: const <Widget>[
+      NavigationDestination(icon: Icon(Icons.explore), label: 'Explore'),
+      NavigationDestination(icon: Icon(Icons.commute), label: 'Commute'),
+      NavigationDestination(
+        selectedIcon: Icon(Icons.bookmark),
+        icon: Icon(Icons.bookmark_border),
+        label: 'Saved',
+      ),
+    ],
+  ),
+
+  DefaultTabController(
+    length: 3,
+    child: TabBar(
+      tabs: const <Widget>[
+        Tab(
+          icon: Icon(Icons.videocam_outlined),
+          text: 'Video',
+          iconMargin: EdgeInsets.only(bottom: 0.0),
+        ),
+        Tab(
+          icon: Icon(Icons.photo_outlined),
+          text: 'Photos',
+          iconMargin: EdgeInsets.only(bottom: 0.0),
+        ),
+        Tab(
+          icon: Icon(Icons.audiotrack_sharp),
+          text: 'Audio',
+          iconMargin: EdgeInsets.only(bottom: 0.0),
+        ),
+      ],
+    ),
+  ),
+
+  AlertDialog(
+    title: const Text('What is a dialog?'),
+    content: const Text(
+      'A dialog is a type of modal window that appears in front of app content to provide critical information, or prompt for a decision to be made.',
+    ),
+    actions: <Widget>[
+      TextButton(
+        child: const Text('Dismiss'),
+        onPressed: () => Navigator.of(context).pop(),
+      ),
+      FilledButton(
+        child: const Text('Okay'),
+        onPressed: () => Navigator.of(context).pop(),
+      ),
+    ],
+  ),
+
+  MaterialBanner(
+    content: const Text(
+      'A dialog is a type of modal window that appears in front of app content to provide critical information, or prompt for a decision to be made.',
+    ),
+    actions: <Widget>[
+      TextButton(
+        child: const Text('Dismiss'),
+        onPressed: () => Navigator.of(context).pop(),
+      ),
+      FilledButton(
+        child: const Text('Okay'),
+        onPressed: () => Navigator.of(context).pop(),
+      ),
+    ],
+  ),
+];
+
+List<Widget> third(BuildContext context) => [
+  Wrap(
+    children: [
+      SizedBox(height: 360, child: NavigationDrawerSection()),
+
+      SizedBox(
+        height: 320,
+        child: IntrinsicWidth(child: NavigationRailSection()),
+      ),
+    ],
+  ),
+
+  BottomAppBar(
+    child: Row(
+      children: <Widget>[
+        const IconButtonAnchorExample(),
+        IconButton(
+          tooltip: 'Search',
+          icon: const Icon(Icons.search),
+          onPressed: () {},
+        ),
+        IconButton(
+          tooltip: 'Favorite',
+          icon: const Icon(Icons.favorite),
+          onPressed: () {},
+        ),
+      ],
+    ),
+  ),
+
+  ExpansionPanelList(
+    materialGapSize: 0,
+    children: [
+      ExpansionPanel(
+        canTapOnHeader: true,
+        isExpanded: true,
+        headerBuilder: (context, isExpanded) => Text("Header"),
+        body: Text("Body"),
+      ),
+      ExpansionPanel(
+        canTapOnHeader: true,
+        headerBuilder: (context, isExpanded) => Text("Header"),
+        body: Text("Body"),
+      ),
+    ],
+  ),
+
+  // SizedBox(width: 40, height: 40, child: GradientLoader()),
+
+  // CircularProgress(
+  //   size: 50,
+  //   secondaryColor: Colors.red,
+  //   primaryColor: Colors.yellow,
+  // ),
+  NeonButton(
+    color: context.cs.tertiary,
+    builder: (completed) => Text(
+      "Hello",
+      style: GoogleFonts.agbalumo(
+        textStyle: context.h6.c(
+          completed ? context.cs.onTertiary : context.cs.tertiary,
+        ),
+      ),
+    ),
+  ),
+
+  DataTable(
+    columns: const <DataColumn>[
+      DataColumn(
+        label: Expanded(
+          child: Text('Name', style: TextStyle(fontStyle: FontStyle.italic)),
+        ),
+      ),
+      DataColumn(
+        label: Expanded(
+          child: Text('Age', style: TextStyle(fontStyle: FontStyle.italic)),
+        ),
+      ),
+      DataColumn(
+        label: Expanded(
+          child: Text('Role', style: TextStyle(fontStyle: FontStyle.italic)),
+        ),
+      ),
+    ],
+    rows: const <DataRow>[
+      DataRow(
+        cells: <DataCell>[
+          DataCell(Text('Sarah')),
+          DataCell(Text('19')),
+          DataCell(Text('Student')),
+        ],
+      ),
+      DataRow(
+        cells: <DataCell>[
+          DataCell(Text('Janine')),
+          DataCell(Text('43')),
+          DataCell(Text('Professor')),
+        ],
+      ),
+      DataRow(
+        cells: <DataCell>[
+          DataCell(Text('William')),
+          DataCell(Text('27')),
+          DataCell(Text('Associate Professor')),
+        ],
+      ),
+    ],
+  ),
+
+  Wrap(
+    alignment: WrapAlignment.spaceEvenly,
+    children: [
+      TextButton(
+        child: const Text('Show modal navigation drawer'),
+        onPressed: () {},
+      ),
+      TextButton(
+        child: const Text('Show modal bottom sheet'),
+        onPressed: () {
+          showModalBottomSheet<void>(
+            showDragHandle: true,
+            context: context,
+            constraints: const BoxConstraints(maxWidth: 640),
+            builder: (context) {
+              return SizedBox(
+                height: 150,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                  child: ListView(
+                    shrinkWrap: true,
+                    scrollDirection: Axis.horizontal,
+                    children: [Text("Hello")],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+      TextButton(
+        child: Text('Show bottom sheet'),
+        onPressed: () {
+          showBottomSheet(
+            elevation: 8.0,
+            context: context,
+            constraints: const BoxConstraints(maxWidth: 640),
+            builder: (context) {
+              return SizedBox(
+                height: 150,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                  child: ListView(
+                    shrinkWrap: true,
+                    scrollDirection: Axis.horizontal,
+                    children: [Text("Hello")],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    ],
+  ),
+];
 
 //------------
 
@@ -788,18 +778,6 @@ class ThemeSettings extends StatelessWidget {
             ThemeSelector(),
             ListTile(
               onTap: () {
-                context.push("/typography");
-              },
-              title: Text("Typography"),
-            ),
-            ListTile(
-              onTap: () {
-                context.push("/colors");
-              },
-              title: Text("Colors"),
-            ),
-            ListTile(
-              onTap: () {
                 context.push("/carousel");
               },
               title: Text("Carousel"),
@@ -857,6 +835,12 @@ class ThemeSettings extends StatelessWidget {
                 context.push("/node_editor");
               },
               title: Text("Node Editor"),
+            ),
+            ListTile(
+              onTap: () {
+                context.push("/widget_book");
+              },
+              title: Text("Widget Book"),
             ),
           ],
         ),
