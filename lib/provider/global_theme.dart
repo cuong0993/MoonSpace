@@ -274,31 +274,36 @@ class ThemePopupButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return PopupMenuButton<AppTheme>(
-      itemBuilder: (context) {
-        return AppTheme.themes
-            .map<PopupMenuEntry<AppTheme>>(
-              (e) => PopupMenuItem(
-                value: e,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [Text(e.name.toUpperCase()), Icon(e.icon)],
-                ),
+    return DropdownMenu<int>(
+      initialSelection: AppTheme.currentThemeIndex,
+      dropdownMenuEntries: AppTheme.themes
+          .asMap()
+          .entries
+          .map(
+            (e) => DropdownMenuEntry<int>(
+              value: e.key,
+              label: e.value.name,
+              labelWidget: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    e.value.name.length > 8
+                        ? e.value.name.substring(0, 8)
+                        : e.value.name,
+                  ),
+                  Icon(e.value.icon),
+                ],
               ),
-            )
-            .toList();
-      },
+            ),
+          )
+          .toList(),
       onSelected: (apptheme) {
-        ref.read(globalThemeProvider.notifier).setTheme(name: apptheme.name);
+        if (apptheme != null) {
+          ref
+              .read(globalThemeProvider.notifier)
+              .setTheme(name: AppTheme.themes[apptheme].name);
+        }
       },
-      position: PopupMenuPosition.under,
-      offset: const Offset(1, -120),
-      child: ListTile(
-        visualDensity: VisualDensity.compact,
-        title: Text('Theme', style: context.tm),
-        subtitle: Text(AppTheme.currentTheme.name),
-        trailing: Icon(AppTheme.currentTheme.icon),
-      ),
     );
   }
 }
@@ -308,31 +313,24 @@ class ThemeTypePopupButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return PopupMenuButton<ThemeType>(
-      itemBuilder: (context) {
-        return ThemeType.values
-            .map<PopupMenuEntry<ThemeType>>(
-              (e) => PopupMenuItem(
-                value: e,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [Text(e.name.toUpperCase()), e.icon],
-                ),
+    return DropdownMenu<ThemeType>(
+      dropdownMenuEntries: ThemeType.values
+          .map(
+            (e) => DropdownMenuEntry<ThemeType>(
+              value: e,
+              label: e.name,
+              labelWidget: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [Text(e.name.toUpperCase()), e.icon],
               ),
-            )
-            .toList();
-      },
+            ),
+          )
+          .toList(),
       onSelected: (type) {
-        ref.read(globalThemeProvider.notifier).setTheme(type: type);
+        if (type != null) {
+          ref.read(globalThemeProvider.notifier).setTheme(type: type);
+        }
       },
-      position: PopupMenuPosition.under,
-      offset: const Offset(1, -120),
-      child: ListTile(
-        visualDensity: VisualDensity.compact,
-        title: Text('Type', style: context.tm),
-        subtitle: Text(AppTheme.currentTheme.name),
-        trailing: Icon(AppTheme.currentTheme.icon),
-      ),
     );
   }
 }

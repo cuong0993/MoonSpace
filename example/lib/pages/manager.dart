@@ -11,6 +11,7 @@ import 'package:moonspace/form/async_text_field.dart';
 import 'package:moonspace/helper/extensions/theme_ext.dart';
 
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:moonspace/theme.dart';
 
 class ManagerApp extends StatefulWidget {
   const ManagerApp({super.key});
@@ -64,6 +65,7 @@ class _ManagerAppState extends State<ManagerApp>
           },
           icon: Icon(Icons.arrow_back),
         ),
+        actions: [IconButton.outlined(onPressed: () {}, icon: Icon(Icons.add))],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60),
           child: Padding(
@@ -205,6 +207,196 @@ class _ManagerAppState extends State<ManagerApp>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Text("You have", style: context.h1),
+                        Text(
+                          "long-term goals",
+                          style: GoogleFonts.sawarabiMincho(
+                            textStyle: context.h1.c(context.cSec),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Long-term goals focus on empowering users to achieve financial independence through automated and personalized planning.",
+                          style: context.h7.w2,
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        GridView.count(
+                          crossAxisCount: 2,
+                          shrinkWrap: true,
+                          mainAxisSpacing: 8,
+                          crossAxisSpacing: 8,
+                          childAspectRatio: 1.1,
+                          physics: NeverScrollableScrollPhysics(),
+                          children:
+                              List.generate(4, (c) {
+                                    return 1;
+                                  })
+                                  .asMap()
+                                  .entries
+                                  .map(
+                                    (e) => Container(
+                                      decoration: BoxDecoration(
+                                        color: e.key == 0
+                                            ? context.cSec
+                                            : context.cSur3,
+                                        borderRadius:
+                                            BorderRadiusGeometry.circular(16),
+                                      ),
+                                      padding: EdgeInsets.all(16),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "Current new worth",
+                                            style: context.h8.c(
+                                              e.key == 0
+                                                  ? context.cOnSec
+                                                  : context.cOnSur,
+                                            ),
+                                          ),
+                                          Text(
+                                            "\$25,981",
+                                            style: context.h5.c(
+                                              e.key == 0
+                                                  ? context.cOnSec
+                                                  : context.cOnSur,
+                                            ),
+                                          ),
+                                          FilledButton(
+                                            style: FilledButton.styleFrom(
+                                              backgroundColor: context.cSur,
+                                            ),
+                                            onPressed: () {},
+                                            child: Text(
+                                              "Edit",
+                                              style: context.h8,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                        ),
+
+                        Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            color: context.cSec.withAlpha(50),
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.ac_unit_rounded),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    "You are good",
+                                    style: GoogleFonts.sawarabiMincho(
+                                      textStyle: context.h6,
+                                    ),
+                                  ),
+                                  Spacer(),
+                                  Icon(Icons.close),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                "We have checked your savings and it looks like you will win.",
+                                style: context.h7.w3,
+                              ),
+                              const SizedBox(height: 8),
+                              Stack(
+                                alignment: Alignment.centerLeft,
+                                children: [
+                                  LinearProgressIndicator(
+                                    value: .5,
+                                    minHeight: 50,
+                                    borderRadius: BorderRadius.circular(8),
+                                    color: context.cSec,
+                                    backgroundColor: context.cSec.withAlpha(40),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                    ),
+                                    child: Text(
+                                      "34%",
+                                      style: context.h6.c(context.cOnSec),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            color: context.cSur3,
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  CircleAvatar(),
+                                  SizedBox(width: 8),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Buy a house",
+                                        style: GoogleFonts.sawarabiMincho(
+                                          textStyle: context.h6,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text("Individual", style: context.h9),
+                                    ],
+                                  ),
+                                  Spacer(),
+                                  Icon(
+                                    Icons.arrow_forward_ios_outlined,
+                                    size: 12,
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 16),
+                              LinearProgressIndicator(
+                                value: .5,
+                                minHeight: 4,
+                                borderRadius: BorderRadius.circular(8),
+                                color: context.cPri,
+                                backgroundColor: context.cOnSur.withAlpha(40),
+                              ),
+
+                              const SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text("\$34034", style: context.h7.w3),
+                                  Text("\$145054", style: context.h7.w3),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [

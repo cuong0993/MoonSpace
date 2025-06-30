@@ -19,6 +19,8 @@ import 'package:moonspace/theme.dart';
 import 'package:moonspace/provider/global_theme.dart';
 
 class Electric {
+  static final GlobalKey<NavigatorState> electricOverlayKey =
+      GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> electricNavigatorKey =
       GlobalKey<NavigatorState>();
   static final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
@@ -27,7 +29,9 @@ class Electric {
       'MoonSpaceRestorationScopeId';
   static const String appRestorationScopeId = 'AppRestorationScopeId';
 
-  static BuildContext get context => electricNavigatorKey.currentContext!;
+  static BuildContext get overlayContext => electricOverlayKey.currentContext!;
+  static BuildContext get navigatorContext =>
+      electricNavigatorKey.currentContext!;
 }
 
 void electrify({
@@ -36,10 +40,10 @@ void electrify({
   final List<LocalizationsDelegate<dynamic>>? localizationsDelegates,
   final List<Locale>? supportedLocales,
   final List<AppTheme>? themes,
-  required GoRouter Function() router,
-  required Widget errorChild,
+  required GoRouter Function(GlobalKey<NavigatorState> navigatorKey) router,
   required void Function(WidgetsBinding widgetsBinding) before,
   required void Function() after,
+  required Widget Function(BuildContext context, Widget? child) wrap,
   required Future<void> Function(ProviderContainer providerContainer) init,
   required void Function(FlutterErrorDetails details) recordFlutterFatalError,
   required void Function(Object error, StackTrace stack) recordError,
@@ -146,10 +150,10 @@ void electrify({
             localizationsDelegates: [GlobalFeedbackLocalizationsDelegate()],
             child: MoonSpaceHome(
               title: title,
-              router: router(),
+              router: router(Electric.electricNavigatorKey),
               localizationsDelegates: localizationsDelegates,
               supportedLocales: supportedLocales,
-              errorChild: errorChild,
+              wrap: wrap,
               debugUi: debugUi,
             ),
           ),
@@ -179,7 +183,7 @@ class MoonSpaceHome extends ConsumerWidget {
     this.localizationsDelegates,
     this.supportedLocales,
     required this.debugUi,
-    required this.errorChild,
+    required this.wrap,
   });
 
   final String title;
@@ -191,7 +195,7 @@ class MoonSpaceHome extends ConsumerWidget {
 
   final bool debugUi;
 
-  final Widget errorChild;
+  final Widget Function(BuildContext context, Widget? child) wrap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -231,18 +235,6 @@ class MoonSpaceHome extends ConsumerWidget {
               builder: (context, child) {
                 initializeDateFormatting();
 
-                // if (kIsWeb) {
-                //   return DevicePreview(
-                //     builder: (context) {
-                //       return ElectricWrap(
-                //         theme: globalAppTheme.theme,
-                //         brightness: brightness,
-                //         child: child,
-                //       );
-                //     },
-                //   );
-                // }
-
                 return Directionality(
                   textDirection: TextDirection.ltr,
                   child: Scaffold(
@@ -253,19 +245,11 @@ class MoonSpaceHome extends ConsumerWidget {
                         OverlayEntry(
                           builder: (context) {
                             return Builder(
-                              key: Electric.electricNavigatorKey,
+                              key: Electric.electricOverlayKey,
                               builder: (context) {
-                                return child ?? errorChild;
+                                return wrap(context, child);
                               },
                             );
-                            // return CupertinoTheme(
-                            //   key: Electric.electricNavigatorKey,
-                            //   data: CupertinoThemeData(
-                            //     brightness: globalAppTheme.theme.brightness,
-                            //     primaryColor: AppTheme.appColorScheme.primary,
-                            //   ),
-                            //   child: child ?? errorChild,
-                            // );
                           },
                         ),
                       ],
@@ -277,6 +261,55 @@ class MoonSpaceHome extends ConsumerWidget {
           );
         },
       ),
+    );
+  }
+}
+
+class DebugRouteOverlay extends StatelessWidget {
+  final Widget child;
+
+  const DebugRouteOverlay({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    if (!kDebugMode) return child;
+
+    return Stack(
+      children: [
+        child,
+        Builder(
+          builder: (context) {
+            final location = GoRouter.of(context).state.uri;
+            return Positioned(
+              top: 24,
+              left: 0,
+              right: 0,
+              child: IgnorePointer(
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Route: $location',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }

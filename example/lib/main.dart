@@ -27,8 +27,6 @@ import 'package:moonspace/widgets/functions.dart';
 
 import 'package:moonspace/widgets/animated/neon_button.dart';
 
-import 'package:device_frame_plus/device_frame_plus.dart';
-
 void main() {
   // runApp(const GoRouterApp());
   // runApp(const SmoothSheetApp());
@@ -43,6 +41,32 @@ void main() {
     title: "Home",
     before: (widgetsBinding) {},
     after: () {},
+    wrap: (context, child) {
+      return DebugWrapper(
+        paths: [
+          DrawerLink(label: "Compass", path: '/compass'),
+          DrawerLink(label: "Quiz", path: '/quiz'),
+          DrawerLink(label: "Manager", path: '/manager'),
+          DrawerLink(label: "Recipe", path: '/recipe'),
+          DrawerLink(label: "Music", path: '/music'),
+          DrawerLink(label: "ColorScheme", child: ColorSchemeExample()),
+          DrawerLink(label: "Carousel", child: Carouselmain()),
+          DrawerLink(
+            label: "First",
+            child: Scaffold(body: ListView(children: first(context))),
+          ),
+          DrawerLink(
+            label: "Second",
+            child: Scaffold(body: ListView(children: second(context))),
+          ),
+          DrawerLink(
+            label: "Third",
+            child: Scaffold(body: ListView(children: third(context))),
+          ),
+        ],
+        child: child ?? Text("Error"),
+      );
+    },
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     themes: [
@@ -82,7 +106,7 @@ void main() {
         padding: (16, 18),
 
         primary: const Color.fromARGB(255, 39, 39, 39),
-        secondary: const Color.fromARGB(255, 107, 107, 107),
+        secondary: Color(0xFF787bce),
         tertiary: Color.fromARGB(255, 90, 239, 79),
 
         baseunit: 1.0,
@@ -163,9 +187,15 @@ void main() {
         baseunit: 1.0,
       ),
     ],
-    router: () => GoRouter(
+    router: (navigatorKey) => GoRouter(
+      navigatorKey: navigatorKey,
       debugLogDiagnostics: true,
       initialLocation: initialLocation,
+      errorPageBuilder: (context, state) {
+        return MaterialPage(
+          child: Scaffold(body: Text(state.error.toString())),
+        );
+      },
       routes: [
         GoRoute(
           path: "/",
@@ -237,7 +267,6 @@ void main() {
       ],
     ),
     init: (c) async {},
-    errorChild: Text("error"),
     recordFlutterFatalError: (details) {},
     recordError: (error, stack) {},
     debugUi: false,
@@ -256,54 +285,54 @@ class _HomeState extends ConsumerState<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return DeviceFrame(
-      device: Devices.ios.iPhone13Mini,
-      screen: Scaffold(
-        key: scaffoldKey,
-        appBar: AppBar(
-          title: Text('${AppTheme.currentTheme.size.width}'),
-          actions: [
-            ThemeBrightnessButton(),
-            if (!context.width6)
-              IconButton(
-                onPressed: () {
-                  context.showFormDialog(
-                    builder: (context) {
-                      return ThemeSettings();
-                    },
-                  );
-                },
-                icon: Icon(Icons.settings),
-              ),
-          ],
-        ),
+    return Scaffold(
+      key: scaffoldKey,
+      appBar: AppBar(
+        title: Text('${AppTheme.currentTheme.size.width}'),
+        actions: [
+          ThemeBrightnessButton(),
+          if (!context.width6)
+            IconButton(
+              onPressed: () {
+                context.showFormDialog(
+                  builder: (context) {
+                    return ThemeSettings();
+                  },
+                );
+              },
+              icon: Icon(Icons.settings),
+            ),
+        ],
+      ),
 
-        endDrawer: IntrinsicWidth(
-          child: SizedBox(height: 420, child: NavigationRailSection()),
-        ),
+      endDrawer: IntrinsicWidth(
+        child: SizedBox(height: 420, child: NavigationRailSection()),
+      ),
 
-        // endDrawer: SizedBox(height: 520, child: NavigationDrawerSection()),
-        body: context.width6
-            ? Row(
-                children: [
-                  ThemeSettings(),
-                  Expanded(child: ListView(children: first(context))),
-                  Expanded(child: ListView(children: second(context))),
-                  Expanded(child: ListView(children: third(context))),
-                ],
-              )
-            : ListView(
-                children: [
-                  ...first(context),
-                  ...second(context),
-                  ...third(context),
-                ],
-              ),
+      // endDrawer: SizedBox(height: 520, child: NavigationDrawerSection()),
+      body: context.width6
+          ? Row(
+              children: [
+                ThemeSettings(),
+                Expanded(child: ListView(children: first(context))),
+                Expanded(child: ListView(children: second(context))),
+                Expanded(child: ListView(children: third(context))),
+              ],
+            )
+          : ListView(
+              children: [
+                ...first(context),
+                ...second(context),
+                ...third(context),
+              ],
+            ),
 
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {},
-          child: const Icon(Icons.add),
-        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          print(">>> ${GoRouter.maybeOf(context)}");
+          print(">>> ${GoRouter.maybeOf(Electric.navigatorContext)}");
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -954,32 +983,40 @@ class _NavigationDrawerSectionState extends State<NavigationDrawerSection> {
               isExpanded: true,
               headerBuilder: (context, isExpanded) =>
                   ListTile(title: Text('Home', style: context.h6.w5)),
-              body: Column(
-                children: [
-                  ...destinations.asMap().entries.map((destination) {
-                    return ListTile(
-                      leading: destination.value.icon,
-                      title: Text(destination.value.label),
-                      selected: destination.key == navDrawerIndex,
-                      selectedTileColor: context.cSec,
-                      selectedColor: context.cOnSec,
-                      style: ListTileStyle.drawer,
-                      shape: destination.key != navDrawerIndex
-                          ? null
-                          : RoundedRectangleBorder(
-                              borderRadius: BorderRadiusGeometry.all(
-                                Radius.circular(32),
+
+              body: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    ...destinations.asMap().entries.map((destination) {
+                      return ListTile(
+                        leading: destination.value.icon,
+                        title: Text(destination.value.label),
+                        selected: destination.key == navDrawerIndex,
+                        selectedTileColor: context.cPriCon,
+                        selectedColor: context.cInvSur,
+                        style: ListTileStyle.drawer,
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        shape: destination.key != navDrawerIndex
+                            ? null
+                            : RoundedRectangleBorder(
+                                borderRadius: BorderRadiusGeometry.all(
+                                  Radius.circular(32),
+                                ),
                               ),
-                            ),
-                      onTap: () {
-                        setState(() {
-                          navDrawerIndex = destination.key;
-                        });
-                      },
-                    );
-                  }),
-                  SizedBox(height: 20),
-                ],
+                        onTap: () {
+                          setState(() {
+                            navDrawerIndex = destination.key;
+                          });
+                        },
+                      );
+                    }),
+                    SizedBox(height: 20),
+                  ],
+                ),
               ),
             ),
 

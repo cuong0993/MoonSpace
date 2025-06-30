@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:accessibility_tools/accessibility_tools.dart';
 import 'package:example/carousel/carouselmain.dart';
 import 'package:example/l10n/app_localizations.dart';
 import 'package:example/main.dart';
@@ -13,6 +14,11 @@ import 'package:example/pages/recipe.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
+import 'package:moonspace/electrify.dart';
+import 'package:moonspace/form/select.dart';
+import 'package:moonspace/helper/extensions/string.dart';
+import 'package:moonspace/provider/global_theme.dart';
 import 'package:widgetbook/widgetbook.dart';
 
 import 'package:path_provider/path_provider.dart';
@@ -93,6 +99,7 @@ class DeviceFrameAddon extends WidgetbookAddon<DeviceFrameSetting> {
       await file.writeAsBytes(pngBytes);
 
       print('Saved to $path');
+      await Clipboard.setData(ClipboardData(text: path));
     } catch (e) {
       print('Error: $e');
     }
@@ -184,7 +191,7 @@ class MyWidgetbook extends StatelessWidget {
                 useCases: [
                   WidgetbookUseCase(
                     name: "Images",
-                    builder: (context) => ImageGridApp(),
+                    builder: (context) => ImageGridScreen(),
                   ),
                 ],
               ),
@@ -238,15 +245,6 @@ class MyWidgetbook extends StatelessWidget {
   }
 }
 
-class ImageGridApp extends StatelessWidget {
-  const ImageGridApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(home: ImageGridScreen());
-  }
-}
-
 class ImageGridScreen extends StatefulWidget {
   const ImageGridScreen({super.key});
 
@@ -291,13 +289,11 @@ class _ImageGridScreenState extends State<ImageGridScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Saved Screenshots')),
       body: imageFiles.isEmpty
           ? const Center(child: Text('No images found.'))
           : Stack(
               children: [
                 GridView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
                   padding: const EdgeInsets.all(8),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -462,7 +458,7 @@ Future<void> createGridImageFromFiles(
   final pngBytes = byteData!.buffer.asUint8List();
 
   final directory = await getApplicationDocumentsDirectory();
-  final file = File('${directory.path}/grid_dynamic.png');
+  final file = File('${directory.path}/${randomString(4)}.png');
   await file.writeAsBytes(pngBytes);
 
   log('✅ Image saved: ${file.path}');
@@ -552,8 +548,293 @@ Future<void> createUniformHeightGrid({
   final pngBytes = byteData!.buffer.asUint8List();
 
   final dir = await getApplicationDocumentsDirectory();
-  final file = File('${dir.path}/grid_uniform_height.png');
+  final file = File('${dir.path}/${randomString(4)}.png');
   await file.writeAsBytes(pngBytes);
 
   print('✅ Grid saved to ${file.path}');
+  await Clipboard.setData(ClipboardData(text: file.path));
+}
+
+class DebugWrapper extends StatefulWidget {
+  const DebugWrapper({super.key, required this.child, required this.paths});
+
+  final Widget child;
+  final List<DrawerLink> paths;
+
+  @override
+  State<DebugWrapper> createState() => _DebugWrapperState();
+}
+
+class _DebugWrapperState extends State<DebugWrapper> {
+  bool showImages = false;
+  bool showDrawer = false;
+
+  DeviceInfo? frame = Devices.ios.iPhone13Mini;
+
+  int navDrawerIndex = 0;
+  final Set<int> openPanel = {0};
+  Widget? child;
+
+  bool accessibility = false;
+
+  final GlobalKey _globalKey = GlobalKey();
+
+  Future<void> _capturePng() async {
+    try {
+      // Find the RenderObject from the global key
+      RenderRepaintBoundary boundary =
+          _globalKey.currentContext!.findRenderObject()
+              as RenderRepaintBoundary;
+
+      // Capture the image
+      ui.Image image = await boundary.toImage(pixelRatio: 4.0);
+      ByteData? byteData = await image.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
+      Uint8List pngBytes = byteData!.buffer.asUint8List();
+
+      // Save the file
+      final directory = await getApplicationDocumentsDirectory();
+      final path = '${directory.path}/${DateTime.now()}.png';
+      final file = File(path);
+      await file.writeAsBytes(pngBytes);
+
+      print('Saved to $path');
+      await Clipboard.setData(ClipboardData(text: path));
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        actions: [
+          TextButton(
+            onPressed: () {
+              showDrawer = !showDrawer;
+              setState(() {});
+            },
+            child: Text("Drawer"),
+          ),
+          TextButton(
+            onPressed: () {
+              showImages = !showImages;
+              setState(() {});
+            },
+            child: Text("Images"),
+          ),
+        ],
+      ),
+      body: showImages
+          ? ImageGridScreen()
+          : Row(
+              children: [
+                if (showDrawer)
+                  MaterialApp(
+                    debugShowCheckedModeBanner: false,
+                    theme: Theme.of(context),
+                    home: SizedBox(
+                      width: 200,
+                      child: Column(
+                        children: [
+                          ThemeSelector(),
+                          ListTile(
+                            selected: accessibility,
+                            onTap: () {
+                              setState(() {
+                                accessibility = !accessibility;
+                              });
+                            },
+                            title: Text("Accessibility"),
+                          ),
+                          OptionBox(
+                            onChange: (selected) {
+                              switch (selected.first) {
+                                case "None":
+                                  frame = null;
+                                  break;
+                                case "S20":
+                                  frame = Devices.android.samsungGalaxyS20;
+                                  break;
+                                case "iPad":
+                                  frame = Devices.ios.iPad;
+                                  break;
+                                case "iPhone13":
+                                  frame = Devices.ios.iPhone13;
+                                  break;
+                                default:
+                              }
+                              setState(() {});
+                            },
+                            options: [
+                              Option(value: "None"),
+                              Option(value: "S20"),
+                              Option(value: "iPad"),
+                              Option(value: "iPhone13"),
+                            ],
+                          ),
+                          Expanded(
+                            child: NavigationDrawer(
+                              onDestinationSelected: (selectedIndex) {
+                                setState(() {
+                                  navDrawerIndex = selectedIndex;
+                                });
+                              },
+                              selectedIndex: navDrawerIndex,
+                              children: <Widget>[
+                                ExpansionPanelList(
+                                  materialGapSize: 0,
+                                  elevation: 0,
+                                  expandedHeaderPadding: EdgeInsets.all(0),
+                                  expansionCallback: (panelIndex, isExpanded) {
+                                    if (openPanel.contains(panelIndex)) {
+                                      openPanel.remove(panelIndex);
+                                    } else {
+                                      openPanel.add(panelIndex);
+                                    }
+                                    setState(() {});
+                                  },
+                                  children: [
+                                    ExpansionPanel(
+                                      canTapOnHeader: true,
+                                      isExpanded: openPanel.contains(0),
+                                      headerBuilder: (context, isExpanded) =>
+                                          ListTile(title: Text('Home')),
+
+                                      body: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8.0,
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            ...widget.paths.asMap().entries.map((
+                                              destination,
+                                            ) {
+                                              return ListTile(
+                                                title: Text(
+                                                  destination.value.label,
+                                                ),
+                                                selected:
+                                                    destination.key ==
+                                                    navDrawerIndex,
+                                                style: ListTileStyle.drawer,
+                                                contentPadding:
+                                                    EdgeInsets.symmetric(
+                                                      horizontal: 16,
+                                                      vertical: 4,
+                                                    ),
+                                                shape:
+                                                    destination.key !=
+                                                        navDrawerIndex
+                                                    ? null
+                                                    : RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadiusGeometry.all(
+                                                              Radius.circular(
+                                                                32,
+                                                              ),
+                                                            ),
+                                                      ),
+                                                onTap: () {
+                                                  setState(() {
+                                                    child = null;
+
+                                                    navDrawerIndex =
+                                                        destination.key;
+                                                    if (destination
+                                                            .value
+                                                            .path !=
+                                                        null) {
+                                                      if (Electric
+                                                          .navigatorContext
+                                                          .canPop()) {
+                                                        Electric
+                                                            .navigatorContext
+                                                            .pop();
+                                                      }
+                                                      Electric.navigatorContext
+                                                          .push(
+                                                            destination
+                                                                .value
+                                                                .path!,
+                                                          );
+                                                    }
+                                                    if (destination
+                                                            .value
+                                                            .child !=
+                                                        null) {
+                                                      child = destination
+                                                          .value
+                                                          .child;
+                                                    }
+                                                  });
+                                                },
+                                              );
+                                            }),
+                                            SizedBox(height: 20),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                Expanded(
+                  child: frame != null
+                      ? Stack(
+                          children: [
+                            Center(
+                              child: RepaintBoundary(
+                                key: _globalKey,
+                                child: DeviceFrame(
+                                  device: frame!,
+                                  screen: accessibility
+                                      ? AccessibilityTools(
+                                          child: Stack(
+                                            children: [
+                                              widget.child,
+                                              if (child != null) child!,
+                                            ],
+                                          ),
+                                        )
+                                      : Stack(
+                                          children: [
+                                            widget.child,
+                                            if (child != null) child!,
+                                          ],
+                                        ),
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: _capturePng,
+                              icon: Icon(Icons.camera),
+                              color: Colors.blue,
+                            ),
+                          ],
+                        )
+                      : Stack(
+                          children: [widget.child, if (child != null) child!],
+                        ),
+                ),
+              ],
+            ),
+    );
+  }
+}
+
+class DrawerLink {
+  final String label;
+  final String? path;
+  final Widget? child;
+
+  DrawerLink({required this.label, this.path, this.child});
 }
