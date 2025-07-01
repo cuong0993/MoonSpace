@@ -501,6 +501,37 @@ List<Widget> second(BuildContext context) => [
     ],
   ),
 
+  BottomAppBar(
+    child: Row(
+      children: <Widget>[
+        const IconButtonAnchorExample(),
+        IconButton(
+          tooltip: 'Search',
+          icon: const Icon(Icons.search),
+          onPressed: () {},
+        ),
+        IconButton(
+          tooltip: 'Favorite',
+          icon: const Icon(Icons.favorite),
+          onPressed: () {},
+        ),
+      ],
+    ),
+  ),
+
+  BottomNavigationBar(
+    showUnselectedLabels: true,
+    onTap: (value) {},
+    items: const [
+      BottomNavigationBarItem(icon: Icon(CupertinoIcons.home), label: 'Home'),
+      BottomNavigationBarItem(icon: Icon(CupertinoIcons.cart), label: 'Cart'),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.favorite_border_outlined),
+        label: 'Review',
+      ),
+    ],
+  ),
+
   DefaultTabController(
     length: 3,
     child: TabBar(
@@ -530,7 +561,7 @@ List<Widget> second(BuildContext context) => [
       'A dialog is a type of modal window that appears in front of app content to provide critical information, or prompt for a decision to be made.',
     ),
     actions: <Widget>[
-      TextButton(
+      OutlinedButton(
         child: const Text('Dismiss'),
         onPressed: () => Navigator.of(context).pop(),
       ),
@@ -546,7 +577,7 @@ List<Widget> second(BuildContext context) => [
       'A dialog is a type of modal window that appears in front of app content to provide critical information, or prompt for a decision to be made.',
     ),
     actions: <Widget>[
-      TextButton(
+      OutlinedButton(
         child: const Text('Dismiss'),
         onPressed: () => Navigator.of(context).pop(),
       ),
@@ -568,24 +599,6 @@ List<Widget> third(BuildContext context) => [
         child: IntrinsicWidth(child: NavigationRailSection()),
       ),
     ],
-  ),
-
-  BottomAppBar(
-    child: Row(
-      children: <Widget>[
-        const IconButtonAnchorExample(),
-        IconButton(
-          tooltip: 'Search',
-          icon: const Icon(Icons.search),
-          onPressed: () {},
-        ),
-        IconButton(
-          tooltip: 'Favorite',
-          icon: const Icon(Icons.favorite),
-          onPressed: () {},
-        ),
-      ],
-    ),
   ),
 
   ExpansionPanelList(
@@ -993,8 +1006,6 @@ class _NavigationDrawerSectionState extends State<NavigationDrawerSection> {
                         leading: destination.value.icon,
                         title: Text(destination.value.label),
                         selected: destination.key == navDrawerIndex,
-                        selectedTileColor: context.cPriCon,
-                        selectedColor: context.cInvSur,
                         style: ListTileStyle.drawer,
                         contentPadding: EdgeInsets.symmetric(
                           horizontal: 16,

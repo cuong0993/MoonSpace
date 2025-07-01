@@ -15,41 +15,53 @@ class RecipeApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      bottom: false,
-      child: Scaffold(
-        bottomNavigationBar: BottomNavigationBar(
-          showUnselectedLabels: true,
-          onTap: (value) {
-            if (value == 1) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CheckoutCartPage()),
-              );
-            } else if (value == 2) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ReviewPage()),
-              );
-            }
-          },
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.cart),
-              label: 'Cart',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.favorite_border_outlined),
-              label: 'Review',
-            ),
-          ],
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text(
+          'Desserts',
+          style: GoogleFonts.alice(textStyle: context.h2),
         ),
-        body: RecipeListView(),
+        centerTitle: false,
+
+        actions: [
+          IconButton(
+            icon: const Icon(CupertinoIcons.clear, size: 16),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
       ),
+      bottomNavigationBar: BottomNavigationBar(
+        showUnselectedLabels: true,
+        onTap: (value) {
+          if (value == 1) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => CheckoutCartPage()),
+            );
+          } else if (value == 2) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ReviewPage()),
+            );
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(CupertinoIcons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(CupertinoIcons.cart),
+            label: 'Cart',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite_border_outlined),
+            label: 'Review',
+          ),
+        ],
+      ),
+      body: RecipeListView(),
     );
   }
 }
@@ -77,70 +89,68 @@ class _RecipeListViewState extends State<RecipeListView> {
       },
       child: CustomScrollView(
         slivers: [
-          SliverAppBar(
-            pinned: true,
-            floating: false,
-            automaticallyImplyLeading: false,
-            snap: false,
-            toolbarHeight: 50,
-            flexibleSpace: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Desserts',
-                    style: GoogleFonts.alice(textStyle: context.h2),
-                  ),
-                  IconButton(
-                    icon: const Icon(CupertinoIcons.clear, size: 16),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          // SliverAppBar(
+          //   pinned: true,
+          //   floating: false,
+          //   automaticallyImplyLeading: false,
+          //   snap: false,
+          //   toolbarHeight: 50,
+          //   flexibleSpace: Padding(
+          //     padding: const EdgeInsets.all(8.0),
+          //     child: Row(
+          //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //       children: [
+          //         Text(
+          //           'Desserts',
+          //           style: GoogleFonts.alice(textStyle: context.h2),
+          //         ),
+          //         IconButton(
+          //           icon: const Icon(CupertinoIcons.clear, size: 16),
+          //           onPressed: () => Navigator.of(context).pop(),
+          //         ),
+          //       ],
+          //     ),
+          //   ),
+          // ),
 
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: GridView.count(
-                crossAxisCount: 3,
-                shrinkWrap: true,
-                mainAxisSpacing: 8,
-                crossAxisSpacing: 8,
-                physics: NeverScrollableScrollPhysics(),
-                children: RecipesData.dessertMenu
-                    .take(6)
-                    .map(
-                      (e) => ClipRRect(
-                        borderRadius: BorderRadiusGeometry.circular(8),
-                        child: Container(
-                          color: context.cSur3,
-                          child: Image.asset(
-                            e.image,
-                            scale: 8,
-                            alignment: Alignment(-2.2, -2.2),
-                            fit: BoxFit.none,
-                          ),
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
-            ),
-          ),
-
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Text(
-                "Categories",
-                style: GoogleFonts.alice(textStyle: context.h4),
-              ),
-            ),
-          ),
-
+          // SliverToBoxAdapter(
+          //   child: Padding(
+          //     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          //     child: GridView.count(
+          //       crossAxisCount: 3,
+          //       shrinkWrap: true,
+          //       mainAxisSpacing: 8,
+          //       crossAxisSpacing: 8,
+          //       physics: NeverScrollableScrollPhysics(),
+          //       children: RecipesData.dessertMenu
+          //           .take(6)
+          //           .map(
+          //             (e) => ClipRRect(
+          //               borderRadius: BorderRadiusGeometry.circular(8),
+          //               child: Container(
+          //                 color: context.cSur3,
+          //                 child: Image.asset(
+          //                   e.image,
+          //                   scale: 8,
+          //                   alignment: Alignment(-2.2, -2.2),
+          //                   fit: BoxFit.none,
+          //                 ),
+          //               ),
+          //             ),
+          //           )
+          //           .toList(),
+          //     ),
+          //   ),
+          // ),
+          // SliverToBoxAdapter(
+          //   child: Padding(
+          //     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          //     child: Text(
+          //       "Categories",
+          //       style: GoogleFonts.alice(textStyle: context.h4),
+          //     ),
+          //   ),
+          // ),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

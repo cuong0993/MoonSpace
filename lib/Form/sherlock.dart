@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:feedback/feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:moonspace/helper/extensions/color.dart';
 import 'package:moonspace/helper/extensions/theme_ext.dart';
@@ -8,7 +9,8 @@ import 'package:moonspace/helper/stream/debounce.dart';
 class Sherlock<T> extends StatefulWidget {
   const Sherlock({
     super.key,
-    required this.fetch,
+    required this.onFetch,
+    this.onSubmit,
     required this.builder,
     this.hint,
     this.isFullScreen = false,
@@ -22,7 +24,8 @@ class Sherlock<T> extends StatefulWidget {
     this.barColor,
   });
 
-  final Future<List<T>> Function(String query) fetch;
+  final Future<List<T>> Function(String query) onFetch;
+  final Future<List<T>> Function(String query)? onSubmit;
   final Widget Function(List<T> data, SearchController controller) builder;
 
   final String? hint;
@@ -87,16 +90,22 @@ class _SherlockState<T> extends State<Sherlock<T>> {
 
       _lastText = searchController.text;
 
-      final d = await widget.fetch(_lastText);
+      final d = await widget.onFetch(_lastText);
       dataStream.value = d;
 
       lastTextStream.add(searchController.text);
     }
   }
 
-  void submit() {
+  void submit() async {
     if (searchController.text == "") return;
     Set<String> history = (searchHistoryStream.value).toSet();
+
+    final value = await widget.onSubmit?.call(searchController.text);
+    if (value != null) {
+      dataStream.value = value;
+    }
+
     history.add(searchController.text);
     searchHistoryStream.value = history;
     debounceSearchTextStream.add(searchController.text);

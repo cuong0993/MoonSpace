@@ -17,6 +17,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:moonspace/electrify.dart';
 import 'package:moonspace/form/select.dart';
+import 'package:moonspace/form/sherlock.dart';
 import 'package:moonspace/helper/extensions/string.dart';
 import 'package:moonspace/provider/global_theme.dart';
 import 'package:widgetbook/widgetbook.dart';
@@ -566,8 +567,17 @@ class DebugWrapper extends StatefulWidget {
 }
 
 class _DebugWrapperState extends State<DebugWrapper> {
+  bool showRefImages = false;
   bool showImages = false;
   bool showDrawer = false;
+  bool isFrameVisible = true;
+
+  double _rotationX = 0.0;
+  double _rotationY = 0.0;
+  double _rotationZ = 0.0;
+
+  String? selectedImage;
+  Set<String> images = {};
 
   DeviceInfo? frame = Devices.ios.iPhone13Mini;
 
@@ -613,6 +623,13 @@ class _DebugWrapperState extends State<DebugWrapper> {
         actions: [
           TextButton(
             onPressed: () {
+              showRefImages = !showRefImages;
+              setState(() {});
+            },
+            child: Text("Ref"),
+          ),
+          TextButton(
+            onPressed: () {
               showDrawer = !showDrawer;
               setState(() {});
             },
@@ -624,6 +641,13 @@ class _DebugWrapperState extends State<DebugWrapper> {
               setState(() {});
             },
             child: Text("Images"),
+          ),
+          TextButton(
+            onPressed: () {
+              isFrameVisible = !isFrameVisible;
+              setState(() {});
+            },
+            child: Text("Frame"),
           ),
         ],
       ),
@@ -639,7 +663,7 @@ class _DebugWrapperState extends State<DebugWrapper> {
                       width: 200,
                       child: Column(
                         children: [
-                          ThemeSelector(),
+                          ThemePopupButton(),
                           ListTile(
                             selected: accessibility,
                             onTap: () {
@@ -674,6 +698,42 @@ class _DebugWrapperState extends State<DebugWrapper> {
                               Option(value: "iPad"),
                               Option(value: "iPhone13"),
                             ],
+                          ),
+                          Slider(
+                            value: _rotationX,
+                            min: -math.pi,
+                            max: math.pi,
+                            divisions: 40,
+                            label: "X:${_rotationX.toStringAsFixed(2)}",
+                            onChanged: (value) {
+                              setState(() {
+                                _rotationX = value;
+                              });
+                            },
+                          ),
+                          Slider(
+                            value: _rotationY,
+                            min: -math.pi,
+                            max: math.pi,
+                            divisions: 40,
+                            label: "Y:${_rotationY.toStringAsFixed(2)}",
+                            onChanged: (value) {
+                              setState(() {
+                                _rotationY = value;
+                              });
+                            },
+                          ),
+                          Slider(
+                            value: _rotationZ,
+                            min: -math.pi,
+                            max: math.pi,
+                            divisions: 40,
+                            label: "Z:${_rotationZ.toStringAsFixed(2)}",
+                            onChanged: (value) {
+                              setState(() {
+                                _rotationZ = value;
+                              });
+                            },
                           ),
                           Expanded(
                             child: NavigationDrawer(
@@ -794,23 +854,31 @@ class _DebugWrapperState extends State<DebugWrapper> {
                             Center(
                               child: RepaintBoundary(
                                 key: _globalKey,
-                                child: DeviceFrame(
-                                  device: frame!,
-                                  screen: accessibility
-                                      ? AccessibilityTools(
-                                          child: Stack(
+                                child: Transform(
+                                  alignment: Alignment.center,
+                                  transform: Matrix4.identity()
+                                    ..rotateX(_rotationX)
+                                    ..rotateY(_rotationY)
+                                    ..rotateZ(_rotationZ),
+                                  child: DeviceFrame(
+                                    isFrameVisible: isFrameVisible,
+                                    device: frame!,
+                                    screen: accessibility
+                                        ? AccessibilityTools(
+                                            child: Stack(
+                                              children: [
+                                                widget.child,
+                                                if (child != null) child!,
+                                              ],
+                                            ),
+                                          )
+                                        : Stack(
                                             children: [
                                               widget.child,
                                               if (child != null) child!,
                                             ],
                                           ),
-                                        )
-                                      : Stack(
-                                          children: [
-                                            widget.child,
-                                            if (child != null) child!,
-                                          ],
-                                        ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -825,6 +893,71 @@ class _DebugWrapperState extends State<DebugWrapper> {
                           children: [widget.child, if (child != null) child!],
                         ),
                 ),
+                if (showRefImages)
+                  Expanded(
+                    child: MaterialApp(
+                      theme: Theme.of(context),
+                      debugShowCheckedModeBanner: false,
+                      home: ListView(
+                        children: [
+                          Sherlock(
+                            onFetch: (query) async {
+                              return images.toList();
+                            },
+                            onSubmit: (query) async {
+                              images.add(query);
+                              return images.toList();
+                            },
+                            builder: (data, controller) {
+                              return ListView(
+                                shrinkWrap: true,
+                                children: images
+                                    .toList()
+                                    .map(
+                                      (e) => ListTile(
+                                        onTap: () {
+                                          selectedImage = e;
+                                          setState(() {});
+                                        },
+                                        trailing: IconButton(
+                                          icon: Icon(Icons.close),
+                                          onPressed: () {
+                                            images.remove(e);
+                                            data = images.toList();
+                                            controller.closeView(null);
+                                            controller.openView();
+                                          },
+                                        ),
+                                        title: Text(e, maxLines: 1),
+                                      ),
+                                    )
+                                    .toList(),
+                              );
+                            },
+                            bar: true,
+                          ),
+                          if (selectedImage != null)
+                            Image.network(
+                              selectedImage!,
+                              frameBuilder: frame == null
+                                  ? null
+                                  : (
+                                      context,
+                                      child,
+                                      fram,
+                                      wasSynchronouslyLoaded,
+                                    ) => DeviceFrame(
+                                      device: frame!,
+                                      screen: child,
+                                    ),
+                              errorBuilder: (context, error, stackTrace) {
+                                return Placeholder();
+                              },
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
               ],
             ),
     );

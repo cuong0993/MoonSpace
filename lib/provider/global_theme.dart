@@ -4,7 +4,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:moonspace/form/color.dart';
 import 'package:moonspace/helper/extensions/color.dart';
-import 'package:moonspace/helper/extensions/theme_ext.dart';
 import 'package:moonspace/theme.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:moonspace/provider/pref.dart';
@@ -125,7 +124,11 @@ class GlobalTheme extends _$GlobalTheme {
       });
     }
 
-    final ctype = type ?? state.type;
+    final ctype =
+        type ??
+        (AppTheme.themes[themeIndex].dark
+            ? ThemeType.night
+            : ThemeType.light); //state.type;
     final cthemeIndex = themeIndex >= 0 ? themeIndex : state.themeIndex;
     final cPrimary = primary ?? state.primary;
     final cSecondary = secondary ?? state.secondary;

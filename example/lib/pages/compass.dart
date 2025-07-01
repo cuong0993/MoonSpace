@@ -53,7 +53,7 @@ class CountriesRoute extends GoRouteData with _$CountriesRoute {
               child: Column(
                 children: [
                   Sherlock<Destination>(
-                    fetch: (query) async {
+                    onFetch: (query) async {
                       return ref
                           .read(travelClientProvider.notifier)
                           .searchDestination(query);
